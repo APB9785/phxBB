@@ -8,7 +8,7 @@ defmodule PhxBb.Posts.Post do
     field :title, :string
     field :last_user, :integer
     has_many :replies, PhxBb.Replies.Reply, on_delete: :delete_all
-    belongs_to :board, Board
+    belongs_to :board, PhxBb.Boards.Board
 
     timestamps()
   end

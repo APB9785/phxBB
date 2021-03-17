@@ -4,13 +4,10 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBb.Posts.Post
   alias PhxBb.Posts
   alias PhxBb.Accounts
-  alias PhxBb.Accounts.User
   alias PhxBb.Boards
   alias PhxBb.Replies.Reply
   alias PhxBb.Replies
 
-
-  ############   MAIN VIEW   ############
 
   def mount(_params, session, socket) do
     socket =
@@ -21,63 +18,45 @@ defmodule PhxBbWeb.PageLive do
     {:ok, socket}
   end
 
-  def handle_event("return_main", _params, socket) do
-    {:noreply, main_helper(socket, 1)}
-  end
-
-  # Option 0 for first mount, Option 1 for returning to Main Index later
-  defp main_helper(socket, option) do
-    boards = Boards.list_boards()
-    users =
-      Enum.reduce(boards, [], fn b, acc ->
-        case b.last_user do
-          nil -> acc
-          last_user -> [last_user | acc]
-        end
-      end)
-    cache =
-      case option do
-        0 -> Accounts.build_cache(users, %{nil => %User{username: "Unknown User"}})
-        1 -> Accounts.build_cache(users, socket.assigns.user_cache)
-      end
-
-    socket
-    |> assign(board_list: boards)
-    |> assign(post_list: [])
-    |> assign(active_board_id: nil)
-    |> assign(active_board_name: nil)
-    |> assign(active_post: nil)
-    |> assign(user_cache: cache)
-    |> assign(page_title: "Board Index")
-  end
-
-  ############   BOARD VIEW   ############
-
   def handle_event("show_board", %{"id" => id, "name" => name}, socket) do
-    posts = Posts.list_posts(id)
-    cache =
-      Enum.reduce(posts, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
-      |> Accounts.build_cache(socket.assigns.user_cache)
-
     socket =
       socket
       |> assign(active_board_id: id)
       |> assign(active_board_name: name)
-      |> assign(post_list: posts)
-      |> assign(changeset: Posts.change_post(%Post{}))
-      |> assign(page_title: name)
-      |> assign(user_cache: cache)
+      |> board_helper(id, name)
 
     {:noreply, socket}
   end
 
+  def handle_event("show_post", %{"id" => id}, socket) do
+    replies = Replies.list_replies(id)
+    post = Posts.get_post!(id)
+    user_ids = Enum.map(replies, fn reply -> reply.author end)
+    cache = Accounts.build_cache(user_ids, socket.assigns.user_cache)
+
+    socket =
+      socket
+      |> assign(nav: :post)
+      |> assign(active_post: post)
+      |> assign(reply_list: replies)
+      |> assign(changeset: Replies.change_reply(%Reply{}))
+      |> assign(user_cache: cache)
+      |> assign(page_title: post.title)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("return_main", _params, socket) do
+    {:noreply, main_helper(socket, 1)}
+  end
+
   def handle_event("return_board", _params, socket) do
+    board_id = socket.assigns.active_board_id
+    board_name = socket.assigns.active_board_name
     socket =
       socket
       |> assign(active_post: nil)
-      |> assign(post_list: Posts.list_posts(socket.assigns.active_board_id))
-      |> assign(changeset: Posts.change_post(%Post{}))
-      |> assign(page_title: socket.assigns.active_board_name)
+      |> board_helper(board_id, board_name)
 
     {:noreply, socket}
   end
@@ -117,42 +96,6 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
-  # Delete Post handler - not in use
-  # def handle_event("delete_post", _params, socket) when socket.assigns.user_token == nil do
-  #   {:noreply, socket}
-  # end
-  # def handle_event("delete_post", %{"id" => id}, socket) do
-  #
-  #   case Posts.delete_post_by_id(id) do
-  #     {:ok, _struct}       -> # Deleted with success
-  #       socket =
-  #         assign(socket, post_list: Posts.list_posts(socket.assigns.board_select))
-  #       {:noreply, socket}
-  #
-  #     {:error, _changeset} -> # Something went wrong
-  #       {:noreply, socket}
-  #   end
-  # end
-
-  ############   POST VIEW   ############
-
-  def handle_event("show_post", %{"id" => id}, socket) do
-    replies = Replies.list_replies(id)
-    post = Posts.get_post!(id)
-    user_ids = Enum.map(replies, fn reply -> reply.author end)
-    cache = Accounts.build_cache(user_ids, socket.assigns.user_cache)
-
-    socket =
-      socket
-      |> assign(active_post: post)
-      |> assign(reply_list: replies)
-      |> assign(changeset: Replies.change_reply(%Reply{}))
-      |> assign(user_cache: cache)
-      |> assign(page_title: post.title)
-
-    {:noreply, socket}
-  end
-
   def handle_event("new_reply", %{"reply" => params}, socket) do
     u_id = current_user_id(socket)
     post = socket.assigns.active_post
@@ -189,6 +132,46 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
+  # Option 0 for first mount, Option 1 for returning to Main Index later
+  defp main_helper(socket, option) do
+    boards = Boards.list_boards()
+    users =
+      Enum.reduce(boards, [], fn b, acc ->
+        case b.last_user do
+          nil -> acc
+          last_user -> [last_user | acc]
+        end
+      end)
+    cache =
+      case option do
+        0 -> Accounts.build_cache(users, %{nil => %{name: "Unknown User"}})
+        1 -> Accounts.build_cache(users, socket.assigns.user_cache)
+      end
+
+    socket
+    |> assign(nav: :main)
+    |> assign(board_list: boards)
+    |> assign(post_list: [])
+    |> assign(active_board_id: nil)
+    |> assign(active_board_name: nil)
+    |> assign(active_post: nil)
+    |> assign(user_cache: cache)
+    |> assign(page_title: "Board Index")
+  end
+
+  defp board_helper(socket, board_id, board_name) do
+    posts = Posts.list_posts(board_id)
+    cache =
+      Enum.reduce(posts, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
+      |> Accounts.build_cache(socket.assigns.user_cache)
+
+    socket
+    |> assign(nav: :board)
+    |> assign(post_list: posts)
+    |> assign(changeset: Posts.change_post(%Post{}))
+    |> assign(page_title: board_name)
+    |> assign(user_cache: cache)
+  end
 
   defp current_user_id(socket) do
     Accounts.get_user_by_session_token(socket.assigns.user_token).id

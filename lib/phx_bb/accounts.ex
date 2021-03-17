@@ -67,7 +67,10 @@ defmodule PhxBb.Accounts do
   def build_cache(user_ids, cache) do
     Enum.reduce(user_ids, cache, fn id, acc ->
       fun = fn ->
-        get_user!(id)
+        Repo.one from u in User,
+                   where: u.id == ^id,
+                   select: %{name: u.username,
+                             joined: u.inserted_at}
       end
 
       Map.put_new_lazy(acc, id, fun)

@@ -5,9 +5,115 @@
     Welcome to the Forum!
   </div>
 
-  <!-- ####################   POST VIEW   #################### -->
+  <%= case @nav do %>
 
-  <%= if @active_post != nil do %>
+  <% :main -> %> <!-- #################   MAIN VIEW   ################# -->
+
+    <div class="divide-y-2">
+      <%= for board <- @board_list do %>
+        <div class="flex">
+          <div class="py-4 px-4">
+            <div>
+              <a href="#"
+                 phx-click="show_board"
+                 phx-value-id="<%= board.id %>"
+                 phx-value-name="<%= board.name %>"
+                 class="text-purple-700 hover:underline">
+                <%= board.name %>
+              </a>
+            </div>
+            <div>
+              <%= board.description %>
+            </div>
+          </div>
+          <div class="p-4">
+            <div>
+              <%= board.topic_count %> topics
+            </div>
+            <div>
+              <%= board.post_count %> posts
+            </div>
+          </div>
+          <%= if board.last_post != nil do %>
+            <div class="p-4">
+              <div>
+                Last post by <%= @user_cache[board.last_user].name %>
+              </div>
+              <div>
+                in
+                <a href="#"
+                   class="text-purple-700 hover:underline">
+                  <%= Posts.get_title!(board.last_post) %>
+                </a>
+              </div>
+            </div>
+          <% else %>
+            <div class="p-4">
+              No posts yet!
+            </div>
+          <% end %>
+        </div>
+
+      <% end %>
+    </div>
+
+
+  <% :board -> %> <!-- #################   BOARD VIEW   ################# -->
+
+    <!-- Breadcrumb -->
+    <div class="pl-4 pb-2">
+      >
+      <a href="#"
+         phx-click="return_main"
+         class="text-purple-700 hover:underline">
+        Board Index
+      </a>
+    </div>
+
+    <!-- Post listing -->
+    <%= for post <- @post_list do %>
+      <div class="p-4 border-b-2">
+        <div>
+          <a href="#"
+             phx-click="show_post"
+             phx-value-id="<%= post.id %>"
+             class="text-purple-700 hover:underline">
+            <%= post.title %>
+          </a>
+        </div>
+        <div>
+          Last post by <%= @user_cache[post.last_user].name %>
+          at <%= post.updated_at %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- New Post form -->
+    <div id="create_post">
+      <%= f = form_for @changeset, "#",
+                phx_submit: "new_post" %>
+
+        <div class="field">
+          <%= text_input f, :title,
+                         placeholder: "Subject",
+                         autocomplete: "off",
+                         class: "py-2 m-2 max-w-sm bg-white rounded-xl shadow-md" %>
+        </div>
+
+        <div class="field">
+          <%= textarea f, :body,
+                       placeholder: "Body",
+                       autocomplete: "off",
+                       class: "py-2 ml-2 max-w-sm bg-white rounded-xl shadow-md" %>
+        </div>
+
+        <%= submit "Create Post",
+                   phx_disable_with: "Posting...",
+                   class: "px-8 py-2 m-2 justify-center rounded-md bg-purple-700 text-white" %>
+      </form>
+    </div>
+
+  <% :post -> %> <!-- #################   POST VIEW   ################# -->
 
     <!-- Breadcrumb -->
     <div class="pl-4">
@@ -32,7 +138,7 @@
         <%= @active_post.title %>
       </div>
       <div class="pl-2">
-        by <%= @user_cache[@active_post.author].username %> at
+        by <%= @user_cache[@active_post.author].name %> at
         <%= @active_post.inserted_at %>
       </div>
       <div class="py-4">
@@ -47,7 +153,7 @@
           Re: <%= @active_post.title %>
         </div>
         <div class="pl-2">
-          by <%= @user_cache[reply.author].username %> at
+          by <%= @user_cache[reply.author].name %> at
           <%= reply.updated_at %>
         </div>
         <div class="py-4">
@@ -74,117 +180,5 @@
       </form>
     </div>
 
-  <% else %>
-
-    <!-- ####################   MAIN VIEW   #################### -->
-
-    <%= if @active_board_id == nil do %>
-
-      <div class="divide-y-2">
-        <%= for board <- @board_list do %>
-          <div class="flex">
-            <div class="py-4 px-4">
-              <div>
-                <a href="#"
-                   phx-click="show_board"
-                   phx-value-id="<%= board.id %>"
-                   phx-value-name="<%= board.name %>"
-                   class="text-purple-700 hover:underline">
-                  <%= board.name %>
-                </a>
-              </div>
-              <div>
-                <%= board.description %>
-              </div>
-            </div>
-            <div class="p-4">
-              <div>
-                <%= board.topic_count %> topics
-              </div>
-              <div>
-                <%= board.post_count %> posts
-              </div>
-            </div>
-            <%= if board.last_post != nil do %>
-              <div class="p-4">
-                <div>
-                  Last post by <%= @user_cache[board.last_user].username %>
-                </div>
-                <div>
-                  in
-                  <a href="#"
-                     class="text-purple-700 hover:underline">
-                    <%= Posts.get_post!(board.last_post).title %>
-                  </a>
-                </div>
-              </div>
-            <% else %>
-            <div class="p-4">
-              No posts yet!
-            </div>
-            <% end %>
-          </div>
-
-        <% end %>
-      </div>
-
-    <!-- ####################   BOARD VIEW   #################### -->
-
-    <% else %>
-
-      <!-- Breadcrumb -->
-      <div class="pl-4 pb-2">
-        >
-        <a href="#"
-           phx-click="return_main"
-           class="text-purple-700 hover:underline">
-          Board Index
-        </a>
-      </div>
-
-      <!-- Post listing -->
-      <%= for post <- @post_list do %>
-        <div class="p-4 border-b-2">
-          <div>
-            <a href="#"
-               phx-click="show_post"
-               phx-value-id="<%= post.id %>"
-               class="text-purple-700 hover:underline">
-              <%= post.title %>
-            </a>
-          </div>
-          <div>
-            Last post by <%= @user_cache[post.last_user].username %>
-            at <%= post.updated_at %>
-          </div>
-        </div>
-      <% end %>
-
-      <!-- New Post form -->
-      <div id="create_post">
-        <%= f = form_for @changeset, "#",
-                  phx_submit: "new_post" %>
-
-          <div class="field">
-            <%= text_input f, :title,
-                           placeholder: "Subject",
-                           autocomplete: "off",
-                           class: "py-2 m-2 max-w-sm bg-white rounded-xl shadow-md" %>
-          </div>
-
-          <div class="field">
-            <%= textarea f, :body,
-                         placeholder: "Body",
-                         autocomplete: "off",
-                         class: "py-2 ml-2 max-w-sm bg-white rounded-xl shadow-md" %>
-          </div>
-
-          <%= submit "Create Post",
-                     phx_disable_with: "Posting...",
-                     class: "px-8 py-2 m-2 justify-center rounded-md bg-purple-700 text-white" %>
-        </form>
-      </div>
-
-    <% end %>
   <% end %>
 </div>
