@@ -42,6 +42,10 @@
               <div>
                 in
                 <a href="#"
+                   phx-click="goto_post"
+                   phx-value-post="<%= board.last_post %>"
+                   phx-value-board="<%= board.id %>"
+                   phx-value-bname="<%= board.name %>"
                    class="text-purple-700 hover:underline">
                   <%= Posts.get_title!(board.last_post) %>
                 </a>
@@ -112,6 +116,7 @@
                    class: "px-8 py-2 m-2 justify-center rounded-md bg-purple-700 text-white" %>
       </form>
     </div>
+
 
   <% :post -> %> <!-- #################   POST VIEW   ################# -->
 

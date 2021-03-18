@@ -29,19 +29,17 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_event("show_post", %{"id" => id}, socket) do
-    replies = Replies.list_replies(id)
-    post = Posts.get_post!(id)
-    user_ids = Enum.map(replies, fn reply -> reply.author end)
-    cache = Accounts.build_cache(user_ids, socket.assigns.user_cache)
+    socket = post_helper(socket, id)
 
+    {:noreply, socket}
+  end
+
+  def handle_event("goto_post", params, socket) do
     socket =
       socket
-      |> assign(nav: :post)
-      |> assign(active_post: post)
-      |> assign(reply_list: replies)
-      |> assign(changeset: Replies.change_reply(%Reply{}))
-      |> assign(user_cache: cache)
-      |> assign(page_title: post.title)
+      |> assign(active_board_id: params["board"])
+      |> assign(active_board_name: params["bname"])
+      |> post_helper(params["post"])
 
     {:noreply, socket}
   end
@@ -171,6 +169,21 @@ defmodule PhxBbWeb.PageLive do
     |> assign(changeset: Posts.change_post(%Post{}))
     |> assign(page_title: board_name)
     |> assign(user_cache: cache)
+  end
+
+  defp post_helper(socket, post_id) do
+    post = Posts.get_post!(post_id)
+    replies = Replies.list_replies(post_id)
+    user_ids = Enum.map(replies, fn reply -> reply.author end)
+    cache = Accounts.build_cache(user_ids, socket.assigns.user_cache)
+
+    socket
+    |> assign(nav: :post)
+    |> assign(user_cache: cache)
+    |> assign(page_title: post.title)
+    |> assign(changeset: Replies.change_reply(%Reply{}))
+    |> assign(reply_list: replies)
+    |> assign(active_post: post)
   end
 
   defp current_user_id(socket) do
