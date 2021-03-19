@@ -13,9 +13,14 @@
 alias PhxBb.Repo
 alias PhxBb.Boards.Board
 
+gen_script =
+  "This board is for discussion of a general nature. Please feel free to " <>
+  "talk about your favorite interests. Anyone can post here as long as " <>
+  "they are a registered user."
+
 %Board{
   name: "General Discussion",
-  description: "Test Board #1",
+  description: gen_script,
   post_count: 0,
   topic_count: 0,
   last_post: nil,
@@ -26,6 +31,20 @@ alias PhxBb.Boards.Board
 %Board{
   name: "Ontopic Discussion",
   description: "Test Board #2",
+  post_count: 0,
+  topic_count: 0,
+  last_post: nil,
+  last_user: nil
+}
+|> Repo.insert!()
+
+custard =
+  "All discussion of custard goes here. No custard posts will be allowed " <>
+  "in other boards."
+
+%Board{
+  name: "Custard Discussion",
+  description: custard,
   post_count: 0,
   topic_count: 0,
   last_post: nil,
