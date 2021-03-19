@@ -1,4 +1,11 @@
-# PhxBb
+# phxBB
+
+**phxBB** is a re-imagining of classic message board software such as phpBB and   
+vBulletin.  It uses Phoenix LiveView to establish a persistent connection with each   
+user, holding and updating state for virtually instantaneous navigation and   
+interaction without any full page reloads.   
+
+## Installation
 
 To start your Phoenix server:
 
@@ -11,10 +18,3 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
