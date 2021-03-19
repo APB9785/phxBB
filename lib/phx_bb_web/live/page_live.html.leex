@@ -14,13 +14,9 @@
         <div class="flex">
           <div class="py-4 px-4">
             <div>
-              <a href="#"
-                 phx-click="show_board"
-                 phx-value-id="<%= board.id %>"
-                 phx-value-name="<%= board.name %>"
-                 class="text-purple-700 hover:underline">
-                <%= board.name %>
-              </a>
+              <%= live_patch board.name,
+                    to: Routes.live_path(@socket, __MODULE__, board: board.id),
+                    class: "text-purple-700 hover:underline" %>
             </div>
             <div>
               <%= board.description %>
@@ -41,14 +37,9 @@
               </div>
               <div>
                 in
-                <a href="#"
-                   phx-click="goto_post"
-                   phx-value-post="<%= board.last_post %>"
-                   phx-value-board="<%= board.id %>"
-                   phx-value-bname="<%= board.name %>"
-                   class="text-purple-700 hover:underline">
-                  <%= Posts.get_title!(board.last_post) %>
-                </a>
+                <%= live_patch Posts.get_title(board.last_post),
+                      to: Routes.live_path(@socket, __MODULE__, post: board.last_post),
+                      class: "text-purple-700 hover:underline" %>
               </div>
             </div>
           <% else %>
@@ -67,23 +58,18 @@
     <!-- Breadcrumb -->
     <div class="pl-4 pb-2">
       >
-      <a href="#"
-         phx-click="return_main"
-         class="text-purple-700 hover:underline">
-        Board Index
-      </a>
+      <%= live_patch "Board Index",
+            to: Routes.live_path(@socket, __MODULE__),
+            class: "text-purple-700 hover:underline" %>
     </div>
 
     <!-- Post listing -->
     <%= for post <- @post_list do %>
       <div class="p-4 border-b-2">
         <div>
-          <a href="#"
-             phx-click="show_post"
-             phx-value-id="<%= post.id %>"
-             class="text-purple-700 hover:underline">
-            <%= post.title %>
-          </a>
+          <%= live_patch post.title,
+                to: Routes.live_path(@socket, __MODULE__, post: post.id),
+                class: "text-purple-700 hover:underline" %>
         </div>
         <div>
           Last post by <%= @user_cache[post.last_user].name %>
@@ -123,17 +109,13 @@
     <!-- Breadcrumb -->
     <div class="pl-4">
       >
-      <a href="#"
-         phx-click="return_main"
-         class="text-purple-700 hover:underline">
-        Board Index
-      </a>
+      <%= live_patch "Board Index",
+            to: Routes.live_path(@socket, __MODULE__),
+            class: "text-purple-700 hover:underline" %>
        >
-      <a href="#"
-         phx-click="return_board"
-         class="text-purple-700 hover:underline">
-        <%= @active_board_name %>
-      </a>
+      <%= live_patch @active_board_name,
+            to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
+            class: "text-purple-700 hover:underline" %>
     </div>
     <br>
 

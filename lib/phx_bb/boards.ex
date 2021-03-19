@@ -38,7 +38,11 @@ defmodule PhxBb.Boards do
   """
   def get_board!(id), do: Repo.get!(Board, id)
 
-  def get_board_name!(id), do: Repo.get!(Board, id) |> Map.get(:name)
+  def get_name(id) do
+    Repo.one from b in Board,
+               where: b.id == ^id,
+               select: b.name
+  end
 
   @doc """
   Creates a board.

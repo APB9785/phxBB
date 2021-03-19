@@ -39,7 +39,7 @@ defmodule PhxBb.Posts do
   """
   def get_post!(id), do: Repo.get!(Post, id)
 
-  def get_title!(id) do
+  def get_title(id) do
     Repo.one from p in Post,
                where: p.id == ^id,
                select: p.title
