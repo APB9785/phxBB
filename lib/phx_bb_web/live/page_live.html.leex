@@ -86,30 +86,13 @@
       </div>
     <% end %>
 
-    <!-- New Post form -->
-    <div id="create_post">
-      <%= f = form_for @changeset, "#",
-                phx_submit: "new_post" %>
-
-        <div class="field">
-          <%= text_input f, :title,
-                         placeholder: "Subject",
-                         autocomplete: "off",
-                         class: "py-2 m-2 max-w-sm bg-white rounded-xl shadow-md" %>
-        </div>
-
-        <div class="field">
-          <%= textarea f, :body,
-                       placeholder: "Body",
-                       autocomplete: "off",
-                       class: "py-2 ml-2 max-w-sm bg-white rounded-xl shadow-md" %>
-        </div>
-
-        <%= submit "Create Post",
-                   phx_disable_with: "Posting...",
-                   class: "px-8 py-2 m-2 justify-center rounded-md bg-purple-700 text-white" %>
-      </form>
+    <div class="pb-6 pl-8 pt-4">
+      <%= live_patch ~L"<button>New Post</button>",
+            to: Routes.live_path(@socket, __MODULE__,
+                                 [board: @active_board_id, create_post: 1]),
+            class: "px-8 py-2 justify-center rounded-md bg-purple-700 text-white" %>
     </div>
+
 
 
   <% :post -> %> <!-- #################   POST VIEW   ################# -->
@@ -170,6 +153,46 @@
         </div>
 
         <%= submit "Post Reply",
+                   phx_disable_with: "Posting...",
+                   class: "px-8 py-2 m-2 justify-center rounded-md bg-purple-700 text-white" %>
+      </form>
+    </div>
+
+
+  <% :create_post -> %> <!-- ###############   CREATE VIEW   ############### -->
+
+    <!-- Breadcrumb -->
+    <div class="pl-4">
+      >
+      <%= live_patch "Board Index",
+            to: Routes.live_path(@socket, __MODULE__),
+            class: "text-purple-700 hover:underline" %>
+       >
+      <%= live_patch @active_board_name,
+            to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
+            class: "text-purple-700 hover:underline" %>
+    </div>
+    <br>
+
+    <div id="create_post">
+      <%= f = form_for @changeset, "#",
+                phx_submit: "new_post" %>
+
+        <div class="field">
+          <%= text_input f, :title,
+                         placeholder: "Subject",
+                         autocomplete: "off",
+                         class: "py-2 m-2 max-w-sm bg-white rounded-xl shadow-md" %>
+        </div>
+
+        <div class="field">
+          <%= textarea f, :body,
+                       placeholder: "Body",
+                       autocomplete: "off",
+                       class: "py-2 ml-2 max-w-sm bg-white rounded-xl shadow-md" %>
+        </div>
+
+        <%= submit "Create Post",
                    phx_disable_with: "Posting...",
                    class: "px-8 py-2 m-2 justify-center rounded-md bg-purple-700 text-white" %>
       </form>

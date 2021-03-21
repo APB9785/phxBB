@@ -21,6 +21,7 @@ defmodule PhxBbWeb.PageLive do
   def handle_params(params, _url, socket) do
     socket =
       case params do
+        %{"create_post" => "1", "board" => board_id} -> create_post_helper(socket, board_id)
         %{"post" => post_id} -> post_helper(socket, post_id)
         %{"board" => board_id} -> board_helper(socket, board_id)
         %{} -> main_helper(socket)
@@ -41,11 +42,6 @@ defmodule PhxBbWeb.PageLive do
 
     case Posts.create_post(params) do
       {:ok, post} ->
-        socket =
-          socket
-          |> assign(post_list: Posts.list_posts(b_id))
-          |> assign(changeset: Posts.change_post(%Post{}))
-
         current_board = Boards.get_board!(b_id)
         changes =
           %{
@@ -57,7 +53,9 @@ defmodule PhxBbWeb.PageLive do
 
         {:ok, _} = Boards.update_board(current_board, changes)
 
-        {:noreply, socket}
+        {:noreply,
+         socket
+         |> push_patch(to: Routes.live_path(socket, __MODULE__, board: b_id))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         socket = assign(socket, changeset: changeset)
@@ -155,6 +153,22 @@ defmodule PhxBbWeb.PageLive do
     |> assign(active_post: post)
     |> assign(active_board_id: post.board_id)
     |> assign(active_board_name: Boards.get_name(post.board_id))
+  end
+
+  defp create_post_helper(socket, board_id) do
+    socket =
+      if socket.assigns[:active_board_id] != board_id do
+        socket
+        |> assign(active_board_id: board_id)
+        |> assign(active_board_name: Boards.get_name(board_id))
+      else
+        socket
+      end
+
+    socket
+    |> assign(nav: :create_post)
+    |> assign(page_title: "Create Post")
+    |> assign(changeset: Posts.change_post(%Post{}))
   end
 
   defp current_user_id(socket) do
