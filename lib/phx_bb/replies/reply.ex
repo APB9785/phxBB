@@ -5,7 +5,7 @@ defmodule PhxBb.Replies.Reply do
   schema "replies" do
     field :author, :integer
     field :body, :string
-    belongs_to :post, Post
+    belongs_to :post, PhxBb.Posts.Post
 
     timestamps()
   end

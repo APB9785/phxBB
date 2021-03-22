@@ -6,9 +6,9 @@ defmodule PhxBb.RepliesTest do
   describe "replies" do
     alias PhxBb.Replies.Reply
 
-    @valid_attrs %{author: 42, body: "some body"}
-    @update_attrs %{author: 43, body: "some updated body"}
-    @invalid_attrs %{author: nil, body: nil}
+    @valid_attrs %{post_id: 24, author: 1, body: "some body"}
+    @update_attrs %{post_id: 25, author: 2, body: "some updated body"}
+    @invalid_attrs %{post_id: nil, author: nil, body: nil}
 
     def reply_fixture(attrs \\ %{}) do
       {:ok, reply} =
@@ -31,8 +31,9 @@ defmodule PhxBb.RepliesTest do
 
     test "create_reply/1 with valid data creates a reply" do
       assert {:ok, %Reply{} = reply} = Replies.create_reply(@valid_attrs)
-      assert reply.author == 42
+      assert reply.author == 1
       assert reply.body == "some body"
+      assert reply.post_id == 24
     end
 
     test "create_reply/1 with invalid data returns error changeset" do
@@ -42,8 +43,9 @@ defmodule PhxBb.RepliesTest do
     test "update_reply/2 with valid data updates the reply" do
       reply = reply_fixture()
       assert {:ok, %Reply{} = reply} = Replies.update_reply(reply, @update_attrs)
-      assert reply.author == 43
+      assert reply.author == 2
       assert reply.body == "some updated body"
+      assert reply.post_id == 25
     end
 
     test "update_reply/2 with invalid data returns error changeset" do

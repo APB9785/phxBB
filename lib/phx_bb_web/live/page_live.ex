@@ -142,7 +142,7 @@ defmodule PhxBbWeb.PageLive do
     post = Posts.get_post!(post_id)
     replies = Replies.list_replies(post_id)
     user_ids = Enum.map(replies, fn reply -> reply.author end)
-    cache = Accounts.build_cache(user_ids, socket.assigns.user_cache)
+    cache = Accounts.build_cache([post.author | user_ids], socket.assigns.user_cache)
 
     socket
     |> assign(nav: :post)
