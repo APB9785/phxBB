@@ -1,11 +1,20 @@
+<div class="px-6 mt-8 mx-auto w-full max-w-md">
+
 <h1>Resend confirmation instructions</h1>
 
-<%= form_for :user, Routes.user_confirmation_path(@conn, :create), fn f -> %>
-  <%= label f, :email %>
-  <%= email_input f, :email, required: true %>
+<%= form_for :user, Routes.user_confirmation_path(@conn, :create),
+             [class: "bg-white px-10 py-8 mb-6 shadow rounded-lg"],
+             fn f -> %>
+  <%= label f, :email, class: "block mb-2 text-sm font-medium text-gray-600" %>
+  <%= email_input f, :email, required: true,
+                  class: "mb-4 appearance-none w-full border-purple-300 rounded-md
+                         transition duration-150 text-sm focus:outline-none
+                         focus:ring focus:ring-purple-300 focus:border-purple-300" %>
 
   <div>
-    <%= submit "Resend confirmation instructions" %>
+    <%= submit "Resend confirmation instructions",
+               phx_disable_with: "Sending...",
+               class: "px-8 py-2 m-2 justify-center rounded-md bg-purple-700 text-white" %>
   </div>
 <% end %>
 
@@ -13,3 +22,5 @@
   <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
   <%= link "Log in", to: Routes.user_session_path(@conn, :new) %>
 </p>
+
+</div>

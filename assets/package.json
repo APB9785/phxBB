@@ -16,6 +16,7 @@
   "devDependencies": {
     "@babel/core": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
+    "@tailwindcss/jit": "^0.1.6",
     "autoprefixer": "^10.2.5",
     "babel-loader": "^8.0.0",
     "copy-webpack-plugin": "^5.1.1",
@@ -25,6 +26,7 @@
     "node-sass": "^4.13.1",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "postcss": "^8.2.8",
+    "postcss-import": "^14.0.0",
     "postcss-loader": "4.2",
     "sass-loader": "^8.0.2",
     "tailwindcss": "^2.0.3",
