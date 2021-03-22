@@ -174,4 +174,39 @@ defmodule PhxBbWeb.PageLive do
   defp current_user_id(socket) do
     Accounts.get_user_by_session_token(socket.assigns.user_token).id
   end
+
+  def format_time(ndt) do
+    month_abv =
+      case ndt.month do
+        1 -> "Jan"
+        2 -> "Feb"
+        3 -> "Mar"
+        4 -> "Apr"
+        5 -> "May"
+        6 -> "Jun"
+        7 -> "Jul"
+        8 -> "Aug"
+        9 -> "Sep"
+        10 -> "Oct"
+        11 -> "Nov"
+        12 -> "Dec"
+      end
+    ampm = if ndt.hour > 11 do "pm" else "am" end
+    hour =
+      case ndt.hour do
+        0 -> "12"
+        x when x > 12 -> Integer.to_string(x - 12)
+        x -> Integer.to_string(x)
+      end
+    minute = Integer.to_string(ndt.minute) |> String.pad_leading(2, "0")
+
+    month_abv <> " " <> Integer.to_string(ndt.day) <> ", " <>
+      Integer.to_string(ndt.year) <> "  " <> hour <> ":" <> minute <> " " <> ampm
+  end
+
+  def format_time(ndt, offset) do
+    ndt
+    |> NaiveDateTime.add(offset * 3600)
+    |> format_time
+  end
 end

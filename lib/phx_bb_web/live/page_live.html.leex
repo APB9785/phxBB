@@ -47,7 +47,7 @@
                       class: "text-purple-700 hover:underline" %>
               </div>
               <div class="hidden md:block">
-                at <%= board.updated_at %>
+                <%= format_time(board.updated_at) %>
               </div>
             </div>
           <% else %>
@@ -81,7 +81,7 @@
         </div>
         <div>
           Last post by <%= @user_cache[post.last_user].name %>
-          at <%= post.updated_at %>
+          <%= format_time(post.updated_at) %>
         </div>
       </div>
     <% end %>
@@ -116,8 +116,8 @@
         <%= @active_post.title %>
       </div>
       <div class="pl-2">
-        by <%= @user_cache[@active_post.author].name %> at
-        <%= @active_post.inserted_at %>
+        by <%= @user_cache[@active_post.author].name %>
+        <%= format_time(@active_post.inserted_at) %>
       </div>
       <div class="py-4">
         <%= @active_post.body %>
@@ -131,8 +131,8 @@
           Re: <%= @active_post.title %>
         </div>
         <div class="pl-2">
-          by <%= @user_cache[reply.author].name %> at
-          <%= reply.updated_at %>
+          by <%= @user_cache[reply.author].name %>
+          <%= format_time(reply.updated_at) %>
         </div>
         <div class="py-4">
           <%= reply.body %>
