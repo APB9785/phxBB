@@ -1,13 +1,14 @@
-<div class="mx-auto w-11/12 bg-transparent rounded-xl
-            md:shadow-md space-y-2 m-4 antialiased relative
-            md:bg-gray-100 font-sans max-w-full">
-  <div class="text-3xl text-purple-700 text-center p-4">
-    Welcome to the Forum!
-  </div>
+<div class="mx-auto w-11/12 bg-transparent rounded-xl space-y-2 m-4
+            antialiased relative font-sans max-w-full
+            md:bg-gray-100 md:shadow-md">
 
   <%= case @nav do %>
 
   <% :main -> %> <!-- #################   MAIN VIEW   ################# -->
+
+    <div class="text-3xl text-purple-700 text-center p-4">
+      Welcome to the Forum!
+    </div>
 
     <div class="divide-y-2">
       <%= for board <- @board_list do %>
@@ -64,27 +65,49 @@
   <% :board -> %> <!-- #################   BOARD VIEW   ################# -->
 
     <!-- Breadcrumb -->
-    <div class="pl-4 pb-2">
+    <div class="p-8">
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
             class: "text-purple-700 hover:underline" %>
     </div>
 
+    <!-- Title -->
+    <div class="text-2xl pl-8 pb-4">
+      <%= @active_board_name %>
+    </div>
+
     <!-- Post listing -->
-    <%= for post <- @post_list do %>
-      <div class="p-4 border-b-2">
-        <div>
-          <%= live_patch post.title,
-                to: Routes.live_path(@socket, __MODULE__, post: post.id),
-                class: "text-purple-700 hover:underline" %>
+    <div class="md:border-t-2 md:border-b-2 md:divide-y-2">
+      <%= for post <- @post_list do %>
+        <div class="p-4 block items-center bg-gray-100 rounded-lg m-1
+                   md:flex md:m-0">
+
+          <div class="px-4 md:w-7/12">
+            <%= live_patch post.title,
+                  to: Routes.live_path(@socket, __MODULE__, post: post.id),
+                  class: "text-purple-700 hover:underline" %>
+            <p class="text-sm hidden md:block">
+              by <%= @user_cache[post.author].name %> at
+              <%= format_time(post.inserted_at) %>
+            </p>
+          </div>
+
+          <div class="px-4 w-2/12 text-center hidden md:block">
+            <%= Replies.count_by_post_id(post.id) %> replies
+          </div>
+
+          <div class="px-4 flex md:block md:w-3/12">
+            <p class="text-sm md:text-base">
+              Last post by <%= @user_cache[post.last_user].name %>
+            </p>
+            <p class="px-1 text-sm md:hidden">at</p>
+            <p class="text-sm"><%= format_time(post.updated_at) %></p>
+          </div>
+
         </div>
-        <div>
-          Last post by <%= @user_cache[post.last_user].name %>
-          <%= format_time(post.updated_at) %>
-        </div>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
 
     <div class="pb-6 pl-8 pt-4">
       <%= live_patch ~L"<button>New Post</button>",
@@ -98,7 +121,7 @@
   <% :post -> %> <!-- #################   POST VIEW   ################# -->
 
     <!-- Breadcrumb -->
-    <div class="pl-4">
+    <div class="p-8">
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
