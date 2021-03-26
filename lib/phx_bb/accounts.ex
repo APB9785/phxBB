@@ -6,6 +6,8 @@ defmodule PhxBb.Accounts do
   import Ecto.Query, warn: false
   alias PhxBb.Repo
   alias PhxBb.Accounts.{User, UserToken, UserNotifier}
+  alias PhxBb.Posts.Post
+  alias PhxBb.Replies.Reply
 
   ## Database getters
 
@@ -75,6 +77,14 @@ defmodule PhxBb.Accounts do
 
       Map.put_new_lazy(acc, id, fun)
     end)
+  end
+
+  # This is inefficient and will be eventually replaced
+  def post_count(user_id) do
+    a = Repo.one from p in Post, where: [author: ^user_id], select: count()
+    b = Repo.one from r in Reply, where: [author: ^user_id], select: count()
+
+    a + b
   end
 
   ## User registration

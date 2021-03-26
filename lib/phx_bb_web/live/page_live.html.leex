@@ -65,7 +65,7 @@
   <% :board -> %> <!-- #################   BOARD VIEW   ################# -->
 
     <!-- Breadcrumb -->
-    <div class="p-8">
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8">
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
@@ -73,7 +73,7 @@
     </div>
 
     <!-- Title -->
-    <div class="text-2xl pl-8 pb-4">
+    <div class="text-2xl pb-4 md:pl-8">
       <%= @active_board_name %>
     </div>
 
@@ -109,7 +109,7 @@
       <% end %>
     </div>
 
-    <div class="pb-6 pl-8 pt-4">
+    <div class="pb-6 pl-2 md:pl-8 pt-4">
       <%= live_patch ~L"<button>New Post</button>",
             to: Routes.live_path(@socket, __MODULE__,
                                  [board: @active_board_id, create_post: 1]),
@@ -121,7 +121,7 @@
   <% :post -> %> <!-- #################   POST VIEW   ################# -->
 
     <!-- Breadcrumb -->
-    <div class="p-8">
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8">
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
@@ -131,53 +131,57 @@
             to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
             class: "text-purple-700 hover:underline" %>
     </div>
-    <br>
 
-    <!-- Original Post -->
-    <div class="px-4 pb-2 border-b-2">
-      <div class="text-lg font-bold">
-        <%= @active_post.title %>
-      </div>
-      <div class="pl-2">
-        by <%= @user_cache[@active_post.author].name %>
-        <%= format_time(@active_post.inserted_at) %>
-      </div>
-      <div class="py-4">
-        <%= @active_post.body %>
-      </div>
+    <!-- Title -->
+    <div class="text-2xl pb-4 md:pl-8">
+      <%= @active_post.title %>
     </div>
 
-    <!-- Replies -->
-    <%= for reply <- @reply_list do %>
-      <div class="px-4 pb-2 border-b-2">
-        <div class="font-bold">
-          Re: <%= @active_post.title %>
+    <!-- Post + replies -->
+    <div class="md:border-t-2 md:border-b-2 md:divide-y-2">
+      <%= for post <- [@active_post | @reply_list] do %>
+        <div class="block rounded-xl bg-gray-100 mb-4 md:flex md:rounded-none">
+
+          <div class="block pl-4 border-b-2 pb-2 pt-2
+                     md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none">
+            <%= @user_cache[post.author].name %>
+            <p class="text-sm">Registered User</p>
+
+            <div class="hidden md:block">
+              <p class="text-sm mt-4">
+                Posts: <%= Accounts.post_count(post.author) %>
+              </p>
+              <p class="text-sm">
+                Joined: <%= format_date(@user_cache[post.author].joined) %>
+              </p>
+            </div>
+          </div>
+
+          <div class="md:w-10/12 pt-2 block pl-4">
+            <p class="text-sm text-gray-500"><%= format_time(post.inserted_at) %></p>
+            <div class="py-4 pr-4"><%= post.body %></div>
+          </div>
+
         </div>
-        <div class="pl-2">
-          by <%= @user_cache[reply.author].name %>
-          <%= format_time(reply.updated_at) %>
-        </div>
-        <div class="py-4">
-          <%= reply.body %>
-        </div>
-      </div>
-    <% end %>
+      <% end %>
+    </div>
 
     <!-- New Reply form -->
-    <div>
+    <div class="flex w-full justify-center pt-2 md:pt-4 pb-2">
       <%= f = form_for @changeset, "#",
-                phx_submit: "new_reply" %>
+                [phx_submit: "new_reply",
+                class: "flex-grow mx-4 grid justify-items-auto w-full flex-grow"] %>
 
-        <div class="field">
           <%= textarea f, :body,
-                       placeholder: "Reply text",
-                       autocomplete: "off",
-                       class: "py-2 m-2 max-w-md bg-white rounded-xl shadow-md" %>
-        </div>
+                         placeholder: "Reply text",
+                         autocomplete: "off",
+                         class: "appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 bg-white
+                                justify-self-center rounded-xl shadow-md" %>
 
-        <%= submit "Post Reply",
-                   phx_disable_with: "Posting...",
-                   class: "px-8 py-2 m-2 justify-center rounded-md bg-purple-700 text-white" %>
+          <%= submit "Post Reply",
+                       phx_disable_with: "Posting...",
+                       class: "px-8 py-2 m-2 rounded-md justify-self-center
+                              bg-purple-700 md:w-1/6 text-white" %>
       </form>
     </div>
 
@@ -185,7 +189,7 @@
   <% :create_post -> %> <!-- ###############   CREATE VIEW   ############### -->
 
     <!-- Breadcrumb -->
-    <div class="pl-4">
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8">
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
@@ -195,29 +199,29 @@
             to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
             class: "text-purple-700 hover:underline" %>
     </div>
-    <br>
 
-    <div id="create_post">
+    <!-- Title -->
+    <div class="text-2xl pb-4 md:pl-8">
+      Create New Topic
+    </div>
+
+    <div class="flex w-full">
       <%= f = form_for @changeset, "#",
-                phx_submit: "new_post" %>
+                [phx_submit: "new_post", class: "grid w-full"] %>
 
-        <div class="field">
-          <%= text_input f, :title,
+        <%= text_input f, :title,
                          placeholder: "Subject",
                          autocomplete: "off",
-                         class: "py-2 m-2 max-w-sm bg-white rounded-xl shadow-md" %>
-        </div>
+                         class: "py-2 mb-4 md:ml-8 w-11/12 md:w-7/12 bg-white rounded-xl shadow-md" %>
 
-        <div class="field">
-          <%= textarea f, :body,
+        <%= textarea f, :body,
                        placeholder: "Body",
                        autocomplete: "off",
-                       class: "py-2 ml-2 max-w-sm bg-white rounded-xl shadow-md" %>
-        </div>
+                       class: "py-2 md:ml-8 w-11/12 md:w-7/12 h-64 bg-white rounded-xl shadow-md" %>
 
         <%= submit "Create Post",
                    phx_disable_with: "Posting...",
-                   class: "px-8 py-2 m-2 justify-center rounded-md bg-purple-700 text-white" %>
+                   class: "px-8 py-2 mt-4 mb-4 md:ml-8 w-6/12 md:w-3/12 rounded-md bg-purple-700 text-white" %>
       </form>
     </div>
 
