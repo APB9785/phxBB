@@ -43,7 +43,7 @@
               </div>
               <div>
                 in
-                <%= live_patch Posts.get_title(board.last_post),
+                <%= live_patch display_title(board.last_post),
                       to: Routes.live_path(@socket, __MODULE__, post: board.last_post),
                       class: "text-purple-700 hover:underline" %>
               </div>
