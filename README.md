@@ -5,16 +5,15 @@ vBulletin.  It uses Phoenix LiveView to establish a persistent connection with e
 user, holding and updating state for virtually instantaneous navigation and   
 interaction without any full page reloads.   
 
-## Installation
+## Installation   
 
-To start your Phoenix server:
-
-  * Install dependencies with `mix deps.get`
+To start a local phxBB server:
+  * [Ensure that your system has Phoenix and its dependencies installed](https://hexdocs.pm/phoenix/installation.html)
+  * Install app dependencies with `mix deps.get`
   * Create and migrate your database with `mix ecto.setup`
   * Install Node.js dependencies with `npm install` inside the `assets` directory
   * Start Phoenix endpoint with `mix phx.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
+Ready to run in production? Check out the [Phoenix deployment guides](https://hexdocs.pm/phoenix/deployment.html).
