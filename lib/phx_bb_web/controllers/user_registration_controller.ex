@@ -12,7 +12,10 @@ defmodule PhxBbWeb.UserRegistrationController do
 
   def create(conn, %{"user" => user_params}) do
     lower = Map.get(user_params, "username") |> String.downcase
-    user_params = Map.put(user_params, "lowercase", lower)
+    user_params =
+      user_params
+      |> Map.put("lowercase", lower)
+      |> Map.put("post_count", 0)
 
     case Accounts.register_user(user_params) do
       {:ok, user} ->

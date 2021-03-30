@@ -10,6 +10,7 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
       add :confirmed_at, :naive_datetime
       add :username, :string
       add :lowercase, :string
+      add :post_count, :integer
       timestamps()
     end
 

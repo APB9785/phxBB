@@ -47,6 +47,9 @@ defmodule PhxBbWeb.PageLive do
         # Update the last post info for the active board
         {1, _} = Boards.added_post(b_id, post.id, u_id)
 
+        # Update the user's post count
+        {1, _} = Accounts.added_post(u_id)
+
         {:noreply,
          socket
          |> push_patch(to: Routes.live_path(socket, __MODULE__, board: b_id))}
@@ -78,6 +81,9 @@ defmodule PhxBbWeb.PageLive do
         # Update the last post info for the active board
         {1, _} =
           Boards.added_reply(socket.assigns.active_board_id, post.id, u_id)
+
+        # Update the user's post count
+        {1, _} = Accounts.added_post(u_id)
 
         {:noreply, socket}
 

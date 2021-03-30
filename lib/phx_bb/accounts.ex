@@ -87,6 +87,13 @@ defmodule PhxBb.Accounts do
     a + b
   end
 
+  def added_post(user_id) do
+    from(u in User,
+      update: [inc: [post_count: 1]],
+      where: u.id == ^user_id)
+    |> Repo.update_all([])
+  end
+
   ## User registration
 
   @doc """

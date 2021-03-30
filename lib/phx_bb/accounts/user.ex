@@ -10,6 +10,7 @@ defmodule PhxBb.Accounts.User do
     field :confirmed_at, :naive_datetime
     field :username, :string
     field :lowercase, :string
+    field :post_count, :integer
 
     timestamps()
   end
@@ -33,7 +34,7 @@ defmodule PhxBb.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :username, :lowercase])
+    |> cast(attrs, [:email, :password, :username, :lowercase, :post_count])
     |> validate_email()
     |> validate_password(opts)
     |> validate_username()
