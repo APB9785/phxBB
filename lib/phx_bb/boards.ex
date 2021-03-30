@@ -80,9 +80,23 @@ defmodule PhxBb.Boards do
     |> Repo.update()
   end
 
-  # def update_reply(%Board{} = board, attrs) do
-  #
-  # end
+  def added_post(board_id, post_id, user_id) do
+    now = NaiveDateTime.utc_now()
+    from(b in Board,
+      update: [inc: [post_count: 1, topic_count: 1],
+               set: [last_post: ^post_id, last_user: ^user_id, updated_at: ^now]],
+      where: b.id == ^board_id)
+    |> Repo.update_all([])
+  end
+
+  def added_reply(board_id, post_id, user_id) do
+    now = NaiveDateTime.utc_now()
+    from(b in Board,
+      update: [inc: [post_count: 1],
+               set: [last_post: ^post_id, last_user: ^user_id, updated_at: ^now]],
+      where: b.id == ^board_id)
+    |> Repo.update_all([])
+  end
 
   @doc """
   Deletes a board.
