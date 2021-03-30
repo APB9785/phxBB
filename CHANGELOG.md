@@ -18,7 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Solved possible race condition during post creation
 
-## [0.2] - 2014-07-10
+## [0.2] - 2021-03-25
 
 ### Added
 
