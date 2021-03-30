@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - CHANGELOG.md file now included
+- View count for posts
 
 ### Changed
 
@@ -17,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Solved possible race condition during post creation
+- DB queries reduced by adding new columns for post count and reply count
 
 ## [0.2] - 2021-03-25
 
@@ -32,11 +34,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - New topic creation moved from the bottom of the board to its own view
 - All views have updated styling including user account pages
-- Alert width now matches content width
 
 ### Fixed
 
 - Fixed a bug with URLs leading directly to a post
+- Alert width now matches content width
 
 ## [0.1] - 2021-03-16
 

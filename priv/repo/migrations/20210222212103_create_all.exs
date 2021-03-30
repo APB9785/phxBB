@@ -45,6 +45,8 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
       add :author, references(:users)
       add :board_id, references(:boards, on_delete: :delete_all)
       add :last_user, references(:users)
+      add :view_count, :integer
+      add :reply_count, :integer
 
       timestamps()
     end

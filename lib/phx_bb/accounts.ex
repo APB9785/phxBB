@@ -79,12 +79,8 @@ defmodule PhxBb.Accounts do
     end)
   end
 
-  # This is inefficient and will be eventually replaced
   def post_count(user_id) do
-    a = Repo.one from p in Post, where: [author: ^user_id], select: count()
-    b = Repo.one from r in Reply, where: [author: ^user_id], select: count()
-
-    a + b
+    Repo.one from u in User, select: u.post_count, where: u.id == ^user_id
   end
 
   def added_post(user_id) do

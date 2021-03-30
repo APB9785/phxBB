@@ -58,6 +58,11 @@ defmodule PhxBb.Posts do
 
   """
   def create_post(attrs \\ %{}) do
+    attrs =
+      attrs
+      |> Map.put("view_count", 0)
+      |> Map.put("reply_count", 0)
+
     %Post{}
     |> Post.changeset(attrs)
     |> Repo.insert()
@@ -79,6 +84,20 @@ defmodule PhxBb.Posts do
     post
     |> Post.changeset(attrs)
     |> Repo.update([force: true])
+  end
+
+  def viewed(post_id) do
+    from(p in Post, update: [inc: [view_count: 1]], where: p.id == ^post_id)
+    |> Repo.update_all([])
+  end
+
+  def added_reply(post_id, user_id) do
+    now = NaiveDateTime.utc_now()
+    from(p in Post,
+      update: [inc: [reply_count: 1],
+               set: [last_user: ^user_id, updated_at: ^now]],
+      where: p.id == ^post_id)
+    |> Repo.update_all([])
   end
 
   @doc """

@@ -94,7 +94,9 @@
           </div>
 
           <div class="px-4 w-2/12 text-center hidden md:block">
-            <%= Replies.count_by_post_id(post.id) %> replies
+            <%= post.reply_count %> replies
+            <br>
+            <%= post.view_count %> views 
           </div>
 
           <div class="px-4 flex md:block md:w-3/12">

@@ -76,7 +76,7 @@ defmodule PhxBbWeb.PageLive do
           |> assign(changeset: Replies.change_reply(%Reply{}))
 
         # Update the last reply info for the active post
-        {:ok, _} = Posts.update_post(post, %{"last_user" => u_id})
+        {1, _} = Posts.added_reply(post.id, u_id)
 
         # Update the last post info for the active board
         {1, _} =
@@ -137,6 +137,9 @@ defmodule PhxBbWeb.PageLive do
     replies = Replies.list_replies(post_id)
     user_ids = Enum.map(replies, fn reply -> reply.author end)
     cache = Accounts.build_cache([post.author | user_ids], socket.assigns.user_cache)
+
+    # Increments post view count
+    {1, _} = Posts.viewed(post_id)
 
     socket
     |> assign(nav: :post)
