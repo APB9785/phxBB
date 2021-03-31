@@ -13,7 +13,7 @@ defmodule PhxBb.Replies do
 
   ## Examples
 
-      iex> list_replies()
+      iex> list_replies(post_id)
       [%Reply{}, ...]
 
   """

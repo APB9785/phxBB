@@ -1,40 +1,46 @@
 defmodule PhxBb.PostsTest do
   use PhxBb.DataCase
 
+  import PhxBb.AccountsFixtures
+  import PhxBb.ForumFixtures
+
   alias PhxBb.Posts
+
+  setup do
+    %{user: user_fixture()}
+  end
 
   describe "posts" do
     alias PhxBb.Posts.Post
 
-    @valid_attrs %{author: 42, board_id: 24, body: "some body", title: "some title"}
-    @update_attrs %{author: 43, board_id: 25, body: "some updated body", title: "some updated title"}
     @invalid_attrs %{author: nil, board_id: nil, body: nil, title: nil}
 
-    def post_fixture(attrs \\ %{}) do
-      {:ok, post} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Posts.create_post()
+    test "list_posts/1 returns all posts in a board" do
+      board = board_fixture()
+      user = user_fixture()
+      post = post_fixture(%{author: user.id, board_id: board.id})
 
-      post
-    end
-
-    test "list_posts/0 returns all posts" do
-      post = post_fixture()
-      assert Posts.list_posts() == [post]
+      assert Posts.list_posts(board.id) == [post]
     end
 
     test "get_post!/1 returns the post with given id" do
-      post = post_fixture()
+      board = board_fixture()
+      user = user_fixture()
+      post = post_fixture(%{author: user.id, board_id: board.id})
+
       assert Posts.get_post!(post.id) == post
     end
 
     test "create_post/1 with valid data creates a post" do
-      assert {:ok, %Post{} = post} = Posts.create_post(@valid_attrs)
+      board = board_fixture()
+      user = user_fixture()
+      post = post_fixture(%{author: user.id, board_id: board.id})
+
+      assert %Post{} = post
       assert post.body == "some body"
       assert post.title == "some title"
-      assert post.board_id == 24
-      assert post.author == 42
+      assert post.board_id == board.id
+      assert post.author == user.id
     end
 
     test "create_post/1 with invalid data returns error changeset" do
@@ -42,28 +48,49 @@ defmodule PhxBb.PostsTest do
     end
 
     test "update_post/2 with valid data updates the post" do
-      post = post_fixture()
-      assert {:ok, %Post{} = post} = Posts.update_post(post, @update_attrs)
+      board = board_fixture()
+      board_2 = board_fixture()
+      user = user_fixture()
+      user_2 = user_fixture()
+      post = post_fixture(%{author: user.id, board_id: board.id})
+      changes =
+        %{
+          author: user_2.id,
+          board_id: board_2.id,
+          body: "some updated body",
+          title: "some updated title"
+        }
+
+      assert {:ok, %Post{} = post} = Posts.update_post(post, changes)
       assert post.body == "some updated body"
       assert post.title == "some updated title"
-      assert post.board_id == 25
-      assert post.author == 43
+      assert post.board_id == board_2.id
+      assert post.author == user_2.id
     end
 
     test "update_post/2 with invalid data returns error changeset" do
-      post = post_fixture()
+      board = board_fixture()
+      user = user_fixture()
+      post = post_fixture(%{author: user.id, board_id: board.id})
+
       assert {:error, %Ecto.Changeset{}} = Posts.update_post(post, @invalid_attrs)
       assert post == Posts.get_post!(post.id)
     end
 
     test "delete_post/1 deletes the post" do
-      post = post_fixture()
+      board = board_fixture()
+      user = user_fixture()
+      post = post_fixture(%{author: user.id, board_id: board.id})
+
       assert {:ok, %Post{}} = Posts.delete_post(post)
       assert_raise Ecto.NoResultsError, fn -> Posts.get_post!(post.id) end
     end
 
     test "change_post/1 returns a post changeset" do
-      post = post_fixture()
+      board = board_fixture()
+      user = user_fixture()
+      post = post_fixture(%{author: user.id, board_id: board.id})
+
       assert %Ecto.Changeset{} = Posts.change_post(post)
     end
   end

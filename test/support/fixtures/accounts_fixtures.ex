@@ -4,15 +4,21 @@ defmodule PhxBb.AccountsFixtures do
   entities via the `PhxBb.Accounts` context.
   """
 
+  def unique_user, do: "user#{rem(System.unique_integer([:positive, :monotonic]), 1000000000)}"
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
 
   def user_fixture(attrs \\ %{}) do
+    unique_username = unique_user()
+
     {:ok, user} =
       attrs
       |> Enum.into(%{
         email: unique_user_email(),
-        password: valid_user_password()
+        password: valid_user_password(),
+        username: unique_username,
+        lowercase: unique_username,
+        post_count: 0
       })
       |> PhxBb.Accounts.register_user()
 

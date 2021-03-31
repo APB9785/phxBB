@@ -58,11 +58,11 @@ defmodule PhxBb.AccountsTest do
     end
 
     test "validates email and password when given" do
-      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "not valid"})
+      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "short"})
 
       assert %{
                email: ["must have the @ sign and no spaces"],
-               password: ["should be at least 12 character(s)"]
+               password: ["should be at least 8 character(s)"]
              } = errors_on(changeset)
     end
 
@@ -85,7 +85,11 @@ defmodule PhxBb.AccountsTest do
 
     test "registers users with a hashed password" do
       email = unique_user_email()
-      {:ok, user} = Accounts.register_user(%{email: email, password: valid_user_password()})
+      name = unique_user()
+      {:ok, user} =
+        %{email: email, password: valid_user_password(), username: name, lowercase: name}
+        |> Accounts.register_user()
+
       assert user.email == email
       assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)
@@ -96,15 +100,15 @@ defmodule PhxBb.AccountsTest do
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:password, :email]
+      assert changeset.required == [:username, :lowercase, :password, :email]
     end
 
     test "allows fields to be set" do
       email = unique_user_email()
       password = valid_user_password()
-
-      changeset =
-        Accounts.change_user_registration(%User{}, %{"email" => email, "password" => password})
+      name = unique_user()
+      changes = %{email: email, password: password, username: name, lowercase: name}
+      changeset = Accounts.change_user_registration(%User{}, changes)
 
       assert changeset.valid?
       assert get_change(changeset, :email) == email
@@ -258,12 +262,12 @@ defmodule PhxBb.AccountsTest do
     test "validates password", %{user: user} do
       {:error, changeset} =
         Accounts.update_user_password(user, valid_user_password(), %{
-          password: "not valid",
+          password: "short",
           password_confirmation: "another"
         })
 
       assert %{
-               password: ["should be at least 12 character(s)"],
+               password: ["should be at least 8 character(s)"],
                password_confirmation: ["does not match password"]
              } = errors_on(changeset)
     end
@@ -467,12 +471,12 @@ defmodule PhxBb.AccountsTest do
     test "validates password", %{user: user} do
       {:error, changeset} =
         Accounts.reset_user_password(user, %{
-          password: "not valid",
+          password: "short",
           password_confirmation: "another"
         })
 
       assert %{
-               password: ["should be at least 12 character(s)"],
+               password: ["should be at least 8 character(s)"],
                password_confirmation: ["does not match password"]
              } = errors_on(changeset)
     end

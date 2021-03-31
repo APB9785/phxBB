@@ -13,13 +13,13 @@ defmodule PhxBb.Posts do
 
   ## Examples
 
-      iex> list_posts()
+      iex> list_posts(board_id)
       [%Post{}, ...]
 
   """
-  def list_posts(id) do
+  def list_posts(board_id) do
     Repo.all(from p in Post,
-             where: p.board_id == ^id)
+             where: p.board_id == ^board_id)
     |> Enum.sort_by(fn schema -> schema.updated_at end, {:desc, NaiveDateTime})
   end
 
@@ -60,8 +60,8 @@ defmodule PhxBb.Posts do
   def create_post(attrs \\ %{}) do
     attrs =
       attrs
-      |> Map.put("view_count", 0)
-      |> Map.put("reply_count", 0)
+      |> Map.put(:view_count, 0)
+      |> Map.put(:reply_count, 0)
 
     %Post{}
     |> Post.changeset(attrs)
