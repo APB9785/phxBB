@@ -36,13 +36,8 @@ defmodule PhxBbWeb.PageLive do
   def handle_event("new_post", %{"post" => params}, socket) do
     b_id = socket.assigns.active_board_id
     u_id = current_user_id(socket)
-    params =
-      params
-      |> Map.put("board_id", b_id)
-      |> Map.put("author", u_id)
-      |> Map.put("last_user", u_id)
 
-    case Posts.create_post(params) do
+    case postmaker(params["body"], params["title"], b_id, u_id) do
       {:ok, post} ->
         # Update the last post info for the active board
         {1, _} = Boards.added_post(b_id, post.id, u_id)
@@ -63,12 +58,8 @@ defmodule PhxBbWeb.PageLive do
   def handle_event("new_reply", %{"reply" => params}, socket) do
     u_id = current_user_id(socket)
     post = socket.assigns.active_post
-    params =
-      params
-      |> Map.put("post_id", post.id)
-      |> Map.put("author", u_id)
 
-    case Replies.create_reply(params) do
+    case replymaker(params["body"], post.id, u_id) do
       {:ok, _reply} ->
         socket =
           socket

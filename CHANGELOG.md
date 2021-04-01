@@ -14,11 +14,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Long topic titles are now shortened in the Main Index links
+- Postgres now handles sorting content by date (instead of Elixir process)
 
 ### Fixed
 
 - Solved possible race condition during post creation
 - DB queries reduced by adding new columns for post count and reply count
+- Tests updated to handle foreign key constraints
 
 ## [0.2] - 2021-03-25
 

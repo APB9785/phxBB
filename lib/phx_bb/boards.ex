@@ -18,8 +18,7 @@ defmodule PhxBb.Boards do
 
   """
   def list_boards do
-    Repo.all(Board)
-    |> Enum.sort_by(fn b -> b.id end)
+    Repo.all(from b in Board, order_by: [asc: b.id])
   end
 
   @doc """

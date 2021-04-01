@@ -13,7 +13,7 @@ defmodule PhxBb.PostsTest do
   describe "posts" do
     alias PhxBb.Posts.Post
 
-    @invalid_attrs %{author: nil, board_id: nil, body: nil, title: nil}
+    @invalid_attrs %{author: nil, board_id: nil, body: nil, title: nil, reply_count: nil, view_count: nil}
 
     test "list_posts/1 returns all posts in a board" do
       board = board_fixture()

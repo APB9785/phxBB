@@ -19,8 +19,9 @@ defmodule PhxBb.Posts do
   """
   def list_posts(board_id) do
     Repo.all(from p in Post,
-             where: p.board_id == ^board_id)
-    |> Enum.sort_by(fn schema -> schema.updated_at end, {:desc, NaiveDateTime})
+             where: p.board_id == ^board_id,
+             order_by: [desc: p.updated_at])
+    # |> Enum.sort_by(fn schema -> schema.updated_at end, {:desc, NaiveDateTime})
   end
 
   @doc """
@@ -58,10 +59,7 @@ defmodule PhxBb.Posts do
 
   """
   def create_post(attrs \\ %{}) do
-    attrs =
-      attrs
-      |> Map.put(:view_count, 0)
-      |> Map.put(:reply_count, 0)
+    attrs = Enum.into(attrs, %{view_count: 0, reply_count: 0})
 
     %Post{}
     |> Post.changeset(attrs)

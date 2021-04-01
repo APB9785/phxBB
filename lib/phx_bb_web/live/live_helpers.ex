@@ -59,4 +59,14 @@ defmodule PhxBbWeb.LiveHelpers do
     |> PhxBb.Posts.get_title
     |> shortener
   end
+
+  def postmaker(body, title, board_id, user_id) do
+    %{body: body, title: title, board_id: board_id, author: user_id, last_user: user_id}
+    |> PhxBb.Posts.create_post
+  end
+
+  def replymaker(body, post_id, user_id) do
+    %{body: body, post_id: post_id, author: user_id}
+    |> PhxBb.Replies.create_reply
+  end
 end
