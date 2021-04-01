@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CHANGELOG.md file now included
 - View count for posts
+- Custom 404 page for all bad routes and params
 
 ### Changed
 

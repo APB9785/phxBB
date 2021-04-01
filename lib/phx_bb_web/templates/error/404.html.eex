@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>404 Page Not Found · phxBB</title>
+    <link rel="stylesheet" href="/css/app.css">
+  </head>
+
+  <body class="bg-purple-300">
+    <div class="mx-auto w-11/12 bg-transparent rounded-xl space-y-2 m-4 mt-20 pt-8
+                antialiased relative font-sans max-w-full text-center text-2xl
+                md:bg-gray-100 md:shadow-md">
+      404 Page Not Found
+      <div class="text-center pb-8 pt-8">
+        <a href="/" class="text-purple-700 text-lg hover:underline">
+          Return to Main Index
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

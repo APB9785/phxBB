@@ -26,7 +26,8 @@ defmodule PhxBbWeb.PageLive do
         %{"create_post" => "1", "board" => board_id} -> create_post_helper(socket, board_id)
         %{"post" => post_id} -> post_helper(socket, post_id)
         %{"board" => board_id} -> board_helper(socket, board_id)
-        %{} -> main_helper(socket)
+        map when map == %{} -> main_helper(socket)
+        %{} -> invalid_helper(socket)
       end
 
     {:noreply, socket}
@@ -107,55 +108,75 @@ defmodule PhxBbWeb.PageLive do
   end
 
   defp board_helper(socket, board_id) do
-    posts = Posts.list_posts(board_id)
-    name = Boards.get_name(board_id)
-    cache =
-      Enum.reduce(posts, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
-      |> Accounts.build_cache(socket.assigns.user_cache)
+    case Boards.get_name(board_id) do
+      nil ->
+        invalid_helper(socket)
+      name ->
+        posts = Posts.list_posts(board_id)
+        cache =
+          Enum.reduce(posts, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
+          |> Accounts.build_cache(socket.assigns.user_cache)
 
-    socket
-    |> assign(nav: :board)
-    |> assign(post_list: posts)
-    |> assign(changeset: Posts.change_post(%Post{}))
-    |> assign(page_title: name)
-    |> assign(user_cache: cache)
-    |> assign(active_board_id: board_id)
-    |> assign(active_board_name: name)
+        socket
+        |> assign(nav: :board)
+        |> assign(post_list: posts)
+        |> assign(changeset: Posts.change_post(%Post{}))
+        |> assign(page_title: name)
+        |> assign(user_cache: cache)
+        |> assign(active_board_id: board_id)
+        |> assign(active_board_name: name)
+    end
   end
 
   defp post_helper(socket, post_id) do
-    post = Posts.get_post!(post_id)
-    replies = Replies.list_replies(post_id)
-    user_ids = Enum.map(replies, fn reply -> reply.author end)
-    cache = Accounts.build_cache([post.author | user_ids], socket.assigns.user_cache)
+    case Posts.get_post(post_id) do
+      nil ->
+        invalid_helper(socket)
+      post ->
+        replies = Replies.list_replies(post_id)
+        user_ids = Enum.map(replies, fn reply -> reply.author end)
+        cache = Accounts.build_cache([post.author | user_ids], socket.assigns.user_cache)
 
-    # Increments post view count
-    {1, _} = Posts.viewed(post_id)
+        # Increments post view count
+        {1, _} = Posts.viewed(post_id)
 
-    socket
-    |> assign(nav: :post)
-    |> assign(user_cache: cache)
-    |> assign(page_title: post.title)
-    |> assign(changeset: Replies.change_reply(%Reply{}))
-    |> assign(reply_list: replies)
-    |> assign(active_post: post)
-    |> assign(active_board_id: post.board_id)
-    |> assign(active_board_name: Boards.get_name(post.board_id))
+        socket
+        |> assign(nav: :post)
+        |> assign(user_cache: cache)
+        |> assign(page_title: post.title)
+        |> assign(changeset: Replies.change_reply(%Reply{}))
+        |> assign(reply_list: replies)
+        |> assign(active_post: post)
+        |> assign(active_board_id: post.board_id)
+        |> assign(active_board_name: Boards.get_name(post.board_id))
+    end
   end
 
   defp create_post_helper(socket, board_id) do
-    socket =
-      if socket.assigns[:active_board_id] != board_id do
-        socket
-        |> assign(active_board_id: board_id)
-        |> assign(active_board_name: Boards.get_name(board_id))
-      else
-        socket
+    if socket.assigns[:active_board_id] != board_id do
+      # User got here via external link - must query DB for board info
+      case Boards.get_name(board_id) do
+        nil ->  # Board does not exist
+          invalid_helper(socket)
+        name ->  # Board exists, need to store info in assigns
+          socket
+          |> assign(active_board_id: board_id)
+          |> assign(active_board_name: name)
+          |> assign(nav: :create_post)
+          |> assign(page_title: "Create Post")
+          |> assign(changeset: Posts.change_post(%Post{}))
       end
+    else
+      # User got here from a valid board, no need to query DB or update assigns
+      socket
+      |> assign(nav: :create_post)
+      |> assign(page_title: "Create Post")
+      |> assign(changeset: Posts.change_post(%Post{}))
+    end
+  end
 
+  defp invalid_helper(socket) do
     socket
-    |> assign(nav: :create_post)
-    |> assign(page_title: "Create Post")
-    |> assign(changeset: Posts.change_post(%Post{}))
+    |> assign(nav: :invalid)
   end
 end
