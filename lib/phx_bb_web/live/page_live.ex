@@ -35,53 +35,57 @@ defmodule PhxBbWeb.PageLive do
 
 
   def handle_event("new_post", %{"post" => params}, socket) do
-    b_id = socket.assigns.active_board_id
-    u_id = current_user_id(socket)
+    case socket.assigns.user_token do
+      nil ->
+        {:noreply, push_redirect(socket, to: "/users/log_in")}
+      token ->
+        u_id = lookup_token(token)
+        b_id = socket.assigns.active_board_id
+        case postmaker(params["body"], params["title"], b_id, u_id) do
+          {:ok, post} ->
+            # Update the last post info for the active board
+            {1, _} = Boards.added_post(b_id, post.id, u_id)
+            # Update the user's post count
+            {1, _} = Accounts.added_post(u_id)
 
-    case postmaker(params["body"], params["title"], b_id, u_id) do
-      {:ok, post} ->
-        # Update the last post info for the active board
-        {1, _} = Boards.added_post(b_id, post.id, u_id)
+            {:noreply, push_patch(socket, to: Routes.live_path(socket, __MODULE__, board: b_id))}
 
-        # Update the user's post count
-        {1, _} = Accounts.added_post(u_id)
-
-        {:noreply,
-         socket
-         |> push_patch(to: Routes.live_path(socket, __MODULE__, board: b_id))}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        socket = assign(socket, changeset: changeset)
-        {:noreply, socket}
+          {:error, %Ecto.Changeset{} = changeset} ->
+            {:noreply, assign(socket, changeset: changeset)}
+        end
     end
   end
 
   def handle_event("new_reply", %{"reply" => params}, socket) do
-    u_id = current_user_id(socket)
-    post = socket.assigns.active_post
+    case socket.assigns.user_token do
+      nil ->
+        {:noreply, push_redirect(socket, to: "/users/log_in")}
+      token ->
+        u_id = lookup_token(token)
+        post = socket.assigns.active_post
+        case replymaker(params["body"], post.id, u_id) do
+          {:ok, _reply} ->
+            socket =
+              socket
+              |> assign(reply_list: Replies.list_replies(post.id))
+              |> assign(changeset: Replies.change_reply(%Reply{}))
 
-    case replymaker(params["body"], post.id, u_id) do
-      {:ok, _reply} ->
-        socket =
-          socket
-          |> assign(reply_list: Replies.list_replies(post.id))
-          |> assign(changeset: Replies.change_reply(%Reply{}))
+            # Update the last reply info for the active post
+            {1, _} = Posts.added_reply(post.id, u_id)
 
-        # Update the last reply info for the active post
-        {1, _} = Posts.added_reply(post.id, u_id)
+            # Update the last post info for the active board
+            {1, _} =
+              Boards.added_reply(socket.assigns.active_board_id, post.id, u_id)
 
-        # Update the last post info for the active board
-        {1, _} =
-          Boards.added_reply(socket.assigns.active_board_id, post.id, u_id)
+            # Update the user's post count
+            {1, _} = Accounts.added_post(u_id)
 
-        # Update the user's post count
-        {1, _} = Accounts.added_post(u_id)
+            {:noreply, socket}
 
-        {:noreply, socket}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        socket = assign(socket, changeset: changeset)
-        {:noreply, socket}
+          {:error, %Ecto.Changeset{} = changeset} ->
+            socket = assign(socket, changeset: changeset)
+            {:noreply, socket}
+        end
     end
   end
 

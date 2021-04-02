@@ -3,6 +3,10 @@ defmodule PhxBbWeb.LiveHelpers do
     PhxBb.Accounts.get_user_by_session_token(socket.assigns.user_token).id
   end
 
+  def lookup_token(token) do
+    PhxBb.Accounts.get_user_by_session_token(token).id
+  end
+
   defp month_abv(n) do
     case n do
       1 -> "Jan"
