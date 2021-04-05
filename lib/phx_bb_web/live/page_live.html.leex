@@ -1,3 +1,36 @@
+<!--   USER MENU   -->
+<%= if @active_user do %>
+  <div class="<%= user_menu() %>">
+    <div class="text-center">
+      Logged in as <%= @active_user.username %>
+      <br>
+    </div>
+    <div class="text-purple-700 flex justify-center">
+      <div class="hover:underline">
+        <%= link "Settings", to: Routes.user_settings_path(@socket, :edit) %>
+      </div>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <div class="hover:underline">
+        <%= link "Log out", to: Routes.user_session_path(@socket, :delete), method: :delete %>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="<%= user_menu() %>">
+    <div class="text-purple-700 flex justify-center">
+      <div class="hover:underline">
+        <%= live_patch "Register", to: Routes.live_path(@socket, __MODULE__, register: 1) %>
+      </div>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <div class="hover:underline">
+        <%= link "Log in", to: Routes.user_session_path(@socket, :new) %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+
+<!--   DISPLAY FORUM CONTENT BASED ON NAV ASSIGN   -->
 <div class="mx-auto w-11/12 bg-transparent rounded-xl space-y-2 m-4
             antialiased relative font-sans max-w-full
             md:bg-gray-100 md:shadow-md">
@@ -48,7 +81,7 @@
                       class: "text-purple-700 hover:underline" %>
               </div>
               <div class="hidden md:block">
-                <%= format_time(board.updated_at) %>
+                <%= format_time(board.updated_at, @active_user.timezone) %>
               </div>
             </div>
           <% else %>
@@ -89,7 +122,7 @@
                   class: "text-purple-700 hover:underline" %>
             <p class="text-sm hidden md:block">
               by <%= @user_cache[post.author].name %> at
-              <%= format_time(post.inserted_at) %>
+              <%= format_time(post.inserted_at, @active_user.timezone) %>
             </p>
           </div>
 
@@ -104,7 +137,7 @@
               Last post by <%= @user_cache[post.last_user].name %>
             </p>
             <p class="px-1 text-sm md:hidden">at</p>
-            <p class="text-sm"><%= format_time(post.updated_at) %></p>
+            <p class="text-sm"><%= format_time(post.updated_at, @active_user.timezone) %></p>
           </div>
 
         </div>
@@ -153,13 +186,13 @@
                 Posts: <%= Accounts.post_count(post.author) %>
               </p>
               <p class="text-sm">
-                Joined: <%= format_date(@user_cache[post.author].joined) %>
+                Joined: <%= format_date(@user_cache[post.author].joined, @active_user.timezone) %>
               </p>
             </div>
           </div>
 
           <div class="md:w-10/12 pt-2 block pl-4">
-            <p class="text-sm text-gray-500"><%= format_time(post.inserted_at) %></p>
+            <p class="text-sm text-gray-500"><%= format_time(post.inserted_at, @active_user.timezone) %></p>
             <div class="py-4 pr-4"><%= post.body %></div>
           </div>
 
@@ -225,6 +258,52 @@
                    class: "px-8 py-2 mt-4 mb-4 md:ml-8 w-6/12 md:w-3/12 rounded-md bg-purple-700 text-white" %>
       </form>
     </div>
+
+
+  <% :register -> %> <!-- ###############   REGISTER VIEW   ############### -->
+
+    <h1>Register</h1>
+
+    <%= f = form_for @changeset, "#",
+                     [phx_submit: "new_user",
+                     class: "bg-white px-10 py-8 mb-6 shadow rounded-lg"] %>
+      <%= if @changeset.action do %>
+        <div class="alert alert-danger">
+          <p>Oops, something went wrong! Please check the errors below.</p>
+        </div>
+      <% end %>
+
+      <%= label f, :email, class: user_form_label() %>
+      <%= email_input f, :email, required: true, type: "email", phx_debounce: "blur",
+                      class: user_form() %>
+      <%= error_tag f, :email %>
+
+      <%= label f, :username, class: user_form_label() %>
+      <%= text_input f, :username, required: true, phx_debounce: "blur",
+                     class: user_form() %>
+      <%= error_tag f, :username %>
+
+      <%= label f, :password, class: user_form_label() %>
+      <%= password_input f, :password, required: true, value: input_value(f, :password),
+                         type: "password", phx_debounce: "blur",
+                         class: user_form() %>
+      <%= error_tag f, :password %>
+
+      <%= label f, :timezone, class: user_form_label() %>
+      <%= select f, :timezone, Tzdata.zone_list(), required: true, class: user_form() %>
+      <%= error_tag f, :timezone %>
+
+      <div>
+        <%= submit "Register",
+                   phx_disable_with: "Registering...",
+                   class: "px-8 py-2 m-6 justify-center rounded-md bg-purple-700 text-white" %>
+      </div>
+    </form>
+
+    <p>
+      <%= link "Log in", to: Routes.user_session_path(@socket, :new) %> |
+      <%= link "Forgot your password?", to: Routes.user_reset_password_path(@socket, :new) %>
+    </p>
 
 
   <% :invalid -> %> <!-- ###############   404 VIEW   ############### -->

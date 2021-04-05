@@ -8,14 +8,14 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :naive_datetime
-      add :username, :string
-      add :lowercase, :string
+      add :username, :citext, null: false
       add :post_count, :integer
+      add :timezone, :string
       timestamps()
     end
 
     create unique_index(:users, [:email])
-    create unique_index(:users, [:lowercase])
+    create unique_index(:users, [:username])
 
     create table(:users_tokens) do
       add :user_id, references(:users, on_delete: :delete_all), null: false

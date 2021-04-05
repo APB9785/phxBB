@@ -11,11 +11,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - CHANGELOG.md file now included
 - View count for posts
 - Custom 404 page for all bad routes and params
+- Users can now select a timezone and see timestamps adjusted accordingly
 
 ### Changed
 
 - Long topic titles are now shortened in the Main Index links
 - Postgres now handles sorting content by date (instead of Elixir process)
+- Usernames are now stored with citext to ensure unique names
+- User registration moved into the LiveView
+- Socket assigns now holds active User struct instead of user token
 
 ### Fixed
 

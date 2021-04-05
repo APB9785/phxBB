@@ -3,8 +3,23 @@ defmodule PhxBbWeb.LiveHelpers do
     PhxBb.Accounts.get_user_by_session_token(socket.assigns.user_token).id
   end
 
+  def lookup_token(token) when is_nil(token) do
+    nil
+  end
   def lookup_token(token) do
-    PhxBb.Accounts.get_user_by_session_token(token).id
+    PhxBb.Accounts.get_user_by_session_token(token)
+  end
+
+  def user_form do
+    "mb-4 appearance-none w-full border-purple-300 rounded-md transition duration-150 text-sm focus:outline-none focus:ring focus:ring-purple-300 focus:border-purple-300"
+  end
+
+  def user_form_label do
+    "block my-2 text-sm font-medium text-gray-600"
+  end
+
+  def user_menu do
+    "py-2 max-w-sm mx-auto rounded-xl shadow-md antialiased relative opacity-100 font-sans bg-gray-100"
   end
 
   defp month_abv(n) do
@@ -24,31 +39,38 @@ defmodule PhxBbWeb.LiveHelpers do
     end
   end
 
-  def format_date(ndt) do
-    date = NaiveDateTime.to_date(ndt)
-    month_abv(date.month) <> " " <> Integer.to_string(date.day) <>
-      ", " <> Integer.to_string(date.year)
+  def format_date(naive_datetime, time_zone) do
+    datetime = DateTime.from_naive!(naive_datetime, "Etc/UTC")
+
+    DateTime.shift_zone!(datetime, time_zone)
+    |> format_date
   end
 
-  def format_time(ndt) do
-    month = month_abv(ndt.month)
-    ampm = if ndt.hour > 11 do "pm" else "am" end
+  def format_date(datetime) do
+    month_abv(datetime.month) <> " " <> Integer.to_string(datetime.day) <>
+      ", " <> Integer.to_string(datetime.year)
+  end
+
+  def format_time(naive_datetime, time_zone) do
+    datetime = DateTime.from_naive!(naive_datetime, "Etc/UTC")
+
+    DateTime.shift_zone!(datetime, time_zone)
+    |> format_time
+  end
+
+  def format_time(datetime) do
+    month = month_abv(datetime.month)
+    ampm = if datetime.hour > 11 do "pm" else "am" end
     hour =
-      case ndt.hour do
+      case datetime.hour do
         0 -> "12"
         x when x > 12 -> Integer.to_string(x - 12)
         x -> Integer.to_string(x)
       end
-    minute = Integer.to_string(ndt.minute) |> String.pad_leading(2, "0")
+    minute = Integer.to_string(datetime.minute) |> String.pad_leading(2, "0")
 
-    month <> " " <> Integer.to_string(ndt.day) <> ", " <>
-      Integer.to_string(ndt.year) <> "  " <> hour <> ":" <> minute <> " " <> ampm
-  end
-
-  def format_time(ndt, offset) do
-    ndt
-    |> NaiveDateTime.add(offset * 3600)
-    |> format_time
+    month <> " " <> Integer.to_string(datetime.day) <> ", " <>
+      Integer.to_string(datetime.year) <> "  " <> hour <> ":" <> minute <> " " <> ampm
   end
 
   def shortener(text) do
@@ -72,5 +94,9 @@ defmodule PhxBbWeb.LiveHelpers do
   def replymaker(body, post_id, user_id) do
     %{body: body, post_id: post_id, author: user_id}
     |> PhxBb.Replies.create_reply
+  end
+
+  def assign_timezone(socket) do
+    socket
   end
 end

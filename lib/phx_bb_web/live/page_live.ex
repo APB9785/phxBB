@@ -7,6 +7,7 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBb.Boards
   alias PhxBb.Replies.Reply
   alias PhxBb.Replies
+  alias PhxBb.Accounts.User
 
   import PhxBbWeb.LiveHelpers
 
@@ -14,8 +15,9 @@ defmodule PhxBbWeb.PageLive do
   def mount(_params, session, socket) do
     socket =
       socket
-      |> assign(user_token: session["user_token"])
+      |> assign(active_user: lookup_token(session["user_token"]))
       |> assign(user_cache: %{nil => %{name: "Unknown User"}})
+      |> assign_timezone
 
     {:ok, socket}
   end
@@ -26,6 +28,8 @@ defmodule PhxBbWeb.PageLive do
         %{"create_post" => "1", "board" => board_id} -> create_post_helper(socket, board_id)
         %{"post" => post_id} -> post_helper(socket, post_id)
         %{"board" => board_id} -> board_helper(socket, board_id)
+        %{"register" => "1"} -> registration_helper(socket)
+        %{"settings" => "1"} -> settings_helper(socket)
         map when map == %{} -> main_helper(socket)
         %{} -> invalid_helper(socket)
       end
@@ -35,18 +39,17 @@ defmodule PhxBbWeb.PageLive do
 
 
   def handle_event("new_post", %{"post" => params}, socket) do
-    case socket.assigns.user_token do
+    case socket.assigns.active_user do
       nil ->
         {:noreply, push_redirect(socket, to: "/users/log_in")}
-      token ->
-        u_id = lookup_token(token)
+      user ->
         b_id = socket.assigns.active_board_id
-        case postmaker(params["body"], params["title"], b_id, u_id) do
+        case postmaker(params["body"], params["title"], b_id, user.id) do
           {:ok, post} ->
             # Update the last post info for the active board
-            {1, _} = Boards.added_post(b_id, post.id, u_id)
+            {1, _} = Boards.added_post(b_id, post.id, user.id)
             # Update the user's post count
-            {1, _} = Accounts.added_post(u_id)
+            {1, _} = Accounts.added_post(user.id)
 
             {:noreply, push_patch(socket, to: Routes.live_path(socket, __MODULE__, board: b_id))}
 
@@ -57,13 +60,12 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_event("new_reply", %{"reply" => params}, socket) do
-    case socket.assigns.user_token do
+    case socket.assigns.active_user do
       nil ->
         {:noreply, push_redirect(socket, to: "/users/log_in")}
-      token ->
-        u_id = lookup_token(token)
+      user ->
         post = socket.assigns.active_post
-        case replymaker(params["body"], post.id, u_id) do
+        case replymaker(params["body"], post.id, user.id) do
           {:ok, _reply} ->
             socket =
               socket
@@ -71,14 +73,14 @@ defmodule PhxBbWeb.PageLive do
               |> assign(changeset: Replies.change_reply(%Reply{}))
 
             # Update the last reply info for the active post
-            {1, _} = Posts.added_reply(post.id, u_id)
+            {1, _} = Posts.added_reply(post.id, user.id)
 
             # Update the last post info for the active board
             {1, _} =
-              Boards.added_reply(socket.assigns.active_board_id, post.id, u_id)
+              Boards.added_reply(socket.assigns.active_board_id, post.id, user.id)
 
             # Update the user's post count
-            {1, _} = Accounts.added_post(u_id)
+            {1, _} = Accounts.added_post(user.id)
 
             {:noreply, socket}
 
@@ -86,6 +88,23 @@ defmodule PhxBbWeb.PageLive do
             socket = assign(socket, changeset: changeset)
             {:noreply, socket}
         end
+    end
+  end
+
+  def handle_event("new_user", %{"user" => user_params}, socket) do
+    user_params = Map.put(user_params, "post_count", 0)
+
+    case Accounts.register_user(user_params) do
+      {:ok, _user} ->
+        # {:ok, _} = Accounts.deliver_user_confirmation_instructions(user, &Routes.user_confirmation_url(socket, :confirm, &1))
+
+        {:noreply,
+          socket
+          |> put_flash(:info, "User created successfully. Please check your email for confirmation instructions.")
+          |> redirect(to: Routes.user_session_path(socket, :new))}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
     end
   end
 
@@ -182,5 +201,19 @@ defmodule PhxBbWeb.PageLive do
   defp invalid_helper(socket) do
     socket
     |> assign(nav: :invalid)
+    |> assign(page_title: "404 Page Not Found")
+  end
+
+  defp registration_helper(socket) do
+    socket
+    |> assign(nav: :register)
+    |> assign(page_title: "Register")
+    |> assign(changeset: Accounts.change_user_registration(%User{}))
+  end
+
+  defp settings_helper(socket) do
+    socket
+    |> assign(nav: :settings)
+    |> assign(page_title: "User Settings")
   end
 end

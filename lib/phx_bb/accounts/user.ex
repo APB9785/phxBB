@@ -9,8 +9,8 @@ defmodule PhxBb.Accounts.User do
     field :hashed_password, :string
     field :confirmed_at, :naive_datetime
     field :username, :string
-    field :lowercase, :string
     field :post_count, :integer
+    field :timezone, :string
 
     timestamps()
   end
@@ -34,7 +34,7 @@ defmodule PhxBb.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :username, :lowercase, :post_count])
+    |> cast(attrs, [:email, :password, :username, :post_count, :timezone])
     |> validate_email()
     |> validate_password(opts)
     |> validate_username()
@@ -42,12 +42,9 @@ defmodule PhxBb.Accounts.User do
 
   defp validate_username(changeset) do
     changeset
-    |> validate_required([:username, :lowercase])
+    |> validate_required([:username])
     |> validate_length(:username, min: 3, max: 16)
-    |> unsafe_validate_unique(:lowercase, PhxBb.Repo,
-                              [message: "has already been taken",
-                               error_key: :username])
-    |> unique_constraint(:lowercase)
+    |> unique_constraint(:username)
   end
 
   defp validate_email(changeset) do
@@ -55,7 +52,6 @@ defmodule PhxBb.Accounts.User do
     |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
-    |> unsafe_validate_unique(:email, PhxBb.Repo)
     |> unique_constraint(:email)
   end
 

@@ -1,0 +1,33 @@
+<%= if @user_token do %>
+  <div class="py-2 max-w-sm mx-auto rounded-xl
+              shadow-md antialiased relative opacity-100
+              font-sans bg-gray-100">
+    <div class="text-center">
+      Logged in 
+      <br>
+    </div>
+    <div class="text-purple-700 flex justify-center">
+      <div class="hover:underline">
+        <%= link "Settings", to: Routes.user_settings_path(@socket, :edit) %>
+      </div>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <div class="hover:underline">
+        <%= link "Log out", to: Routes.user_session_path(@socket, :delete), method: :delete %>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="py-2 max-w-sm mx-auto rounded-xl
+              shadow-md antialiased relative opacity-100
+              font-sans bg-gray-100">
+    <div class="text-purple-700 flex justify-center">
+      <div class="hover:underline">
+        <%= link "Register", to: Routes.user_registration_path(@socket, :new) %>
+      </div>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <div class="hover:underline">
+        <%= link "Log in", to: Routes.user_session_path(@socket, :new) %>
+      </div>
+    </div>
+  </div>
+<% end %>
