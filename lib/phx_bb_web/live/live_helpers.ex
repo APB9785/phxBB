@@ -22,6 +22,10 @@ defmodule PhxBbWeb.LiveHelpers do
     "py-2 max-w-sm mx-auto rounded-xl shadow-md antialiased relative opacity-100 font-sans bg-gray-100"
   end
 
+  def button_style do
+    "px-8 py-2 mt-4 mb-4 w-6/12 md:w-3/12 rounded-md bg-purple-700 text-white"
+  end
+
   defp month_abv(n) do
     case n do
       1 -> "Jan"
@@ -39,10 +43,13 @@ defmodule PhxBbWeb.LiveHelpers do
     end
   end
 
-  def format_date(naive_datetime, time_zone) do
+  def format_date(naive_datetime, user) when is_nil(user) do
+    format_date(naive_datetime)
+  end
+  def format_date(naive_datetime, user) do
     datetime = DateTime.from_naive!(naive_datetime, "Etc/UTC")
 
-    DateTime.shift_zone!(datetime, time_zone)
+    DateTime.shift_zone!(datetime, user.timezone)
     |> format_date
   end
 
@@ -51,10 +58,13 @@ defmodule PhxBbWeb.LiveHelpers do
       ", " <> Integer.to_string(datetime.year)
   end
 
-  def format_time(naive_datetime, time_zone) do
+  def format_time(naive_datetime, user) when is_nil(user) do
+    format_time(naive_datetime)
+  end
+  def format_time(naive_datetime, user) do
     datetime = DateTime.from_naive!(naive_datetime, "Etc/UTC")
 
-    DateTime.shift_zone!(datetime, time_zone)
+    DateTime.shift_zone!(datetime, user.timezone)
     |> format_time
   end
 

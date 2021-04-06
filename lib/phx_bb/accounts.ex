@@ -136,6 +136,10 @@ defmodule PhxBb.Accounts do
     User.email_changeset(user, attrs)
   end
 
+  def change_user_timezone(user, attrs \\ %{}) do
+    User.timezone_changeset(user, attrs)
+  end
+
   @doc """
   Emulates that the email will change without actually changing
   it in the database.
@@ -238,6 +242,12 @@ defmodule PhxBb.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  def update_user_timezone(%User{} = user, attrs) do
+    user
+    |> User.timezone_changeset(attrs)
+    |> Repo.update
   end
 
   ## Session

@@ -7,7 +7,7 @@
     </div>
     <div class="text-purple-700 flex justify-center">
       <div class="hover:underline">
-        <%= link "Settings", to: Routes.user_settings_path(@socket, :edit) %>
+        <%= live_patch "Settings", to: Routes.live_path(@socket, __MODULE__, settings: 1) %>
       </div>
       &nbsp;&nbsp;&nbsp;&nbsp;
       <div class="hover:underline">
@@ -31,7 +31,7 @@
 
 
 <!--   DISPLAY FORUM CONTENT BASED ON NAV ASSIGN   -->
-<div class="mx-auto w-11/12 bg-transparent rounded-xl space-y-2 m-4
+<div class="mx-auto w-11/12 bg-transparent rounded-xl space-y-2 m-4 pb-4
             antialiased relative font-sans max-w-full
             md:bg-gray-100 md:shadow-md">
 
@@ -81,7 +81,7 @@
                       class: "text-purple-700 hover:underline" %>
               </div>
               <div class="hidden md:block">
-                <%= format_time(board.updated_at, @active_user.timezone) %>
+                <%= format_time(board.updated_at, @active_user) %>
               </div>
             </div>
           <% else %>
@@ -122,7 +122,7 @@
                   class: "text-purple-700 hover:underline" %>
             <p class="text-sm hidden md:block">
               by <%= @user_cache[post.author].name %> at
-              <%= format_time(post.inserted_at, @active_user.timezone) %>
+              <%= format_time(post.inserted_at, @active_user) %>
             </p>
           </div>
 
@@ -137,7 +137,7 @@
               Last post by <%= @user_cache[post.last_user].name %>
             </p>
             <p class="px-1 text-sm md:hidden">at</p>
-            <p class="text-sm"><%= format_time(post.updated_at, @active_user.timezone) %></p>
+            <p class="text-sm"><%= format_time(post.updated_at, @active_user) %></p>
           </div>
 
         </div>
@@ -186,13 +186,13 @@
                 Posts: <%= Accounts.post_count(post.author) %>
               </p>
               <p class="text-sm">
-                Joined: <%= format_date(@user_cache[post.author].joined, @active_user.timezone) %>
+                Joined: <%= format_date(@user_cache[post.author].joined, @active_user) %>
               </p>
             </div>
           </div>
 
           <div class="md:w-10/12 pt-2 block pl-4">
-            <p class="text-sm text-gray-500"><%= format_time(post.inserted_at, @active_user.timezone) %></p>
+            <p class="text-sm text-gray-500"><%= format_time(post.inserted_at, @active_user) %></p>
             <div class="py-4 pr-4"><%= post.body %></div>
           </div>
 
@@ -239,71 +239,166 @@
       Create New Topic
     </div>
 
-    <div class="flex w-full">
+    <div class="flex w-full md:ml-8">
       <%= f = form_for @changeset, "#",
                 [phx_submit: "new_post", class: "grid w-full"] %>
 
         <%= text_input f, :title,
                          placeholder: "Subject",
                          autocomplete: "off",
-                         class: "py-2 mb-4 md:ml-8 w-11/12 md:w-7/12 bg-white rounded-xl shadow-md" %>
+                         class: "py-2 mb-4 w-11/12 md:w-7/12 bg-white rounded-xl shadow-md" %>
 
         <%= textarea f, :body,
                        placeholder: "Body",
                        autocomplete: "off",
-                       class: "py-2 md:ml-8 w-11/12 md:w-7/12 h-64 bg-white rounded-xl shadow-md" %>
+                       class: "py-2 w-11/12 md:w-7/12 h-64 bg-white rounded-xl shadow-md" %>
 
         <%= submit "Create Post",
                    phx_disable_with: "Posting...",
-                   class: "px-8 py-2 mt-4 mb-4 md:ml-8 w-6/12 md:w-3/12 rounded-md bg-purple-700 text-white" %>
+                   class: button_style() %>
       </form>
     </div>
 
 
   <% :register -> %> <!-- ###############   REGISTER VIEW   ############### -->
 
-    <h1>Register</h1>
+    <div class="text-2xl p-4 md:pl-8">
+      Register
+    </div>
 
-    <%= f = form_for @changeset, "#",
-                     [phx_submit: "new_user",
-                     class: "bg-white px-10 py-8 mb-6 shadow rounded-lg"] %>
-      <%= if @changeset.action do %>
-        <div class="alert alert-danger">
-          <p>Oops, something went wrong! Please check the errors below.</p>
-        </div>
-      <% end %>
+    <div class="mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg">
+      <%= f = form_for @changeset, "#", phx_submit: "new_user" %>
+        <%= if @changeset.action do %>
+          <div class="alert alert-danger">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+        <% end %>
 
-      <%= label f, :email, class: user_form_label() %>
-      <%= email_input f, :email, required: true, type: "email", phx_debounce: "blur",
-                      class: user_form() %>
-      <%= error_tag f, :email %>
+        <%= label f, :email, class: user_form_label() %>
+        <%= email_input f, :email, required: true, type: "email", phx_debounce: "blur",
+                        class: user_form() %>
+        <%= error_tag f, :email %>
 
-      <%= label f, :username, class: user_form_label() %>
-      <%= text_input f, :username, required: true, phx_debounce: "blur",
-                     class: user_form() %>
-      <%= error_tag f, :username %>
+        <%= label f, :username, class: user_form_label() %>
+        <%= text_input f, :username, required: true, phx_debounce: "blur",
+                       class: user_form() %>
+        <%= error_tag f, :username %>
 
-      <%= label f, :password, class: user_form_label() %>
-      <%= password_input f, :password, required: true, value: input_value(f, :password),
-                         type: "password", phx_debounce: "blur",
-                         class: user_form() %>
-      <%= error_tag f, :password %>
+        <%= label f, :password, class: user_form_label() %>
+        <%= password_input f, :password, required: true, value: input_value(f, :password),
+                           type: "password", phx_debounce: "blur",
+                           class: user_form() %>
+        <%= error_tag f, :password %>
 
-      <%= label f, :timezone, class: user_form_label() %>
-      <%= select f, :timezone, Tzdata.zone_list(), required: true, class: user_form() %>
-      <%= error_tag f, :timezone %>
+        <%= label f, :timezone, class: user_form_label() %>
+        <%= select f, :timezone, Tzdata.zone_list(), required: true, class: user_form() %>
+        <%= error_tag f, :timezone %>
 
-      <div>
-        <%= submit "Register",
-                   phx_disable_with: "Registering...",
-                   class: "px-8 py-2 m-6 justify-center rounded-md bg-purple-700 text-white" %>
-      </div>
-    </form>
+        <%= submit "Register", phx_disable_with: "Registering...", class: button_style() %>
+      </form>
 
-    <p>
-      <%= link "Log in", to: Routes.user_session_path(@socket, :new) %> |
-      <%= link "Forgot your password?", to: Routes.user_reset_password_path(@socket, :new) %>
-    </p>
+      <p>
+        <%= link "Forgot your password?", to: Routes.user_reset_password_path(@socket, :new) %>
+      </p>
+    </div>
+
+
+  <% :settings -> %>
+
+    <!-- Breadcrumb -->
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8">
+      >
+      <%= live_patch "Board Index",
+            to: Routes.live_path(@socket, __MODULE__),
+            class: "text-purple-700 hover:underline" %>
+    </div>
+
+    <div class="text-2xl pb-4 md:pl-8">
+      Change timezone
+    </div>
+
+    <div class="mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg">
+      <%= f = form_for @tz_changeset, "#", phx_submit: "change_timezone" %>
+        <%= if @tz_changeset.action do %>
+          <div class="alert alert-danger">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+        <% end %>
+
+        <%= label f, :timezone, class: user_form_label() %>
+        <%= select f, :timezone, Tzdata.zone_list(), class: user_form() %>
+        <%= error_tag f, :timezone %>
+
+        <%= submit "Change timezone", phx_disable_with: "Changing...", class: button_style() %>
+      </form>
+    </div>
+
+    <div class="text-2xl pb-4 md:pl-8">
+      Change email
+    </div>
+
+    <div class="mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg">
+      <%= f = form_for @email_changeset, "#", phx_submit: "change_email" %>
+        <%= if @email_changeset.action do %>
+          <div class="alert alert-danger">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+        <% end %>
+
+        <%= hidden_input f, :action, name: "action", value: "update_email" %>
+
+        <%= label f, :email, class: user_form_label() %>
+        <%= email_input f, :email, required: true,
+                        class: user_form() %>
+        <%= error_tag f, :email %>
+
+        <%= label f, :current_password, for: "current_password_for_email",
+                  class: user_form_label() %>
+        <%= password_input f, :current_password, required: true,
+                           name: "current_password", id: "current_password_for_email",
+                           class: user_form() %>
+        <%= error_tag f, :current_password %>
+
+        <%= submit "Change email", phx_disable_with: "Changing...", class: button_style() %>
+      </form>
+
+    </div>
+
+    <div class="text-2xl py-4 md:pl-8">
+      Change password
+    </div>
+
+    <div class="mx-8 px-4 bg-white py-8 shadow rounded-lg">
+      <%= f = form_for @password_changeset, "#", phx_submit: "change_password" %>
+        <%= if @password_changeset.action do %>
+          <div class="alert alert-danger">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+        <% end %>
+
+        <%= hidden_input f, :action, name: "action", value: "update_password" %>
+
+        <%= label f, :password, "New password", class: user_form_label() %>
+        <%= password_input f, :password, required: true,
+                           class: user_form() %>
+        <%= error_tag f, :password %>
+
+        <%= label f, :password_confirmation, "Confirm new password",
+                  class: user_form_label() %>
+        <%= password_input f, :password_confirmation, required: true,
+                           class: user_form() %>
+        <%= error_tag f, :password_confirmation %>
+
+        <%= label f, :current_password, for: "current_password_for_password",
+                  class: user_form_label() %>
+        <%= password_input f, :current_password, required: true,
+                           name: "current_password", id: "current_password_for_password",
+                           class: user_form() %>
+        <%= error_tag f, :current_password %>
+
+        <%= submit "Change password", phx_disable_with: "Changing...", class: button_style() %>
+      </form>
+    </div>
 
 
   <% :invalid -> %> <!-- ###############   404 VIEW   ############### -->

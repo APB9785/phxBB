@@ -112,6 +112,15 @@ defmodule PhxBb.Accounts.User do
     |> validate_password(opts)
   end
 
+  def timezone_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:timezone])
+    |> case do
+         %{changes: %{timezone: _}} = changeset -> changeset
+         %{} = changeset -> add_error(changeset, :timezone, "did not change")
+       end
+  end
+
   @doc """
   Confirms the account by setting `confirmed_at`.
   """

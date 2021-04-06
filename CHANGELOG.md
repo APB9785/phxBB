@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Postgres now handles sorting content by date (instead of Elixir process)
 - Usernames are now stored with citext to ensure unique names
 - User registration moved into the LiveView
+- User settings moved into the LiveView
 - Socket assigns now holds active User struct instead of user token
 
 ### Fixed

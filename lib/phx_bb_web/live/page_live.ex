@@ -108,6 +108,73 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
+  def handle_event("update_email", params, socket) do
+    %{"current_password" => password, "user" => user_params} = params
+    user = socket.assigns.active_user
+
+    case Accounts.apply_user_email(user, password, user_params) do
+      {:ok, applied_user} ->
+        # Accounts.deliver_update_email_instructions(
+        #   applied_user,
+        #   user.email,
+        #   &Routes.user_settings_url(conn, :confirm_email, &1)
+        # )
+
+        {:noreply,
+          socket
+          |> put_flash(:info, "A link to confirm your email change has been sent to the new address.")
+          |> redirect(to: Routes.user_settings_path(socket, :edit))}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, email_changeset: changeset)}
+    end
+  end
+
+  def handle_event("change_password", params, socket) do
+    %{"current_password" => password, "user" => user_params} = params
+    user = socket.assigns.active_user
+
+    case Accounts.update_user_password(user, password, user_params) do
+      {:ok, user} ->
+        {:noreply,
+          socket
+          |> put_flash(:info, "Password updated successfully.  Please log in again.")
+          |> redirect(to: Routes.user_session_path(socket, :new))}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, password_changeset: changeset)}
+    end
+  end
+
+  def handle_event("change_timezone", %{"user" => params}, socket) do
+    user = socket.assigns.active_user
+
+    case Accounts.update_user_timezone(user, params) do
+      {:ok, user} ->
+        {:noreply,
+          socket
+          |> put_flash(:info, "Timezone updated successfully.")
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, tz_changeset: changeset)}
+    end
+  end
+
+  # def confirm_email(conn, %{"token" => token}) do
+  #   case Accounts.update_user_email(conn.assigns.current_user, token) do
+  #     :ok ->
+  #       conn
+  #       |> put_flash(:info, "Email changed successfully.")
+  #       |> redirect(to: Routes.user_settings_path(conn, :edit))
+  #
+  #     :error ->
+  #       conn
+  #       |> put_flash(:error, "Email change link is invalid or it has expired.")
+  #       |> redirect(to: Routes.user_settings_path(conn, :edit))
+  #   end
+  # end
+
   defp main_helper(socket) do
     boards = Boards.list_boards()
     users =
@@ -212,8 +279,16 @@ defmodule PhxBbWeb.PageLive do
   end
 
   defp settings_helper(socket) do
-    socket
-    |> assign(nav: :settings)
-    |> assign(page_title: "User Settings")
+    case socket.assigns.active_user do
+      nil ->
+        push_redirect(socket, to: "/users/log_in")
+      user ->
+        socket
+        |> assign(nav: :settings)
+        |> assign(page_title: "User Settings")
+        |> assign(email_changeset: Accounts.change_user_email(user))
+        |> assign(password_changeset: Accounts.change_user_password(user))
+        |> assign(tz_changeset: Accounts.change_user_timezone(user))
+    end
   end
 end
