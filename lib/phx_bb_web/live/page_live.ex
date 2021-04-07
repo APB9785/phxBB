@@ -113,7 +113,7 @@ defmodule PhxBbWeb.PageLive do
     user = socket.assigns.active_user
 
     case Accounts.apply_user_email(user, password, user_params) do
-      {:ok, applied_user} ->
+      {:ok, _applied_user} ->
         # Accounts.deliver_update_email_instructions(
         #   applied_user,
         #   user.email,
@@ -135,7 +135,7 @@ defmodule PhxBbWeb.PageLive do
     user = socket.assigns.active_user
 
     case Accounts.update_user_password(user, password, user_params) do
-      {:ok, user} ->
+      {:ok, _user} ->
         {:noreply,
           socket
           |> put_flash(:info, "Password updated successfully.  Please log in again.")
@@ -150,7 +150,7 @@ defmodule PhxBbWeb.PageLive do
     user = socket.assigns.active_user
 
     case Accounts.update_user_timezone(user, params) do
-      {:ok, user} ->
+      {:ok, _user} ->
         {:noreply,
           socket
           |> put_flash(:info, "Timezone updated successfully.")
@@ -243,25 +243,31 @@ defmodule PhxBbWeb.PageLive do
   end
 
   defp create_post_helper(socket, board_id) do
-    if socket.assigns[:active_board_id] != board_id do
-      # User got here via external link - must query DB for board info
-      case Boards.get_name(board_id) do
-        nil ->  # Board does not exist
-          invalid_helper(socket)
-        name ->  # Board exists, need to store info in assigns
-          socket
-          |> assign(active_board_id: board_id)
-          |> assign(active_board_name: name)
-          |> assign(nav: :create_post)
-          |> assign(page_title: "Create Post")
-          |> assign(changeset: Posts.change_post(%Post{}))
-      end
-    else
-      # User got here from a valid board, no need to query DB or update assigns
-      socket
-      |> assign(nav: :create_post)
-      |> assign(page_title: "Create Post")
-      |> assign(changeset: Posts.change_post(%Post{}))
+    cond do
+      is_nil(socket.assigns.active_user) ->
+        # User is not logged in
+        push_redirect(socket, to: "/users/log_in")
+
+      socket.assigns[:active_board_id] != board_id ->
+        # User got here via external link - must query DB for board info
+        case Boards.get_name(board_id) do
+          nil ->  # Board does not exist
+            invalid_helper(socket)
+          name ->  # Board exists, need to store info in assigns
+            socket
+            |> assign(active_board_id: board_id)
+            |> assign(active_board_name: name)
+            |> assign(nav: :create_post)
+            |> assign(page_title: "Create Post")
+            |> assign(changeset: Posts.change_post(%Post{}))
+        end
+
+      true ->
+        # User got here from a valid board, no need to query DB or update assigns
+        socket
+        |> assign(nav: :create_post)
+        |> assign(page_title: "Create Post")
+        |> assign(changeset: Posts.change_post(%Post{}))
     end
   end
 
