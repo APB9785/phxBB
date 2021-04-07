@@ -92,7 +92,10 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_event("new_user", %{"user" => user_params}, socket) do
-    user_params = Map.put(user_params, "post_count", 0)
+    user_params =
+      user_params
+      |> Map.put("post_count", 0)
+      |> Map.put("title", "Registered User")
 
     case Accounts.register_user(user_params) do
       {:ok, _user} ->
@@ -158,6 +161,21 @@ defmodule PhxBbWeb.PageLive do
 
       {:error, changeset} ->
         {:noreply, assign(socket, tz_changeset: changeset)}
+    end
+  end
+
+  def handle_event("change_user_title", %{"user" => params}, socket) do
+    user = socket.assigns.active_user
+
+    case Accounts.update_user_title(user, params) do
+      {:ok, _user} ->
+        {:noreply,
+          socket
+          |> put_flash(:info, "User title updated successfully.")
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, title_changeset: changeset)}
     end
   end
 
@@ -295,6 +313,7 @@ defmodule PhxBbWeb.PageLive do
         |> assign(email_changeset: Accounts.change_user_email(user))
         |> assign(password_changeset: Accounts.change_user_password(user))
         |> assign(tz_changeset: Accounts.change_user_timezone(user))
+        |> assign(title_changeset: Accounts.change_user_title(user))
     end
   end
 end

@@ -11,6 +11,7 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
       add :username, :citext, null: false
       add :post_count, :integer
       add :timezone, :string
+      add :title, :string
       timestamps()
     end
 

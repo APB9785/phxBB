@@ -10,6 +10,10 @@ defmodule PhxBbWeb.LiveHelpers do
     PhxBb.Accounts.get_user_by_session_token(token)
   end
 
+  def settings_block do
+    "md:mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg"
+  end
+
   def user_form do
     "mb-4 appearance-none w-full border-purple-300 rounded-md transition duration-150 text-sm focus:outline-none focus:ring focus:ring-purple-300 focus:border-purple-300"
   end

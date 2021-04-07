@@ -176,10 +176,11 @@
       <%= for post <- [@active_post | @reply_list] do %>
         <div class="block rounded-xl bg-gray-100 mb-4 md:flex md:rounded-none">
 
+          <!-- Author info box -->
           <div class="block pl-4 border-b-2 pb-2 pt-2
                      md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none">
             <%= @user_cache[post.author].name %>
-            <p class="text-sm">Registered User</p>
+            <p class="text-sm"><%= @user_cache[post.author].title %></p>
 
             <div class="hidden md:block">
               <p class="text-sm mt-4">
@@ -191,6 +192,7 @@
             </div>
           </div>
 
+          <!-- Post contents -->
           <div class="md:w-10/12 pt-2 block pl-4">
             <p class="text-sm text-gray-500"><%= format_time(post.inserted_at, @active_user) %></p>
             <div class="py-4 pr-4"><%= post.body %></div>
@@ -313,11 +315,9 @@
             class: "text-purple-700 hover:underline" %>
     </div>
 
-    <div class="text-2xl pb-4 md:pl-8">
-      Change timezone
-    </div>
-
-    <div class="mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg">
+    <!-- Change Timezone -->
+    <div class="text-2xl pb-4 md:pl-8">Change timezone</div>
+    <div class="<%= settings_block() %>">
       <%= f = form_for @tz_changeset, "#", phx_submit: "change_timezone" %>
         <%= if @tz_changeset.action do %>
           <div class="alert alert-danger">
@@ -333,11 +333,26 @@
       </form>
     </div>
 
-    <div class="text-2xl pb-4 md:pl-8">
-      Change email
+    <!-- Change user title -->
+    <div class="text-2xl py-4 md:pl-8">Change user title</div>
+    <div class="<%= settings_block() %>">
+      <%= f = form_for @title_changeset, "#", phx_submit: "change_user_title" %>
+        <%= if @title_changeset.action do %>
+          <div class="alert alert-danger">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+        <% end %>
+
+        <%= label f, :title, class: user_form_label() %>
+        <%= text_input f, :title, class: user_form() %>
+
+        <%= submit "Change user title", phx_disable_with: "Changing...", class: button_style() %>
+      </form>
     </div>
 
-    <div class="mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg">
+    <!-- Change Email -->
+    <div class="text-2xl py-4 md:pl-8">Change email</div>
+    <div class="<%= settings_block() %>">
       <%= f = form_for @email_changeset, "#", phx_submit: "change_email" %>
         <%= if @email_changeset.action do %>
           <div class="alert alert-danger">
@@ -364,11 +379,9 @@
 
     </div>
 
-    <div class="text-2xl py-4 md:pl-8">
-      Change password
-    </div>
-
-    <div class="mx-8 px-4 bg-white py-8 shadow rounded-lg">
+    <!-- Change password -->
+    <div class="text-2xl py-4 md:pl-8">Change password</div>
+    <div class="<%= settings_block() %>">
       <%= f = form_for @password_changeset, "#", phx_submit: "change_password" %>
         <%= if @password_changeset.action do %>
           <div class="alert alert-danger">

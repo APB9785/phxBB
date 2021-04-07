@@ -70,7 +70,8 @@ defmodule PhxBb.Accounts do
         Repo.one from u in User,
                    where: u.id == ^id,
                    select: %{name: u.username,
-                             joined: u.inserted_at}
+                             joined: u.inserted_at,
+                             title: u.title}
       end
 
       Map.put_new_lazy(acc, id, fun)
@@ -138,6 +139,10 @@ defmodule PhxBb.Accounts do
 
   def change_user_timezone(user, attrs \\ %{}) do
     User.timezone_changeset(user, attrs)
+  end
+
+  def change_user_title(user, attrs \\ %{}) do
+    User.title_changeset(user, attrs)
   end
 
   @doc """
@@ -247,6 +252,12 @@ defmodule PhxBb.Accounts do
   def update_user_timezone(%User{} = user, attrs) do
     user
     |> User.timezone_changeset(attrs)
+    |> Repo.update
+  end
+
+  def update_user_title(%User{} = user, attrs) do
+    user
+    |> User.title_changeset(attrs)
     |> Repo.update
   end
 

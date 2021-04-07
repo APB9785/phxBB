@@ -11,6 +11,7 @@ defmodule PhxBb.Accounts.User do
     field :username, :string
     field :post_count, :integer
     field :timezone, :string
+    field :title, :string
 
     timestamps()
   end
@@ -34,7 +35,7 @@ defmodule PhxBb.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :username, :post_count, :timezone])
+    |> cast(attrs, [:email, :password, :username, :post_count, :timezone, :title])
     |> validate_email()
     |> validate_password(opts)
     |> validate_username()
@@ -118,6 +119,16 @@ defmodule PhxBb.Accounts.User do
     |> case do
          %{changes: %{timezone: _}} = changeset -> changeset
          %{} = changeset -> add_error(changeset, :timezone, "did not change")
+       end
+  end
+
+  def title_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:title])
+    |> validate_length(:title, min: 1, max: 25)
+    |> case do
+         %{changes: %{title: _}} = changeset -> changeset
+         %{} = changeset -> add_error(changeset, :title, "did not change")
        end
   end
 
