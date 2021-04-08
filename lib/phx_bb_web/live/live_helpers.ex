@@ -27,7 +27,7 @@ defmodule PhxBbWeb.LiveHelpers do
   end
 
   def button_style do
-    "px-8 py-2 mt-4 mb-4 w-6/12 md:w-3/12 rounded-md bg-purple-700 text-white"
+    "text-sm md:text-base px-4 md:px-8 py-2 mt-4 mb-4 w-6/12 md:w-3/12 rounded-md bg-purple-700 text-white"
   end
 
   defp month_abv(n) do
@@ -110,7 +110,8 @@ defmodule PhxBbWeb.LiveHelpers do
     |> PhxBb.Replies.create_reply
   end
 
-  def assign_timezone(socket) do
-    socket
+  def filename(entry) do
+    [ext | _] = MIME.extensions(entry.client_type)
+    "#{entry.uuid}.#{ext}"
   end
 end

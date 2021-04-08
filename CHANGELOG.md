@@ -12,6 +12,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - View count for posts
 - Custom 404 page for all bad routes and params
 - Users can now select a timezone and see timestamps adjusted accordingly
+- Users can now choose a custom title to display beneath their username
+- Readme now includes badges from shields.io
+- Users can now upload an avatar to display with their posts
 
 ### Changed
 
@@ -21,12 +24,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - User registration moved into the LiveView
 - User settings moved into the LiveView
 - Socket assigns now holds active User struct instead of user token
+- Users must now log in before they will be allowed to see the New Topic form
 
 ### Fixed
 
 - Solved possible race condition during post creation
 - DB queries reduced by adding new columns for post count and reply count
 - Tests updated to handle foreign key constraints
+- Fixed a bug where a user's first reply could crash and re-mount the LiveView
+- Page margins are now symmetrical at all screen sizes
 
 ## [0.2] - 2021-03-25
 

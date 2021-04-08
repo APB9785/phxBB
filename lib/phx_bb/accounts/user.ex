@@ -12,6 +12,7 @@ defmodule PhxBb.Accounts.User do
     field :post_count, :integer
     field :timezone, :string
     field :title, :string
+    field :avatar, :string
 
     timestamps()
   end
@@ -130,6 +131,11 @@ defmodule PhxBb.Accounts.User do
          %{changes: %{title: _}} = changeset -> changeset
          %{} = changeset -> add_error(changeset, :title, "did not change")
        end
+  end
+
+  def avatar_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:avatar])
   end
 
   @doc """

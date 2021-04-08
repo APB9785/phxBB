@@ -58,7 +58,7 @@ config :phx_bb, PhxBbWeb.Endpoint,
 config :phx_bb, PhxBbWeb.Endpoint,
   live_reload: [
     patterns: [
-      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"priv/static/(?!uploads).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
       ~r"lib/phx_bb_web/(live|views)/.*(ex)$",
       ~r"lib/phx_bb_web/templates/.*(eex)$"

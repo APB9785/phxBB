@@ -12,6 +12,7 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
       add :post_count, :integer
       add :timezone, :string
       add :title, :string
+      add :avatar, :string
       timestamps()
     end
 

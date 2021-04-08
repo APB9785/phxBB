@@ -37,7 +37,7 @@
 <% end %>
 
 <p>
-  <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
+  <%= link "Register", to: Routes.live_path(@conn, PhxBbWeb.PageLive, register: 1) %> |
   <%= link "Forgot your password?", to: Routes.user_reset_password_path(@conn, :new) %>
 </p>
 

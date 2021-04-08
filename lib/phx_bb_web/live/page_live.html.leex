@@ -177,10 +177,16 @@
         <div class="block rounded-xl bg-gray-100 mb-4 md:flex md:rounded-none">
 
           <!-- Author info box -->
-          <div class="block pl-4 border-b-2 pb-2 pt-2
-                     md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none">
-            <%= @user_cache[post.author].name %>
-            <p class="text-sm"><%= @user_cache[post.author].title %></p>
+          <div class="flex justify-end flex-row-reverse pl-4 border-b-2 pb-2 pt-2
+                     md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block">
+            <div>
+              <%= @user_cache[post.author].name %>
+              <p class="text-sm"><%= @user_cache[post.author].title %></p>
+            </div>
+            <%= if @user_cache[post.author].avatar do %>
+              <%= img_tag @user_cache[post.author].avatar,
+                          class: "max-h-40 object-fill mr-4 h-10 w-10 md:h-auto md:w-32 md:mx-auto md:pt-2" %>
+            <% end %>
 
             <div class="hidden md:block">
               <p class="text-sm mt-4">
@@ -300,6 +306,7 @@
       </form>
 
       <p>
+        <%= link "Login", to: Routes.user_session_path(@socket, :new) %> |
         <%= link "Forgot your password?", to: Routes.user_reset_password_path(@socket, :new) %>
       </p>
     </div>
@@ -347,6 +354,54 @@
         <%= text_input f, :title, class: user_form() %>
 
         <%= submit "Change user title", phx_disable_with: "Changing...", class: button_style() %>
+      </form>
+    </div>
+
+    <!-- Change avatar -->
+    <div class="text-2xl py-4 md:pl-8">Change avatar</div>
+    <div class="<%= settings_block() %>">
+      <!-- Current avatar display -->
+      <div class="w-32">
+        <%= img_tag @active_user.avatar, class: "max-h-40 w-full object-fill pb-6" %>
+      </div>
+
+      <%= f = form_for @avatar_changeset, "#", phx_submit: "upload_avatar", phx_change: "validate_avatar" %>
+
+        <div class="border-2 p-2 md:w-1/4" phx-drop-target="<%= @uploads.avatar.ref %>">
+          <%= live_file_input @uploads.avatar %>
+        </div>
+        <div class="hint">
+          (max <%= trunc(@uploads.avatar.max_file_size / 1_000) %> KB)
+        </div>
+
+        <%= for {_ref, err} <- @uploads.avatar.errors do %>
+          <div class="error">
+            <%= humanize(err) %>
+          </div>
+        <% end %>
+
+        <%= for entry <- @uploads.avatar.entries do %>
+          <div class="entry">
+            <div class="w-32">
+              <%= live_img_preview entry, class: "max-h-40 w-full object-fill" %>
+            </div>
+
+            <div class="progress">
+              <div class="value">
+                <%= entry.progress %>%
+              </div>
+              <div class="bar">
+                <span style="w-<%= entry.progress %>%"></span>
+              </div>
+            </div>
+
+            <a href="#" phx-click="cancel_upload" phx-value-ref="<%= entry.ref %>">
+              &times;
+            </a>
+          </div>
+        <% end %>
+
+        <%= submit "Upload", phx_disable_with: "Uploading...", class: button_style() %>
       </form>
     </div>
 

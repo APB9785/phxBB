@@ -13,13 +13,20 @@ defmodule PhxBbWeb.PageLive do
 
 
   def mount(_params, session, socket) do
-    socket =
-      socket
-      |> assign(active_user: lookup_token(session["user_token"]))
-      |> assign(user_cache: %{nil => %{name: "Unknown User"}})
-      |> assign_timezone
-
-    {:ok, socket}
+    case lookup_token(session["user_token"]) do
+      nil ->
+        {:ok,
+          socket
+          |> assign(active_user: nil)
+          |> assign(user_cache: %{})}
+      user ->
+        {:ok,
+          socket
+          |> assign(active_user: user)
+          |> allow_upload(:avatar, accept: ~w(.png .jpeg .jpg), max_entries: 1, max_file_size: 100_000)
+          |> assign(user_cache: %{user.id =>
+               %{name: user.username, joined: user.inserted_at, title: user.title, avatar: user.avatar}})}
+    end
   end
 
   def handle_params(params, _url, socket) do
@@ -179,6 +186,46 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
+  def handle_event("upload_avatar", _params, socket) do
+    [avatar_link] =
+      consume_uploaded_entries(socket, :avatar, fn meta, entry ->
+        dest = Path.join("priv/static/uploads", filename(entry))
+        File.cp!(meta.path, dest)
+        Routes.static_path(socket, "/uploads/#{filename(entry)}")
+      end)
+
+    user = socket.assigns.active_user
+
+    case Accounts.update_user_avatar(user, %{avatar: avatar_link}) do
+      {:ok, _user} ->
+        changeset = Accounts.change_user_avatar(%User{})
+        {:noreply,
+          socket
+          |> assign(changeset: changeset)
+          |> put_flash(:info, "User avatar updated successfully.")
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
+
+  def handle_event("validate_avatar", _params, socket) do
+    changeset =
+      %User{}
+      |> Accounts.change_user_avatar
+      |> Map.put(:action, :insert)
+
+    {:noreply, assign(socket, changeset: changeset)}
+  end
+
+  def handle_event("cancel_upload", %{"ref" => ref}, socket) do
+    {:noreply,
+      socket
+      |> cancel_upload(:avatar, ref)
+      |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+  end
+
   # def confirm_email(conn, %{"token" => token}) do
   #   case Accounts.update_user_email(conn.assigns.current_user, token) do
   #     :ok ->
@@ -314,6 +361,7 @@ defmodule PhxBbWeb.PageLive do
         |> assign(password_changeset: Accounts.change_user_password(user))
         |> assign(tz_changeset: Accounts.change_user_timezone(user))
         |> assign(title_changeset: Accounts.change_user_title(user))
+        |> assign(avatar_changeset: Accounts.change_user_avatar(user))
     end
   end
 end
