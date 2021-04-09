@@ -226,6 +226,23 @@ defmodule PhxBbWeb.PageLive do
       |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
   end
 
+  def handle_event("remove_avatar", _params, socket) do
+    user = socket.assigns.active_user
+
+    case Accounts.update_user_avatar(user, %{avatar: nil}) do
+      {:ok, user} ->
+        changeset = Accounts.change_user_avatar(%User{})
+        {:noreply,
+          socket
+          |> assign(changeset: changeset)
+          |> put_flash(:info, "User avatar removed successfully.")
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign(socket, changeset: changeset)}
+    end
+  end
+
   # def confirm_email(conn, %{"token" => token}) do
   #   case Accounts.update_user_email(conn.assigns.current_user, token) do
   #     :ok ->

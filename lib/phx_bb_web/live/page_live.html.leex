@@ -371,8 +371,13 @@
     <div class="<%= settings_block() %>">
       <!-- Current avatar display -->
       <div class="w-32">
-        <%= img_tag @active_user.avatar, class: "max-h-40 w-full object-fill pb-6" %>
+        <%= img_tag @active_user.avatar, class: "max-h-40 w-full object-fill pb-4" %>
       </div>
+      <%= if @active_user.avatar do %>
+        <button phx-click="remove_avatar" class="text-purple-700 hover:underline pb-4">
+          Remove current avatar
+        </button>
+      <% end %>
 
       <%= f = form_for @avatar_changeset, "#", phx_submit: "upload_avatar", phx_change: "validate_avatar" %>
 
