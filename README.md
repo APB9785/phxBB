@@ -1,7 +1,5 @@
 # phxBB
-
 ![GitHub](https://img.shields.io/github/license/APB9785/phxBB)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/APB9785/phxBB)
 ![GitHub last commit](https://img.shields.io/github/last-commit/APB9785/phxBB)
 
 **phxBB** is a re-imagining of classic message board software such as phpBB and   

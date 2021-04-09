@@ -164,10 +164,17 @@ defmodule PhxBb.Accounts do
 
   """
   def apply_user_email(user, password, attrs) do
-    user
-    |> User.email_changeset(attrs)
-    |> User.validate_current_password(password)
-    |> Ecto.Changeset.apply_action(:update)
+    changeset =
+      user
+      |> User.email_changeset(attrs)
+      |> User.validate_current_password(password)
+
+    if Map.has_key?(changeset.changes, :email) and Repo.get_by(User, email: changeset.changes.email) do
+      {:error, Ecto.Changeset.add_error(changeset, :email, "has already been taken")}
+    else
+      changeset
+      |> Ecto.Changeset.apply_action(:update)
+    end
   end
 
   @doc """

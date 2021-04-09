@@ -75,11 +75,13 @@ defmodule PhxBb.AccountsTest do
 
     test "validates email uniqueness" do
       %{email: email} = user_fixture()
-      {:error, changeset} = Accounts.register_user(%{email: email})
+      attrs = %{username: "tester", password: "test1234", email: email}
+      {:error, changeset} = Accounts.register_user(attrs)
       assert "has already been taken" in errors_on(changeset).email
 
       # Now try with the upper cased email too, to check that email case is ignored.
-      {:error, changeset} = Accounts.register_user(%{email: String.upcase(email)})
+      attrs = %{username: "tester2", password: "test5678", email: String.upcase(email)}
+      {:error, changeset} = Accounts.register_user(attrs)
       assert "has already been taken" in errors_on(changeset).email
     end
 
@@ -100,7 +102,7 @@ defmodule PhxBb.AccountsTest do
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:username, :lowercase, :password, :email]
+      assert changeset.required == [:username, :password, :email]
     end
 
     test "allows fields to be set" do
@@ -150,6 +152,7 @@ defmodule PhxBb.AccountsTest do
       assert "should be at most 160 character(s)" in errors_on(changeset).email
     end
 
+    # Applying for a change of email does not hit the DB
     test "validates email uniqueness", %{user: user} do
       %{email: email} = user_fixture()
 

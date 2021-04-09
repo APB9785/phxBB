@@ -17,7 +17,6 @@ defmodule PhxBb.AccountsFixtures do
         email: unique_user_email(),
         password: valid_user_password(),
         username: unique_username,
-        lowercase: unique_username,
         post_count: 0
       })
       |> PhxBb.Accounts.register_user()
