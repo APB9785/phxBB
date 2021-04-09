@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - CHANGELOG.md file now included
-- View count for posts
+- Topics now track and display their view count
 - Custom 404 page for all bad routes and params
 - Users can now select a timezone and see timestamps adjusted accordingly
 - Users can now choose a custom title to display beneath their username

@@ -7,6 +7,17 @@ vBulletin.  It uses Phoenix LiveView to establish a persistent connection with e
 user, holding and updating state for virtually instantaneous navigation and   
 interaction without any full page reloads.   
 
+## What's New - v0.3
+
+- Topic view count
+- Custom 404 page
+- Timezone selection
+- User titles
+- User avatars
+- User settings now handled within the LiveView
+
+See [CHANGELOG.md](https://github.com/APB9785/phxBB/blob/master/CHANGELOG.md) for the full list of changes
+
 ## Installation   
 
 To start a local phxBB server:
