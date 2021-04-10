@@ -4,13 +4,14 @@ defmodule PhxBb.MixProject do
   def project do
     [
       app: :phx_bb,
-      version: "0.1.0",
+      version: "0.3.1",
       elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: ExCoveralls]
     ]
   end
 
@@ -50,7 +51,8 @@ defmodule PhxBb.MixProject do
       {:phx_gen_auth, "~> 0.6", only: [:dev], runtime: false},
       {:plug_cowboy, "~> 2.4"},
       {:tzdata, "~> 1.1"},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.14.0"}
     ]
   end
 
