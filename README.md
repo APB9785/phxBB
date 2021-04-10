@@ -1,5 +1,6 @@
 # phxBB
 [![Elixir CI](https://github.com/APB9785/phxBB/actions/workflows/elixir.yml/badge.svg)](https://github.com/APB9785/phxBB/actions/workflows/elixir.yml)
+[![codecov](https://codecov.io/gh/APB9785/phxBB/branch/master/graph/badge.svg?token=TCSP07KB1F)](https://codecov.io/gh/APB9785/phxBB)
 ![GitHub](https://img.shields.io/github/license/APB9785/phxBB)
 ![GitHub last commit](https://img.shields.io/github/last-commit/APB9785/phxBB)
 
