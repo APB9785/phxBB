@@ -11,7 +11,6 @@ defmodule PhxBb.RepliesTest do
 
     @invalid_attrs %{post_id: nil, author: nil, body: nil}
 
-
     test "list_replies/1 returns all replies for a post" do
       board = board_fixture()
       user = user_fixture()

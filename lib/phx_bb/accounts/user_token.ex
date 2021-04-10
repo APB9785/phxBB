@@ -1,5 +1,11 @@
 defmodule PhxBb.Accounts.UserToken do
+  @moduledoc """
+  This module contains the UserToken schema and functions for building and
+  verifying tokens.
+  """
+
   use Ecto.Schema
+  
   import Ecto.Query
 
   @hash_algorithm :sha256

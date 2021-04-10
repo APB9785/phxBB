@@ -1,10 +1,12 @@
 defmodule PhxBb.Accounts.UserNotifier do
-  # For simplicity, this module simply logs messages to the terminal.
-  # You should replace it by a proper email or notification tool, such as:
-  #
-  #   * Swoosh - https://hexdocs.pm/swoosh
-  #   * Bamboo - https://hexdocs.pm/bamboo
-  #
+  @moduledoc """
+  For simplicity, this module simply logs messages to the terminal.
+  You should replace it by a proper email or notification tool, such as:
+
+    * Swoosh - https://hexdocs.pm/swoosh
+    * Bamboo - https://hexdocs.pm/bamboo
+  """
+  
   defp deliver(to, body) do
     require Logger
     Logger.debug(body)

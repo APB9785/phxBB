@@ -1,4 +1,9 @@
 defmodule PhxBbWeb.UserAuth do
+  @moduledoc """
+  This module contains the logic for users logging in and out.  It requires
+  access to the session so it must be handled with a Controller. (for now...)
+  """
+
   import Plug.Conn
   import Phoenix.Controller
 

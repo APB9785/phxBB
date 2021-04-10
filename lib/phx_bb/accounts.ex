@@ -4,8 +4,9 @@ defmodule PhxBb.Accounts do
   """
 
   import Ecto.Query, warn: false
-  alias PhxBb.Repo
+
   alias PhxBb.Accounts.{User, UserToken, UserNotifier}
+  alias PhxBb.Repo
 
   ## Database getters
 

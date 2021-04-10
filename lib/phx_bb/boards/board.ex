@@ -1,5 +1,10 @@
 defmodule PhxBb.Boards.Board do
+  @moduledoc """
+  This module defines the Board schema and changeset.
+  """
+
   use Ecto.Schema
+  
   import Ecto.Changeset
 
   schema "boards" do

@@ -4,9 +4,9 @@ defmodule PhxBb.Boards do
   """
 
   import Ecto.Query, warn: false
-  alias PhxBb.Repo
 
   alias PhxBb.Boards.Board
+  alias PhxBb.Repo
 
   @doc """
   Returns the list of boards.

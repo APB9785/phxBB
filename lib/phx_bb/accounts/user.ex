@@ -1,5 +1,11 @@
 defmodule PhxBb.Accounts.User do
+  @moduledoc """
+  This module contains the User schema and functions for building
+  changesets for users, and validating user account info.
+  """
+
   use Ecto.Schema
+  
   import Ecto.Changeset
 
   @derive {Inspect, except: [:password]}

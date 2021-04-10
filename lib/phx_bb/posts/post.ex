@@ -1,5 +1,10 @@
 defmodule PhxBb.Posts.Post do
+  @moduledoc """
+  This module defines the Post schema and changeset.
+  """
+
   use Ecto.Schema
+  
   import Ecto.Changeset
 
   schema "posts" do

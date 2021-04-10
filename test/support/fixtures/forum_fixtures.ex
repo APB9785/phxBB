@@ -1,4 +1,8 @@
 defmodule PhxBb.ForumFixtures do
+  @moduledoc """
+  This module contains functions for creating test replies, posts, and boards.
+  """
+
   def reply_fixture(attrs \\ %{}) do
     {:ok, reply} =
       attrs

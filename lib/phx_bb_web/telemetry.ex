@@ -1,4 +1,9 @@
 defmodule PhxBbWeb.Telemetry do
+  @moduledoc """
+  This module defines metrics to provide a view of the system's behavior
+  over time.
+  """
+
   use Supervisor
   import Telemetry.Metrics
 

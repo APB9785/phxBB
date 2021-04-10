@@ -3,7 +3,6 @@ defmodule PhxBb.BoardsTest do
 
   alias PhxBb.Boards
 
-
   describe "boards" do
     alias PhxBb.Boards.Board
 

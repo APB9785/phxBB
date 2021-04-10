@@ -1,5 +1,10 @@
 defmodule PhxBb.Replies.Reply do
+  @moduledoc """
+  This module defines the Reply schema and changeset.
+  """
+
   use Ecto.Schema
+  
   import Ecto.Changeset
 
   schema "replies" do

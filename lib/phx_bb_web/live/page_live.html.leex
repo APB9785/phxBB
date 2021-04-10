@@ -379,7 +379,9 @@
         </button>
       <% end %>
 
-      <%= f = form_for @avatar_changeset, "#", phx_submit: "upload_avatar", phx_change: "validate_avatar" %>
+      <%= _f = form_for @avatar_changeset, "#",
+                        phx_submit: "upload_avatar",
+                        phx_change: "validate_avatar" %>
 
         <div class="border-2 p-2 md:w-1/4" phx-drop-target="<%= @uploads.avatar.ref %>">
           <%= live_file_input @uploads.avatar %>

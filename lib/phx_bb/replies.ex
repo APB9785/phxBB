@@ -4,9 +4,9 @@ defmodule PhxBb.Replies do
   """
 
   import Ecto.Query, warn: false
-  alias PhxBb.Repo
 
   alias PhxBb.Replies.Reply
+  alias PhxBb.Repo
 
   @doc """
   Returns the sorted list of replies.

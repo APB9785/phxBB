@@ -4,9 +4,9 @@ defmodule PhxBb.Posts do
   """
 
   import Ecto.Query, warn: false
-  alias PhxBb.Repo
 
   alias PhxBb.Posts.Post
+  alias PhxBb.Repo
 
   @doc """
   Returns the list of posts.

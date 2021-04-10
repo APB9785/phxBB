@@ -1,16 +1,19 @@
 defmodule PhxBbWeb.PageLive do
-  use PhxBbWeb, :live_view
+  @moduledoc """
+  This is the main LiveView which renders the forum.
+  """
 
-  alias PhxBb.Posts.Post
-  alias PhxBb.Posts
-  alias PhxBb.Accounts
-  alias PhxBb.Boards
-  alias PhxBb.Replies.Reply
-  alias PhxBb.Replies
-  alias PhxBb.Accounts.User
+  use PhxBbWeb, :live_view
 
   import PhxBbWeb.LiveHelpers
 
+  alias PhxBb.Accounts
+  alias PhxBb.Accounts.User
+  alias PhxBb.Boards
+  alias PhxBb.Posts
+  alias PhxBb.Posts.Post
+  alias PhxBb.Replies
+  alias PhxBb.Replies.Reply
 
   def mount(_params, session, socket) do
     case lookup_token(session["user_token"]) do
@@ -43,7 +46,6 @@ defmodule PhxBbWeb.PageLive do
 
     {:noreply, socket}
   end
-
 
   def handle_event("new_post", %{"post" => params}, socket) do
     case socket.assigns.active_user do
@@ -106,7 +108,8 @@ defmodule PhxBbWeb.PageLive do
 
     case Accounts.register_user(user_params) do
       {:ok, _user} ->
-        # {:ok, _} = Accounts.deliver_user_confirmation_instructions(user, &Routes.user_confirmation_url(socket, :confirm, &1))
+        # {:ok, _} =
+        #   Accounts.deliver_user_confirmation_instructions(user, &Routes.user_confirmation_url(socket, :confirm, &1))
 
         {:noreply,
           socket
@@ -230,7 +233,7 @@ defmodule PhxBbWeb.PageLive do
     user = socket.assigns.active_user
 
     case Accounts.update_user_avatar(user, %{avatar: nil}) do
-      {:ok, user} ->
+      {:ok, _user} ->
         changeset = Accounts.change_user_avatar(%User{})
         {:noreply,
           socket
