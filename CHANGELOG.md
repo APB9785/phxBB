@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Users can now remove their avatar if they wish to not have one
+- Elixir CI with GitHub Actions
 
 ## [0.3] - 2021-04-09
 

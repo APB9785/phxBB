@@ -1,4 +1,5 @@
 # phxBB
+[![Elixir CI](https://github.com/APB9785/phxBB/actions/workflows/elixir.yml/badge.svg)](https://github.com/APB9785/phxBB/actions/workflows/elixir.yml)
 ![GitHub](https://img.shields.io/github/license/APB9785/phxBB)
 ![GitHub last commit](https://img.shields.io/github/last-commit/APB9785/phxBB)
 
