@@ -5,7 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-    
+
 env:
   MIX_ENV: test
 
@@ -14,11 +14,11 @@ jobs:
 
     name: Build and test
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
-        elixir: [1.10.3]
-        otp: [22.3]
+        elixir: [1.11.3]
+        otp: [23.3]
 
     steps:
     - uses: actions/checkout@v2
