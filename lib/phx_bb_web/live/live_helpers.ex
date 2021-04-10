@@ -109,4 +109,10 @@ defmodule PhxBbWeb.LiveHelpers do
     [ext | _] = MIME.extensions(entry.client_type)
     "#{entry.uuid}.#{ext}"
   end
+
+  def display_avatar_error({:avatar, {error, _}}), do: error
+
+  def replace_error(changeset, key, message, keys \\ []) when is_binary(message) do
+    %{changeset | errors: [{key, {message, keys}}], valid?: false}
+  end
 end

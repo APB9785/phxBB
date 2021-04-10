@@ -190,26 +190,38 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_event("upload_avatar", _params, socket) do
-    [avatar_link] =
-      consume_uploaded_entries(socket, :avatar, fn meta, entry ->
-        dest = Path.join("priv/static/uploads", filename(entry))
-        File.cp!(meta.path, dest)
-        Routes.static_path(socket, "/uploads/#{filename(entry)}")
-      end)
+    consume_uploaded_entries(socket, :avatar, fn meta, entry ->
+      dest = Path.join("priv/static/uploads", filename(entry))
+      File.cp!(meta.path, dest)
+      Routes.static_path(socket, "/uploads/#{filename(entry)}")
+    end)
+    |> case do
+      [] ->
+        changeset =
+          socket.assigns.avatar_changeset
+          |> replace_error(:avatar, "no file was selected")
+        {:noreply, assign(socket, avatar_changeset: changeset)}
+      [avatar_link] ->
+        user = socket.assigns.active_user
 
-    user = socket.assigns.active_user
+        # If the user is replacing an existing avatar, delete the old one while
+        # its UUID is still available.
+        if user.avatar do
+          File.rm!("priv/static#{user.avatar}")
+        end
 
-    case Accounts.update_user_avatar(user, %{avatar: avatar_link}) do
-      {:ok, _user} ->
-        changeset = Accounts.change_user_avatar(%User{})
-        {:noreply,
-          socket
-          |> assign(changeset: changeset)
-          |> put_flash(:info, "User avatar updated successfully.")
-          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+        case Accounts.update_user_avatar(user, %{avatar: avatar_link}) do
+          {:ok, _user} ->
+            changeset = Accounts.change_user_avatar(%User{})
+            {:noreply,
+              socket
+              |> assign(avatar_changeset: changeset)
+              |> put_flash(:info, "User avatar updated successfully.")
+              |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, changeset: changeset)}
+          {:error, %Ecto.Changeset{} = changeset} ->
+            {:noreply, assign(socket, avatar_changeset: changeset)}
+        end
     end
   end
 
@@ -219,7 +231,7 @@ defmodule PhxBbWeb.PageLive do
       |> Accounts.change_user_avatar
       |> Map.put(:action, :insert)
 
-    {:noreply, assign(socket, changeset: changeset)}
+    {:noreply, assign(socket, avatar_changeset: changeset)}
   end
 
   def handle_event("cancel_upload", %{"ref" => ref}, socket) do
@@ -231,6 +243,8 @@ defmodule PhxBbWeb.PageLive do
 
   def handle_event("remove_avatar", _params, socket) do
     user = socket.assigns.active_user
+
+    File.rm!("priv/static#{user.avatar}")
 
     case Accounts.update_user_avatar(user, %{avatar: nil}) do
       {:ok, _user} ->

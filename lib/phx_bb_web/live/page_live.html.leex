@@ -417,6 +417,12 @@
           </div>
         <% end %>
 
+        <%= for error <- @avatar_changeset.errors do %>
+          <div class="text-red-500 pt-2">
+            <%= display_avatar_error(error) %>
+          </div>
+        <% end %>
+
         <%= submit "Upload", phx_disable_with: "Uploading...", class: button_style() %>
       </form>
     </div>

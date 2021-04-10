@@ -4,12 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.3.1] - 2021-04-10
 
 ### Added
 
-- Users can now remove their avatar if they wish to not have one
+- Users can now remove their avatar if they wish not to have one
 - Elixir CI with GitHub Actions
+
+### Fixed
+
+- Avatars are now deleted from the server when no longer in use
+- Attempting to upload an avatar without first selecting a file will no longer crash the LiveView
 
 ## [0.3] - 2021-04-09
 
