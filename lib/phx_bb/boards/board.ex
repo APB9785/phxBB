@@ -4,7 +4,7 @@ defmodule PhxBb.Boards.Board do
   """
 
   use Ecto.Schema
-  
+
   import Ecto.Changeset
 
   schema "boards" do

@@ -5,7 +5,7 @@ defmodule PhxBb.Accounts.User do
   """
 
   use Ecto.Schema
-  
+
   import Ecto.Changeset
 
   @derive {Inspect, except: [:password]}

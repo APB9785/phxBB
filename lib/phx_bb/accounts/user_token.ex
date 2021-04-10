@@ -5,7 +5,7 @@ defmodule PhxBb.Accounts.UserToken do
   """
 
   use Ecto.Schema
-  
+
   import Ecto.Query
 
   @hash_algorithm :sha256

@@ -4,7 +4,7 @@ defmodule PhxBb.Posts.Post do
   """
 
   use Ecto.Schema
-  
+
   import Ecto.Changeset
 
   schema "posts" do

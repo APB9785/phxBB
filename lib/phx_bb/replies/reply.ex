@@ -4,7 +4,7 @@ defmodule PhxBb.Replies.Reply do
   """
 
   use Ecto.Schema
-  
+
   import Ecto.Changeset
 
   schema "replies" do

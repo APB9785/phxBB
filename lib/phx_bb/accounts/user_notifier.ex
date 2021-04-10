@@ -6,7 +6,7 @@ defmodule PhxBb.Accounts.UserNotifier do
     * Swoosh - https://hexdocs.pm/swoosh
     * Bamboo - https://hexdocs.pm/bamboo
   """
-  
+
   defp deliver(to, body) do
     require Logger
     Logger.debug(body)
