@@ -52,7 +52,9 @@ defmodule PhxBb.MixProject do
       {:plug_cowboy, "~> 2.4"},
       {:tzdata, "~> 1.1"},
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.14.0"}
+      {:excoveralls, "~> 0.14.0"},
+      {:swoosh, "~> 1.3.4"},
+      {:hackney, "~> 1.17"}
     ]
   end
 

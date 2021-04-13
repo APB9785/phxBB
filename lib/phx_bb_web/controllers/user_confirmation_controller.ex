@@ -32,7 +32,7 @@ defmodule PhxBbWeb.UserConfirmationController do
       {:ok, _} ->
         conn
         |> put_flash(:info, "Account confirmed successfully.")
-        |> redirect(to: "/")
+        |> redirect(to: "/users/log_in")
 
       :error ->
         # If there is a current user and the account was already confirmed,

@@ -7,69 +7,62 @@ defmodule PhxBb.Accounts.UserNotifier do
     * Bamboo - https://hexdocs.pm/bamboo
   """
 
-  defp deliver(to, body) do
-    require Logger
-    Logger.debug(body)
-    {:ok, %{to: to, body: body}}
-  end
+  import Swoosh.Email
 
   @doc """
   Deliver instructions to confirm account.
   """
   def deliver_confirmation_instructions(user, url) do
-    deliver(user.email, """
+    body =
+      greeting(user) <>
+        "You can confirm your account by visiting the URL below:\n\n" <>
+        url <> create_ignore()
 
-    ==============================
-
-    Hi #{user.email},
-
-    You can confirm your account by visiting the URL below:
-
-    #{url}
-
-    If you didn't create an account with us, please ignore this.
-
-    ==============================
-    """)
+    new()
+    |> to({user.username, user.email})
+    |> from({"PhxBB team", "phxbbmail@gmail.com"})
+    |> subject("Please confirm your phxBB acount")
+    |> text_body(body)
+    |> PhxBb.Mailer.deliver
   end
 
   @doc """
   Deliver instructions to reset a user password.
   """
   def deliver_reset_password_instructions(user, url) do
-    deliver(user.email, """
+    body =
+      greeting(user) <>
+        "You can reset your password by visiting the URL below:\n\n" <>
+        url <> change_ignore()
 
-    ==============================
-
-    Hi #{user.email},
-
-    You can reset your password by visiting the URL below:
-
-    #{url}
-
-    If you didn't request this change, please ignore this.
-
-    ==============================
-    """)
+    new()
+    |> to({user.username, user.email})
+    |> from({"PhxBB team", "phxbbmail@gmail.com"})
+    |> subject("Reset password for your phxBB acount")
+    |> text_body(body)
+    |> PhxBb.Mailer.deliver
   end
 
   @doc """
   Deliver instructions to update a user email.
   """
   def deliver_update_email_instructions(user, url) do
-    deliver(user.email, """
+    body =
+      greeting(user) <>
+        "You can confirm your updated email by visiting the URL below:\n\n" <>
+        url <> change_ignore()
 
-    ==============================
-
-    Hi #{user.email},
-
-    You can change your email by visiting the URL below:
-
-    #{url}
-
-    If you didn't request this change, please ignore this.
-
-    ==============================
-    """)
+    new()
+    |> to({user.username, user.email})
+    |> from({"PhxBB team", "phxbbmail@gmail.com"})
+    |> subject("Change the email for your phxBB acount")
+    |> text_body(body)
+    |> PhxBb.Mailer.deliver
   end
+
+  defp greeting(user), do: "Hi #{user.username},\n\n"
+
+  defp change_ignore, do: "\n\nIf you didn't request this change, please ignore this."
+
+  defp create_ignore, do: "\n\nIf you didn't create an account with us, please ignore this.\n"
 end

@@ -107,9 +107,9 @@ defmodule PhxBbWeb.PageLive do
       |> Map.put("title", "Registered User")
 
     case Accounts.register_user(user_params) do
-      {:ok, _user} ->
-        # {:ok, _} =
-        #   Accounts.deliver_user_confirmation_instructions(user, &Routes.user_confirmation_url(socket, :confirm, &1))
+      {:ok, user} ->
+        Accounts.deliver_user_confirmation_instructions(user,
+          &Routes.user_confirmation_url(socket, :confirm, &1))
 
         {:noreply,
           socket
@@ -126,17 +126,17 @@ defmodule PhxBbWeb.PageLive do
     user = socket.assigns.active_user
 
     case Accounts.apply_user_email(user, password, user_params) do
-      {:ok, _applied_user} ->
-        # Accounts.deliver_update_email_instructions(
-        #   applied_user,
-        #   user.email,
-        #   &Routes.user_settings_url(conn, :confirm_email, &1)
-        # )
+      {:ok, applied_user} ->
+        Accounts.deliver_update_email_instructions(
+          applied_user,
+          user.email,
+          &Routes.user_settings_url(socket, :confirm_email, &1)
+        )
 
         {:noreply,
           socket
           |> put_flash(:info, "A link to confirm your email change has been sent to the new address.")
-          |> redirect(to: Routes.user_settings_path(socket, :edit))}
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
 
       {:error, changeset} ->
         {:noreply, assign(socket, email_changeset: changeset)}
@@ -204,8 +204,7 @@ defmodule PhxBbWeb.PageLive do
       [avatar_link] ->
         user = socket.assigns.active_user
 
-        # If the user is replacing an existing avatar, delete the old one while
-        # its UUID is still available.
+        # If the user is replacing an existing avatar, delete the old one
         if user.avatar do
           File.rm!("priv/static#{user.avatar}")
         end
