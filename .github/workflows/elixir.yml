@@ -8,7 +8,9 @@ on:
 
 env:
   MIX_ENV: test
-  CODECOV_TOKEN: 57507daf-21bf-49d5-bb83-0a5a1bdf2511
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+  MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
 
 jobs:
   build:
