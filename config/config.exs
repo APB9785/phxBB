@@ -26,8 +26,8 @@ config :logger, :console,
 # Configures Swoosh email adapter
 config :phx_bb, PhxBb.Mailer,
   adapter: Swoosh.Adapters.Mailjet,
-  api_key: {:system, "MAILJET_API_KEY"},
-  secret: {:system, "MAILJET_SECRET_KEY"}
+  api_key: System.get_env("MAILJET_API_KEY"),
+  secret: System.get_env("MAILJET_SECRET_KEY")
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
