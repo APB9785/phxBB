@@ -4,6 +4,8 @@ defmodule PhxBbWeb.LiveHelpers do
   readability within the other LiveView files.
   """
 
+  alias PhxBb.Boards.Board
+
   @month_abv_map %{1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun",
     7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec"}
 
@@ -114,5 +116,15 @@ defmodule PhxBbWeb.LiveHelpers do
 
   def replace_error(changeset, key, message, keys \\ []) when is_binary(message) do
     %{changeset | errors: [{key, {message, keys}}], valid?: false}
+  end
+
+  def topic_count_display(%Board{topic_count: 1}), do: "1 topic"
+  def topic_count_display(%Board{topic_count: count}) do
+    Integer.to_string(count) <> " topics"
+  end
+
+  def post_count_display(%Board{post_count: 1}), do: "1 post"
+  def post_count_display(%Board{post_count: count}) do
+    Integer.to_string(count) <> " posts"
   end
 end

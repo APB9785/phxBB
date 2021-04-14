@@ -52,40 +52,41 @@
             <div>
               <%= live_patch board.name,
                     to: Routes.live_path(@socket, __MODULE__, board: board.id),
-                    class: "text-purple-700 hover:underline font-bold text-lg" %>
+                    class: "text-purple-700 hover:underline font-bold text-lg",
+                    id: "board-name" %>
             </div>
-            <div class="text-sm">
+            <div class="text-sm" id="board-description">
               <%= board.description %>
             </div>
           </div>
 
           <div class="pl-4 pt-2 text-sm border-t-2 flex border-gray-300
                       md:p-4 md:text-base md:block md:border-0 md:w-1/12">
-            <div>
-              <%= board.topic_count %> topics
+            <div id="board-topic-count">
+              <%= topic_count_display(board) %>
             </div>
-            <div class="ml-2 md:ml-0 md:mt-2">
-              <%= board.post_count %> posts
+            <div class="ml-2 md:ml-0 md:mt-2" id="board-post-count">
+              <%= post_count_display(board) %>
             </div>
           </div>
 
           <%= if board.last_post != nil do %>
             <div class="pl-4 pb-2 md:p-4 text-sm md:w-1/3">
-              <div>
+              <div id="last-post-by">
                 Last post by <%= @user_cache[board.last_user].name %>
               </div>
               <div>
                 in
                 <%= live_patch display_title(board.last_post),
                       to: Routes.live_path(@socket, __MODULE__, post: board.last_post),
-                      class: "text-purple-700 hover:underline" %>
+                      class: "text-purple-700 hover:underline", id: "last-post-link" %>
               </div>
               <div class="hidden md:block">
                 <%= format_time(board.updated_at, @active_user) %>
               </div>
             </div>
           <% else %>
-            <div class="pb-4 pl-4 md:p-4 text-sm md:text-base md:w-1/3">
+            <div class="pb-4 pl-4 md:p-4 text-sm md:text-base md:w-1/3" id="no-posts-yet">
               No posts yet!
             </div>
           <% end %>
@@ -98,7 +99,7 @@
   <% :board -> %> <!-- #################   BOARD VIEW   ################# -->
 
     <!-- Breadcrumb -->
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8">
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
@@ -106,12 +107,12 @@
     </div>
 
     <!-- Title -->
-    <div class="text-2xl pb-4 md:pl-8">
+    <div class="text-2xl pb-4 md:pl-8" id="board-header">
       <%= @active_board_name %>
     </div>
 
     <!-- Post listing -->
-    <div class="md:border-t-2 md:border-b-2 md:divide-y-2">
+    <div class="md:border-t-2 md:border-b-2 md:divide-y-2" id="post-listing">
       <%= for post <- @post_list do %>
         <div class="p-4 block items-center bg-gray-100 rounded-lg m-1
                    md:flex md:m-0">
@@ -119,7 +120,7 @@
           <div class="px-4 md:w-7/12">
             <%= live_patch post.title,
                   to: Routes.live_path(@socket, __MODULE__, post: post.id),
-                  class: "text-purple-700 hover:underline" %>
+                  class: "text-purple-700 hover:underline", id: "post-listing-link" %>
             <p class="text-sm hidden md:block">
               by <%= @user_cache[post.author].name %> at
               <%= format_time(post.inserted_at, @active_user) %>
@@ -148,7 +149,8 @@
       <%= live_patch ~L"<button>New Post</button>",
             to: Routes.live_path(@socket, __MODULE__,
                                  [board: @active_board_id, create_post: 1]),
-            class: "px-8 py-2 justify-center rounded-md bg-purple-700 text-white" %>
+            class: "px-8 py-2 justify-center rounded-md bg-purple-700 text-white",
+            id: "new-post-button" %>
     </div>
 
 
@@ -167,7 +169,7 @@
     </div>
 
     <!-- Title -->
-    <div class="text-2xl pb-4 md:pl-8">
+    <div class="text-2xl pb-4 md:pl-8" id="post-header">
       <%= @active_post.title %>
     </div>
 
@@ -178,7 +180,8 @@
 
           <!-- Author info box -->
           <div class="flex justify-end flex-row-reverse pl-4 border-b-2 pb-2 pt-2
-                     md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block">
+                     md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block"
+               id="post-author-info">
             <div>
               <%= @user_cache[post.author].name %>
               <p class="text-sm"><%= @user_cache[post.author].title %></p>
@@ -189,10 +192,10 @@
             <% end %>
 
             <div class="hidden md:block">
-              <p class="text-sm mt-4">
+              <p class="text-sm mt-4" id="author-post-count">
                 Posts: <%= Accounts.post_count(post.author) %>
               </p>
-              <p class="text-sm">
+              <p class="text-sm" id="author-join-date">
                 Joined: <%= format_date(@user_cache[post.author].joined, @active_user) %>
               </p>
             </div>
@@ -250,7 +253,7 @@
       Create New Topic
     </div>
 
-    <div class="flex w-full md:ml-8">
+    <div class="flex w-full md:ml-8" id="new-topic-form">
       <%= f = form_for @changeset, "#",
                 [phx_submit: "new_post", class: "grid w-full"] %>
 
