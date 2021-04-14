@@ -19,7 +19,9 @@
   <div class="<%= user_menu() %>">
     <div class="text-purple-700 flex justify-center">
       <div class="hover:underline">
-        <%= live_patch "Register", to: Routes.live_path(@socket, __MODULE__, register: 1) %>
+        <%= live_patch "Register",
+              to: Routes.live_path(@socket, __MODULE__, register: 1),
+              id: "user-menu-register" %>
       </div>
       &nbsp;&nbsp;&nbsp;&nbsp;
       <div class="hover:underline">
@@ -39,7 +41,7 @@
 
   <% :main -> %> <!-- #################   MAIN VIEW   ################# -->
 
-    <div class="text-3xl text-purple-700 text-center p-4">
+    <div class="text-3xl text-purple-700 text-center p-4" id="main-header">
       Welcome to the Forum!
     </div>
 
@@ -282,7 +284,7 @@
 
   <% :register -> %> <!-- ###############   REGISTER VIEW   ############### -->
 
-    <div class="text-2xl p-4 md:pl-8">
+    <div class="text-2xl p-4 md:pl-8" id="register-header">
       Register
     </div>
 
@@ -496,13 +498,14 @@
 
   <% :invalid -> %> <!-- ###############   404 VIEW   ############### -->
 
-    <div class="text-2xl p-8 text-center">
+    <div class="text-2xl p-8 text-center" id="page-not-found-live">
       404 Page Not Found
     </div>
     <div class="text-center pb-8">
       <%= live_patch "Return to Main Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: "text-purple-700 text-lg hover:underline" %>
+            class: "text-purple-700 text-lg hover:underline",
+            id: "return-from-invalid" %>
     </div>
   <% end %>
 </div>
