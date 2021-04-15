@@ -18,22 +18,38 @@ defmodule PhxBbWeb.PageLive do
   def mount(_params, session, socket) do
     case lookup_token(session["user_token"]) do
       nil ->
+        # User is logged out
         {:ok,
           socket
           |> assign(active_user: nil)
           |> assign(user_cache: %{})}
+
       user ->
+        # User is logged in
+        user_info = %{
+          name: user.username,
+          joined: user.inserted_at,
+          title: user.title,
+          avatar: user.avatar
+        }
+
         {:ok,
           socket
           |> assign(active_user: user)
-          |> allow_upload(:avatar, accept: ~w(.png .jpeg .jpg), max_entries: 1, max_file_size: 100_000)
-          |> assign(user_cache: %{user.id =>
-               %{name: user.username, joined: user.inserted_at, title: user.title, avatar: user.avatar}})}
+          |> assign(user_cache: %{user.id => user_info})
+          |> allow_upload(:avatar,
+            accept: ~w(.png .jpeg .jpg),
+            max_entries: 1,
+            max_file_size: 100_000
+          )}
     end
   end
 
   def handle_params(%{"create_post" => "1", "board" => board_id}, _url, socket) do
-    {:noreply, create_post_helper(socket, board_id)}
+    {:noreply,
+      socket
+      |> create_post_helper(board_id)
+    }
   end
   def handle_params(%{"post" => post_id}, _url, socket) do
     {:noreply, post_helper(socket, post_id)}
@@ -64,8 +80,10 @@ defmodule PhxBbWeb.PageLive do
     case socket.assigns.active_user do
       nil ->
         {:noreply, push_redirect(socket, to: "/users/log_in")}
+
       user ->
         b_id = socket.assigns.active_board_id
+        
         case postmaker(params["body"], params["title"], b_id, user.id) do
           {:ok, post} ->
             # Update the last post info for the active board

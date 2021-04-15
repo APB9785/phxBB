@@ -255,9 +255,9 @@
       Create New Topic
     </div>
 
-    <div class="flex w-full md:ml-8" id="new-topic-form">
+    <div class="flex w-full md:ml-8">
       <%= f = form_for @changeset, "#",
-                [phx_submit: "new_post", class: "grid w-full"] %>
+                [phx_submit: "new_post", class: "grid w-full", id: "new-topic-form"] %>
 
         <%= text_input f, :title,
                          placeholder: "Subject",
