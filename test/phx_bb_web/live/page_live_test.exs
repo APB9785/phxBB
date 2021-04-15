@@ -175,7 +175,13 @@ defmodule PhxBbWeb.PageLiveTest do
       |> follow_redirect(conn)
 
     assert has_element?(view, "[role=alert]", "User title updated successfully.")
-    assert has_element?(view, "#change-user-timezone-form")
+
+    # Attempt invalid user title update
+    view
+    |> form("#change-user-title-form", %{user: %{title: "abcdefghijklmnopqrstuvwxyz"}})
+    |> render_submit
+
+    assert has_element?(view, "#change-user-title-form", "should be at most")
 
     # Update user timezone
     {:ok, view, _html} =
@@ -185,5 +191,12 @@ defmodule PhxBbWeb.PageLiveTest do
       |> follow_redirect(conn)
 
     assert has_element?(view, "[role=alert]", "Timezone updated successfully.")
+
+    # Attempt invalid timezone update
+    view
+    |> form("#change-user-timezone-form", %{user: %{timezone: "US/Central"}})
+    |> render_submit
+
+    assert has_element?(view, "#change-user-timezone-form", "did not change")
   end
 end

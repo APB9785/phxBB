@@ -196,7 +196,7 @@ defmodule PhxBbWeb.PageLive do
         {:noreply, socket}
 
       {:error, changeset} ->
-        socket = assign(socket, changeset: changeset)
+        socket = assign(socket, email_changeset: changeset)
         {:noreply, socket}
     end
   end
@@ -215,7 +215,7 @@ defmodule PhxBbWeb.PageLive do
         {:noreply, socket}
 
       {:error, changeset} ->
-        socket = assign(socket, changeset: changeset)
+        socket = assign(socket, password_changeset: changeset)
         {:noreply, socket}
     end
   end
@@ -233,7 +233,7 @@ defmodule PhxBbWeb.PageLive do
         {:noreply, socket}
 
       {:error, changeset} ->
-        socket = assign(socket, changeset: changeset)
+        socket = assign(socket, tz_changeset: changeset)
         {:noreply, socket}
     end
   end
@@ -251,7 +251,7 @@ defmodule PhxBbWeb.PageLive do
         {:noreply, socket}
 
       {:error, changeset} ->
-        socket = assign(socket, changeset: changeset)
+        socket = assign(socket, title_changeset: changeset)
         {:noreply, socket}
     end
   end
@@ -290,7 +290,7 @@ defmodule PhxBbWeb.PageLive do
             {:noreply, socket}
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            socket = assign(socket, changeset: changeset)
+            socket = assign(socket, avatar_changeset: changeset)
             {:noreply, socket}
         end
     end
@@ -326,14 +326,14 @@ defmodule PhxBbWeb.PageLive do
         changeset = Accounts.change_user_avatar(%User{})
         socket =
           socket
-          |> assign(changeset: changeset)
+          |> assign(avatar_changeset: changeset)
           |> put_flash(:info, "User avatar removed successfully.")
           |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
 
         {:noreply, socket}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        socket = assign(socket, changeset: changeset)
+        socket = assign(socket, avatar_changeset: changeset)
         {:noreply, socket}
     end
   end

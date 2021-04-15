@@ -377,6 +377,7 @@
 
         <%= label f, :title, class: user_form_label() %>
         <%= text_input f, :title, class: user_form() %>
+        <%= error_tag f, :title %>
 
         <%= submit "Change user title", phx_disable_with: "Changing...", class: button_style() %>
       </form>
