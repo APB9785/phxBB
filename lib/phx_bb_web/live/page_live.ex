@@ -19,10 +19,12 @@ defmodule PhxBbWeb.PageLive do
     case lookup_token(session["user_token"]) do
       nil ->
         # User is logged out
-        {:ok,
+        socket =
           socket
           |> assign(active_user: nil)
           |> assign(user_cache: %{})}
+
+        {:ok, socket}
 
       user ->
         # User is logged in
@@ -33,52 +35,61 @@ defmodule PhxBbWeb.PageLive do
           avatar: user.avatar
         }
 
-        {:ok,
+        socket =
           socket
           |> assign(active_user: user)
           |> assign(user_cache: %{user.id => user_info})
           |> allow_upload(:avatar,
             accept: ~w(.png .jpeg .jpg),
             max_entries: 1,
-            max_file_size: 100_000
-          )}
+            max_file_size: 100_000)
+
+        {:ok, socket}
     end
   end
 
   def handle_params(%{"create_post" => "1", "board" => board_id}, _url, socket) do
     socket = create_post_helper(socket, board_id)
-
     {:noreply, socket}
   end
   def handle_params(%{"post" => post_id}, _url, socket) do
-    {:noreply, post_helper(socket, post_id)}
+    socket = post_helper(socket, post_id)
+    {:noreply, socket}
   end
   def handle_params(%{"board" => board_id}, _url, socket) do
-    {:noreply, board_helper(socket, board_id)}
+    socket = board_helper(socket, board_id)
+    {:noreply, socket}
   end
   def handle_params(%{"register" => "1"}, _url, socket) do
-    {:noreply, registration_helper(socket)}
+    socket = registration_helper(socket)
+    {:noreply, socket}
   end
   def handle_params(%{"settings" => "1"}, _url, socket) do
-    {:noreply, settings_helper(socket)}
+    socket = settings_helper(socket)
+    {:noreply, socket}
   end
   def handle_params(%{"confirm" => token}, _url, socket) do
-    {:noreply, user_confirmation_helper(socket, token)}
+    socket = user_confirmation_helper(socket, token)
+    {:noreply, socket}
   end
   def handle_params(%{"confirm_email" => token}, _url, socket) do
-    {:noreply, email_update_helper(socket, token)}
+    socket = email_update_helper(socket, token)
+    {:noreply, socket}
   end
   def handle_params(params, _url, socket) when params == %{} do
-    {:noreply, main_helper(socket)}
+    socket = main_helper(socket)
+    {:noreply, socket}
   end
   def handle_params(_params, _url, socket) do
-    {:noreply, invalid_helper(socket)}
+    socket = invalid_helper(socket)
+    {:noreply, socket}
   end
 
   def handle_event("new_post", %{"post" => params}, socket) do
     case socket.assigns.active_user do
       nil ->
-        {:noreply, push_redirect(socket, to: "/users/log_in")}
+        socket = push_redirect(socket, to: "/users/log_in")
+        {:noreply, socket}
 
       user ->
         b_id = socket.assigns.active_board_id
@@ -90,10 +101,15 @@ defmodule PhxBbWeb.PageLive do
             # Update the user's post count
             {1, _} = Accounts.added_post(user.id)
 
-            {:noreply, push_patch(socket, to: Routes.live_path(socket, __MODULE__, board: b_id))}
+            socket =
+              socket
+              |> push_patch(to: Routes.live_path(socket, __MODULE__, board: b_id))
+
+            {:noreply, socket}
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            {:noreply, assign(socket, changeset: changeset)}
+            socket = assign(socket, changeset: changeset)
+            {:noreply, socket}
         end
     end
   end
@@ -101,9 +117,12 @@ defmodule PhxBbWeb.PageLive do
   def handle_event("new_reply", %{"reply" => params}, socket) do
     case socket.assigns.active_user do
       nil ->
-        {:noreply, push_redirect(socket, to: "/users/log_in")}
+        socket = push_redirect(socket, to: "/users/log_in")
+        {:noreply, socket}
+
       user ->
         post = socket.assigns.active_post
+
         case replymaker(params["body"], post.id, user.id) do
           {:ok, _reply} ->
             socket =
@@ -138,16 +157,20 @@ defmodule PhxBbWeb.PageLive do
 
     case Accounts.register_user(user_params) do
       {:ok, user} ->
-        Accounts.deliver_user_confirmation_instructions(user,
-          &(PhxBbWeb.Endpoint.url() <> "?confirm=" <> &1))
+        Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
 
-        {:noreply,
+        socket =
           socket
-          |> put_flash(:info, "User created successfully. Please check your email for confirmation instructions.")
-          |> redirect(to: Routes.user_session_path(socket, :new))}
+          |> put_flash(:info,
+            "User created successfully. Please check your email for confirmation instructions."
+          )
+          |> redirect(to: Routes.user_session_path(socket, :new))
+
+        {:noreply, socket}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, changeset: changeset)}
+        socket = assign(socket, changeset: changeset)
+        {:noreply, socket}
     end
   end
 
@@ -160,16 +183,21 @@ defmodule PhxBbWeb.PageLive do
         Accounts.deliver_update_email_instructions(
           applied_user,
           user.email,
-          &(PhxBbWeb.Endpoint.url() <> "?confirm_email=" <> &1)
+          &add_confirm_email_param/1
         )
 
-        {:noreply,
+        socket =
           socket
-          |> put_flash(:info, "A link to confirm your email change has been sent to the new address.")
-          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+          |> put_flash(:info,
+            "A link to confirm your email change has been sent to the new address."
+          )
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
+
+        {:noreply, socket}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, email_changeset: changeset)}
+        socket = assign(socket, changeset: changeset)
+        {:noreply, socket}
     end
   end
 
@@ -179,13 +207,16 @@ defmodule PhxBbWeb.PageLive do
 
     case Accounts.update_user_password(user, password, user_params) do
       {:ok, _user} ->
-        {:noreply,
+        socket =
           socket
           |> put_flash(:info, "Password updated successfully.  Please log in again.")
-          |> redirect(to: Routes.user_session_path(socket, :new))}
+          |> redirect(to: Routes.user_session_path(socket, :new))
+
+        {:noreply, socket}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, password_changeset: changeset)}
+        socket = assign(socket, changeset: changeset)
+        {:noreply, socket}
     end
   end
 
@@ -194,13 +225,16 @@ defmodule PhxBbWeb.PageLive do
 
     case Accounts.update_user_timezone(user, params) do
       {:ok, _user} ->
-        {:noreply,
+        socket =
           socket
           |> put_flash(:info, "Timezone updated successfully.")
-          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
+
+        {:noreply, socket}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, tz_changeset: changeset)}
+        socket = assign(socket, changeset: changeset)
+        {:noreply, socket}
     end
   end
 
@@ -209,13 +243,16 @@ defmodule PhxBbWeb.PageLive do
 
     case Accounts.update_user_title(user, params) do
       {:ok, _user} ->
-        {:noreply,
+        socket =
           socket
           |> put_flash(:info, "User title updated successfully.")
-          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
+
+        {:noreply, socket}
 
       {:error, changeset} ->
-        {:noreply, assign(socket, title_changeset: changeset)}
+        socket = assign(socket, changeset: changeset)
+        {:noreply, socket}
     end
   end
 
@@ -230,7 +267,9 @@ defmodule PhxBbWeb.PageLive do
         changeset =
           socket.assigns.avatar_changeset
           |> replace_error(:avatar, "no file was selected")
+
         {:noreply, assign(socket, avatar_changeset: changeset)}
+
       [avatar_link] ->
         user = socket.assigns.active_user
 
@@ -242,14 +281,17 @@ defmodule PhxBbWeb.PageLive do
         case Accounts.update_user_avatar(user, %{avatar: avatar_link}) do
           {:ok, _user} ->
             changeset = Accounts.change_user_avatar(%User{})
-            {:noreply,
+            socket =
               socket
               |> assign(avatar_changeset: changeset)
               |> put_flash(:info, "User avatar updated successfully.")
-              |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+              |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
+
+            {:noreply, socket}
 
           {:error, %Ecto.Changeset{} = changeset} ->
-            {:noreply, assign(socket, avatar_changeset: changeset)}
+            socket = assign(socket, changeset: changeset)
+            {:noreply, socket}
         end
     end
   end
@@ -260,14 +302,18 @@ defmodule PhxBbWeb.PageLive do
       |> Accounts.change_user_avatar
       |> Map.put(:action, :insert)
 
-    {:noreply, assign(socket, avatar_changeset: changeset)}
+    socket = assign(socket, avatar_changeset: changeset)
+
+    {:noreply, socket}
   end
 
   def handle_event("cancel_upload", %{"ref" => ref}, socket) do
-    {:noreply,
+    socket =
       socket
       |> cancel_upload(:avatar, ref)
-      |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+      |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
+
+    {:noreply, socket}
   end
 
   def handle_event("remove_avatar", _params, socket) do
@@ -278,14 +324,17 @@ defmodule PhxBbWeb.PageLive do
     case Accounts.update_user_avatar(user, %{avatar: nil}) do
       {:ok, _user} ->
         changeset = Accounts.change_user_avatar(%User{})
-        {:noreply,
+        socket =
           socket
           |> assign(changeset: changeset)
           |> put_flash(:info, "User avatar removed successfully.")
-          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))}
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
+
+        {:noreply, socket}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign(socket, changeset: changeset)}
+        socket = assign(socket, changeset: changeset)
+        {:noreply, socket}
     end
   end
 
@@ -367,6 +416,7 @@ defmodule PhxBbWeb.PageLive do
         case Boards.get_name(board_id) do
           nil ->  # Board does not exist
             invalid_helper(socket)
+
           name ->  # Board exists, need to store info in assigns
             socket
             |> assign(active_board_id: board_id)

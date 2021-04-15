@@ -127,4 +127,12 @@ defmodule PhxBbWeb.LiveHelpers do
   def post_count_display(%Board{post_count: count}) do
     Integer.to_string(count) <> " posts"
   end
+
+  def add_confirm_param(token) do
+    PhxBbWeb.Endpoint.url() <> "?confirm=" <> token
+  end
+
+  def add_confirm_email_param(token) do
+    PhxBbWeb.Endpoint.url() <> "?confirm_email=" <> token
+  end
 end
