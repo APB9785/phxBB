@@ -7,7 +7,9 @@
     </div>
     <div class="text-purple-700 flex justify-center">
       <div class="hover:underline">
-        <%= live_patch "Settings", to: Routes.live_path(@socket, __MODULE__, settings: 1) %>
+        <%= live_patch "Settings",
+              to: Routes.live_path(@socket, __MODULE__, settings: 1),
+              id: "user-menu-settings" %>
       </div>
       &nbsp;&nbsp;&nbsp;&nbsp;
       <div class="hover:underline">
@@ -344,7 +346,9 @@
     <!-- Change Timezone -->
     <div class="text-2xl pb-4 md:pl-8">Change timezone</div>
     <div class="<%= settings_block() %>">
-      <%= f = form_for @tz_changeset, "#", phx_submit: "change_timezone" %>
+      <%= f = form_for @tz_changeset, "#",
+                phx_submit: "change_timezone",
+                id: "change-timezone-form" %>
         <%= if @tz_changeset.action do %>
           <div class="alert alert-danger">
             <p>Oops, something went wrong! Please check the errors below.</p>

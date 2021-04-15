@@ -159,6 +159,10 @@ defmodule PhxBbWeb.PageLiveTest do
 
     assert has_element?(view, "#post-body", "I love Phoenix")
 
-    
+    view
+    |> element("#user-menu-settings")
+    |> render_click
+
+    assert has_element?(view, "#change-timezone-form")
   end
 end
