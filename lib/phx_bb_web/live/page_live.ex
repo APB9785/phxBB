@@ -22,7 +22,7 @@ defmodule PhxBbWeb.PageLive do
         socket =
           socket
           |> assign(active_user: nil)
-          |> assign(user_cache: %{})}
+          |> assign(user_cache: %{})
 
         {:ok, socket}
 

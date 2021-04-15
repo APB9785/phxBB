@@ -158,5 +158,7 @@ defmodule PhxBbWeb.PageLiveTest do
     |> render_submit
 
     assert has_element?(view, "#post-body", "I love Phoenix")
+
+    
   end
 end
