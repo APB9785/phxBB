@@ -32,19 +32,32 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
-  def handle_params(params, _url, socket) do
-    socket =
-      case params do
-        %{"create_post" => "1", "board" => board_id} -> create_post_helper(socket, board_id)
-        %{"post" => post_id} -> post_helper(socket, post_id)
-        %{"board" => board_id} -> board_helper(socket, board_id)
-        %{"register" => "1"} -> registration_helper(socket)
-        %{"settings" => "1"} -> settings_helper(socket)
-        map when map == %{} -> main_helper(socket)
-        %{} -> invalid_helper(socket)
-      end
-
-    {:noreply, socket}
+  def handle_params(%{"create_post" => "1", "board" => board_id}, _url, socket) do
+    {:noreply, create_post_helper(socket, board_id)}
+  end
+  def handle_params(%{"post" => post_id}, _url, socket) do
+    {:noreply, post_helper(socket, post_id)}
+  end
+  def handle_params(%{"board" => board_id}, _url, socket) do
+    {:noreply, board_helper(socket, board_id)}
+  end
+  def handle_params(%{"register" => "1"}, _url, socket) do
+    {:noreply, registration_helper(socket)}
+  end
+  def handle_params(%{"settings" => "1"}, _url, socket) do
+    {:noreply, settings_helper(socket)}
+  end
+  def handle_params(%{"confirm" => token}, _url, socket) do
+    {:noreply, user_confirmation_helper(socket, token)}
+  end
+  def handle_params(%{"confirm_email" => token}, _url, socket) do
+    {:noreply, email_update_helper(socket, token)}
+  end
+  def handle_params(params, _url, socket) when params == %{} do
+    {:noreply, main_helper(socket)}
+  end
+  def handle_params(_params, _url, socket) do
+    {:noreply, invalid_helper(socket)}
   end
 
   def handle_event("new_post", %{"post" => params}, socket) do
@@ -109,7 +122,7 @@ defmodule PhxBbWeb.PageLive do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
         Accounts.deliver_user_confirmation_instructions(user,
-          &Routes.user_confirmation_url(socket, :confirm, &1))
+          &(PhxBbWeb.Endpoint.url() <> "?confirm=" <> &1))
 
         {:noreply,
           socket
@@ -130,7 +143,7 @@ defmodule PhxBbWeb.PageLive do
         Accounts.deliver_update_email_instructions(
           applied_user,
           user.email,
-          &Routes.user_settings_url(socket, :confirm_email, &1)
+          &(PhxBbWeb.Endpoint.url() <> "?confirm_email=" <> &1)
         )
 
         {:noreply,
@@ -259,20 +272,6 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
-  # def confirm_email(conn, %{"token" => token}) do
-  #   case Accounts.update_user_email(conn.assigns.current_user, token) do
-  #     :ok ->
-  #       conn
-  #       |> put_flash(:info, "Email changed successfully.")
-  #       |> redirect(to: Routes.user_settings_path(conn, :edit))
-  #
-  #     :error ->
-  #       conn
-  #       |> put_flash(:error, "Email change link is invalid or it has expired.")
-  #       |> redirect(to: Routes.user_settings_path(conn, :edit))
-  #   end
-  # end
-
   defp main_helper(socket) do
     boards = Boards.list_boards()
     users =
@@ -395,6 +394,46 @@ defmodule PhxBbWeb.PageLive do
         |> assign(tz_changeset: Accounts.change_user_timezone(user))
         |> assign(title_changeset: Accounts.change_user_title(user))
         |> assign(avatar_changeset: Accounts.change_user_avatar(user))
+    end
+  end
+
+  defp user_confirmation_helper(socket, token) do
+    # Do not log in the user after confirmation to avoid a
+    # leaked token giving the user access to the account.
+    case Accounts.confirm_user(token) do
+      {:ok, _} ->
+        socket
+        |> put_flash(:info, "Account confirmed successfully.")
+        |> redirect(to: "/users/log_in")
+
+      :error ->
+        # If there is a current user and the account was already confirmed,
+        # then odds are that the confirmation link was already visited, either
+        # by some automation or by the user themselves, so we redirect without
+        # a warning message.
+        case socket.assigns do
+          %{active_user: %{confirmed_at: confirmed_at}} when not is_nil(confirmed_at) ->
+            redirect(socket, to: "/")
+
+          %{} ->
+            socket
+            |> put_flash(:error, "Account confirmation link is invalid or it has expired.")
+            |> redirect(to: "/")
+        end
+    end
+  end
+
+  defp email_update_helper(socket, token) do
+    case Accounts.update_user_email(socket.assigns.active_user, token) do
+      :ok ->
+        socket
+        |> put_flash(:info, "Email changed successfully.")
+        |> push_redirect(to: Routes.live_path(socket, __MODULE__))
+
+      :error ->
+        socket
+        |> put_flash(:error, "Email change link is invalid or it has expired.")
+        |> push_redirect(to: Routes.live_path(socket, __MODULE__))
     end
   end
 end
