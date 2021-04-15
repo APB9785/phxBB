@@ -83,7 +83,7 @@ defmodule PhxBbWeb.PageLive do
 
       user ->
         b_id = socket.assigns.active_board_id
-        
+
         case postmaker(params["body"], params["title"], b_id, user.id) do
           {:ok, post} ->
             # Update the last post info for the active board

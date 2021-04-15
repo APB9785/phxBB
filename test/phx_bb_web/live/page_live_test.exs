@@ -142,7 +142,14 @@ defmodule PhxBbWeb.PageLiveTest do
     |> form("#new-topic-form", %{post: %{title: "Hello World", body: "Elixir is awesome!"}})
     |> render_submit
 
-    assert has_element?(view, "#board-header", @test_board.name)
+    assert has_element?(view, "#board-header", board.name)
     assert has_element?(view, "#post-listing", "Hello World")
+
+    view
+    |> element("#post-listing-link", "Hello World")
+    |> render_click
+
+    assert has_element?(view, "#breadcrumb", board.name)
+    assert has_element?(view, "#post-header", "Hello World")
   end
 end
