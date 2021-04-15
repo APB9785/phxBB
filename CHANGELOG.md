@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - CI now checks coverage % of the test suite with codecov.io
 - Email verification implemented with Swoosh's Mailjet adapter
-- LiveView test suite now covers navigation and content display
+- LiveView test suite now covers most major features
 
 ## [0.3.1] - 2021-04-10
 
