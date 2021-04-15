@@ -1,6 +1,6 @@
 <!--   USER MENU   -->
 <%= if @active_user do %>
-  <div class="<%= user_menu() %>">
+  <div class="<%= user_menu() %>" id="logged-in-menu">
     <div class="text-center">
       Logged in as <%= @active_user.username %>
       <br>
@@ -16,7 +16,7 @@
     </div>
   </div>
 <% else %>
-  <div class="<%= user_menu() %>">
+  <div class="<%= user_menu() %>" id="logged-out-menu">
     <div class="text-purple-700 flex justify-center">
       <div class="hover:underline">
         <%= live_patch "Register",
@@ -251,7 +251,7 @@
     </div>
 
     <!-- Title -->
-    <div class="text-2xl pb-4 md:pl-8">
+    <div class="text-2xl pb-4 md:pl-8" id="create-topic-header">
       Create New Topic
     </div>
 

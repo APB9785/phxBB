@@ -9,6 +9,7 @@ defmodule PhxBbWeb.PageLiveTest do
   alias PhxBb.Boards
   alias PhxBb.Boards.Board
   alias PhxBb.Repo
+  alias PhxBbWeb.UserAuth
 
   @test_board %Board{
     name: "Ontopic Discussion",
@@ -27,7 +28,9 @@ defmodule PhxBbWeb.PageLiveTest do
 
   test "navigation and viewing posts", %{conn: conn} do
     user = user_fixture()
+    # Need to replace this!!
     user_join_date = format_date(user.inserted_at)
+    # ^^^^^
     {:ok, board} = Repo.insert(@test_board)
 
     {:ok, view, _html} = live(conn, "/")
@@ -38,6 +41,7 @@ defmodule PhxBbWeb.PageLiveTest do
     assert has_element?(view, "#board-topic-count", "0 topics")
     assert has_element?(view, "#board-post-count", "0 posts")
     assert has_element?(view, "#no-posts-yet")
+    assert has_element?(view, "#logged-out-menu")
 
     {:ok, post} = postmaker("Test body", "Test title", board.id, user.id)
     # Update the last post info for the active board
@@ -108,5 +112,30 @@ defmodule PhxBbWeb.PageLiveTest do
     |> render_click
 
     assert has_element?(view, "#register-header")
+  end
+
+  test "log in, create posts, and change settings", %{conn: conn} do
+    user = user_fixture(%{timezone: "Etc/UTC"})
+    {:ok, board} = Repo.insert(@test_board)
+    conn =
+      conn
+      |> Map.replace!(:secret_key_base, PhxBbWeb.Endpoint.config(:secret_key_base))
+      |> init_test_session(%{})
+      |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
+      |> recycle
+
+    {:ok, view, _html} = live(conn, "/")
+
+    assert has_element?(view, "#logged-in-menu", user.username)
+
+    view
+    |> element("#board-name", board.name)
+    |> render_click
+
+    view
+    |> element("#new-post-button")
+    |> render_click
+
+    assert has_element?(view, "#create-topic-header")
   end
 end
