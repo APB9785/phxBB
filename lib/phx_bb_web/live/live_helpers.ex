@@ -9,9 +9,9 @@ defmodule PhxBbWeb.LiveHelpers do
   @month_abv_map %{1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun",
     7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec"}
 
-  def current_user_id(socket) do
-    PhxBb.Accounts.get_user_by_session_token(socket.assigns.user_token).id
-  end
+  # def current_user_id(socket) do
+  #   PhxBb.Accounts.get_user_by_session_token(socket.assigns.user_token).id
+  # end
 
   def lookup_token(token) when is_nil(token) do
     nil

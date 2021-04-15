@@ -55,6 +55,18 @@ defmodule PhxBbWeb.PageLiveTest do
     assert has_element?(view, "#last-post-by", user.username)
     assert has_element?(view, "#last-post-link", "Test title")
 
+    # Test another post
+    long_title = String.duplicate("AbcXyz", 20)
+    shortened_title = "AbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbc..."
+    {:ok, long_post} = postmaker("Test body", long_title, board.id, user.id)
+    {1, _} = Boards.added_post(board.id, long_post.id, user.id)
+    {1, _} = Accounts.added_post(user.id)
+    {:ok, view, _html} = live(conn, "/")
+
+    assert has_element?(view, "#board-topic-count", "2 topics")
+    assert has_element?(view, "#board-post-count", "2 posts")
+    assert has_element?(view, "#last-post-link", shortened_title)
+
     # Navigate to Board
     view
     |> element("#board-name", @test_board.name)
@@ -72,7 +84,7 @@ defmodule PhxBbWeb.PageLiveTest do
     assert has_element?(view, "#post-header", "Test title")
     assert has_element?(view, "#post-author-info", user.username)
     assert has_element?(view, "#post-author-info", user.title)
-    assert has_element?(view, "#author-post-count", "1")
+    assert has_element?(view, "#author-post-count", "2")
     assert has_element?(view, "#author-join-date", user_join_date)
 
     # Invalid params
