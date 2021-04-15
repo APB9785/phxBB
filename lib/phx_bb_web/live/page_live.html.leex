@@ -205,8 +205,12 @@
 
           <!-- Post contents -->
           <div class="md:w-10/12 pt-2 block pl-4">
-            <p class="text-sm text-gray-500"><%= format_time(post.inserted_at, @active_user) %></p>
-            <div class="py-4 pr-4"><%= post.body %></div>
+            <p class="text-sm text-gray-500">
+              <%= format_time(post.inserted_at, @active_user) %>
+            </p>
+            <div class="py-4 pr-4" id="post-body">
+              <%= post.body %>
+            </div>
           </div>
 
         </div>
@@ -217,7 +221,8 @@
     <div class="flex w-full justify-center pt-2 md:pt-4 pb-2">
       <%= f = form_for @changeset, "#",
                 [phx_submit: "new_reply",
-                class: "flex-grow mx-4 grid justify-items-auto w-full flex-grow"] %>
+                class: "flex-grow mx-4 grid justify-items-auto w-full flex-grow",
+                id: "new-reply-form"] %>
 
           <%= textarea f, :body,
                          placeholder: "Type your reply",

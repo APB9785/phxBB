@@ -151,5 +151,12 @@ defmodule PhxBbWeb.PageLiveTest do
 
     assert has_element?(view, "#breadcrumb", board.name)
     assert has_element?(view, "#post-header", "Hello World")
+    assert has_element?(view, "#new-reply-form")
+
+    view
+    |> form("#new-reply-form", %{reply: %{body: "I love Phoenix"}})
+    |> render_submit
+
+    assert has_element?(view, "#post-body", "I love Phoenix")
   end
 end

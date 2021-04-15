@@ -46,10 +46,9 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_params(%{"create_post" => "1", "board" => board_id}, _url, socket) do
-    {:noreply,
-      socket
-      |> create_post_helper(board_id)
-    }
+    socket = create_post_helper(socket, board_id)
+
+    {:noreply, socket}
   end
   def handle_params(%{"post" => post_id}, _url, socket) do
     {:noreply, post_helper(socket, post_id)}
