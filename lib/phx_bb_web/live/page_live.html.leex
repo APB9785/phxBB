@@ -348,7 +348,7 @@
     <div class="<%= settings_block() %>">
       <%= f = form_for @tz_changeset, "#",
                 phx_submit: "change_timezone",
-                id: "change-timezone-form" %>
+                id: "change-user-timezone-form" %>
         <%= if @tz_changeset.action do %>
           <div class="alert alert-danger">
             <p>Oops, something went wrong! Please check the errors below.</p>
@@ -366,7 +366,9 @@
     <!-- Change user title -->
     <div class="text-2xl py-4 md:pl-8">Change user title</div>
     <div class="<%= settings_block() %>">
-      <%= f = form_for @title_changeset, "#", phx_submit: "change_user_title" %>
+      <%= f = form_for @title_changeset, "#",
+                phx_submit: "change_user_title",
+                id: "change-user-title-form" %>
         <%= if @title_changeset.action do %>
           <div class="alert alert-danger">
             <p>Oops, something went wrong! Please check the errors below.</p>

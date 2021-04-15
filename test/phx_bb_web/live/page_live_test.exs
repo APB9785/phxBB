@@ -138,6 +138,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
     assert has_element?(view, "#create-topic-header")
 
+    # Create a new post
     view
     |> form("#new-topic-form", %{post: %{title: "Hello World", body: "Elixir is awesome!"}})
     |> render_submit
@@ -153,6 +154,7 @@ defmodule PhxBbWeb.PageLiveTest do
     assert has_element?(view, "#post-header", "Hello World")
     assert has_element?(view, "#new-reply-form")
 
+    # Create a new reply
     view
     |> form("#new-reply-form", %{reply: %{body: "I love Phoenix"}})
     |> render_submit
@@ -163,6 +165,25 @@ defmodule PhxBbWeb.PageLiveTest do
     |> element("#user-menu-settings")
     |> render_click
 
-    assert has_element?(view, "#change-timezone-form")
+    assert has_element?(view, "#change-user-timezone-form")
+
+    # Update user title
+    {:ok, view, _html} =
+      view
+      |> form("#change-user-title-form", %{user: %{title: "Expert"}})
+      |> render_submit
+      |> follow_redirect(conn)
+
+    assert has_element?(view, "[role=alert]", "User title updated successfully.")
+    assert has_element?(view, "#change-user-timezone-form")
+
+    # Update user timezone
+    {:ok, view, _html} =
+      view
+      |> form("#change-user-timezone-form", %{user: %{timezone: "US/Central"}})
+      |> render_submit
+      |> follow_redirect(conn)
+
+    assert has_element?(view, "[role=alert]", "Timezone updated successfully.")
   end
 end
