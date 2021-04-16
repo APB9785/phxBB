@@ -398,7 +398,8 @@
 
       <%= _f = form_for @avatar_changeset, "#",
                         phx_submit: "upload_avatar",
-                        phx_change: "validate_avatar" %>
+                        phx_change: "validate_avatar",
+                        id: "change-user-avatar-form" %>
 
         <div class="border-2 p-2 md:w-1/4" phx-drop-target="<%= @uploads.avatar.ref %>">
           <%= live_file_input @uploads.avatar %>
@@ -435,7 +436,7 @@
         <% end %>
 
         <%= for error <- @avatar_changeset.errors do %>
-          <div class="text-red-500 pt-2">
+          <div class="text-red-500 pt-2" id="avatar-submit-error">
             <%= display_avatar_error(error) %>
           </div>
         <% end %>

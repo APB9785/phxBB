@@ -198,5 +198,12 @@ defmodule PhxBbWeb.PageLiveTest do
     |> render_submit
 
     assert has_element?(view, "#change-user-timezone-form", "did not change")
+
+    # Attempt to change avatar with no file selected
+    view
+    |> form("#change-user-avatar-form", %{})
+    |> render_submit
+
+    assert has_element?(view, "#avatar-submit-error", "no file was selected")
   end
 end
