@@ -8,6 +8,8 @@ defmodule PhxBb.Accounts do
   alias PhxBb.Accounts.User
   alias PhxBb.Accounts.UserNotifier
   alias PhxBb.Accounts.UserToken
+  alias PhxBb.Posts.Post
+  alias PhxBb.Replies.Reply
   alias PhxBb.Repo
 
   ## Database getters
@@ -62,6 +64,8 @@ defmodule PhxBb.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  def get_user(id), do: Repo.get(User, id)
+
   def get_users(ids) do
     Repo.all(from u in User,
              where: u.id in ^ids)
@@ -91,6 +95,34 @@ defmodule PhxBb.Accounts do
       update: [inc: [post_count: 1]],
       where: u.id == ^user_id)
     |> Repo.update_all([])
+  end
+
+  def last_five_posts(user_id) do
+    post_query =
+      from p in Post,
+        where: p.author == ^user_id,
+        order_by: [desc: p.inserted_at],
+        limit: 5
+
+    reply_query =
+      from r in Reply,
+        join: p in Post,
+        on: r.post_id == p.id,
+        select: %Post{
+          body: r.body,
+          author: r.author,
+          inserted_at: r.inserted_at,
+          title: p.title,
+          id: p.id},
+        where: r.author == ^user_id,
+        order_by: [desc: r.inserted_at],
+        limit: 5
+
+    posts = Repo.all(post_query)
+    replies = Repo.all(reply_query)
+
+    Enum.sort_by(posts ++ replies, &(&1.inserted_at), {:desc, NaiveDateTime})
+    |> Enum.take(5)
   end
 
   ## User registration

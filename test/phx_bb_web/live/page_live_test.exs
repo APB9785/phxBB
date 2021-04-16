@@ -205,5 +205,17 @@ defmodule PhxBbWeb.PageLiveTest do
     |> render_submit
 
     assert has_element?(view, "#avatar-submit-error", "no file was selected")
+
+    # Return to Index via breadcrumb
+    view
+    |> element("#crumb-index")
+    |> render_click
+
+    # Visit a user profile
+    view
+    |> element("#last-post-author-link")
+    |> render_click
+
+    assert has_element?(view, "#user-profile-header")
   end
 end

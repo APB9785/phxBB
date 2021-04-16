@@ -60,6 +60,10 @@ defmodule PhxBbWeb.PageLive do
     socket = board_helper(socket, board_id)
     {:noreply, socket}
   end
+  def handle_params(%{"user" => user_id}, _url, socket) do
+    socket = user_profile_helper(socket, user_id)
+    {:noreply, socket}
+  end
   def handle_params(%{"register" => "1"}, _url, socket) do
     socket = registration_helper(socket)
     {:noreply, socket}
@@ -501,6 +505,19 @@ defmodule PhxBbWeb.PageLive do
         socket
         |> put_flash(:error, "Email change link is invalid or it has expired.")
         |> push_redirect(to: Routes.live_path(socket, __MODULE__))
+    end
+  end
+
+  defp user_profile_helper(socket, user_id) do
+    case Accounts.get_user(user_id) do
+      nil ->
+        invalid_helper(socket)
+      user ->
+        socket
+        |> assign(nav: :user_profile)
+        |> assign(page_title: user.username)
+        |> assign(view_user: user)
+        |> assign(post_history: Accounts.last_five_posts(user_id))
     end
   end
 end

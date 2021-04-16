@@ -2,7 +2,9 @@
 <%= if @active_user do %>
   <div class="<%= user_menu() %>" id="logged-in-menu">
     <div class="text-center">
-      Logged in as <%= @active_user.username %>
+      Logged in as <%= live_patch @active_user.username,
+                         to: Routes.live_path(@socket, __MODULE__, user: @active_user.id),
+                         class: link_style() %>
       <br>
     </div>
     <div class="text-purple-700 flex justify-center">
@@ -56,7 +58,7 @@
             <div>
               <%= live_patch board.name,
                     to: Routes.live_path(@socket, __MODULE__, board: board.id),
-                    class: "text-purple-700 hover:underline font-bold text-lg",
+                    class: link_style() <> "font-bold text-lg",
                     id: "board-name" %>
             </div>
             <div class="text-sm" id="board-description">
@@ -77,13 +79,15 @@
           <%= if board.last_post != nil do %>
             <div class="pl-4 pb-2 md:p-4 text-sm md:w-1/3">
               <div id="last-post-by">
-                Last post by <%= @user_cache[board.last_user].name %>
+                Last post by <%= live_patch @user_cache[board.last_user].name,
+                                   to: Routes.live_path(@socket, __MODULE__, user: board.last_user),
+                                   class: link_style(), id: "last-post-author-link" %>
               </div>
               <div>
                 in
                 <%= live_patch display_title(board.last_post),
                       to: Routes.live_path(@socket, __MODULE__, post: board.last_post),
-                      class: "text-purple-700 hover:underline", id: "last-post-link" %>
+                      class: link_style(), id: "last-post-link" %>
               </div>
               <div class="hidden md:block">
                 <%= format_time(board.updated_at, @active_user) %>
@@ -107,7 +111,7 @@
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: "text-purple-700 hover:underline" %>
+            class: link_style() %>
     </div>
 
     <!-- Title -->
@@ -124,9 +128,11 @@
           <div class="px-4 md:w-7/12">
             <%= live_patch post.title,
                   to: Routes.live_path(@socket, __MODULE__, post: post.id),
-                  class: "text-purple-700 hover:underline", id: "post-listing-link" %>
+                  class: link_style(), id: "post-listing-link" %>
             <p class="text-sm hidden md:block">
-              by <%= @user_cache[post.author].name %> at
+              by <%= live_patch @user_cache[post.author].name,
+                       to: Routes.live_path(@socket, __MODULE__, user: post.author),
+                       class: link_style() %> at
               <%= format_time(post.inserted_at, @active_user) %>
             </p>
           </div>
@@ -139,7 +145,9 @@
 
           <div class="px-4 flex md:block md:w-3/12">
             <p class="text-sm md:text-base">
-              Last post by <%= @user_cache[post.last_user].name %>
+              Last post by <%= live_patch @user_cache[post.last_user].name,
+                                 to: Routes.live_path(@socket, __MODULE__, user: post.last_user),
+                                 class: link_style() %>
             </p>
             <p class="px-1 text-sm md:hidden">at</p>
             <p class="text-sm"><%= format_time(post.updated_at, @active_user) %></p>
@@ -165,11 +173,11 @@
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: "text-purple-700 hover:underline" %>
+            class: link_style() %>
        >
       <%= live_patch @active_board_name,
             to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
-            class: "text-purple-700 hover:underline" %>
+            class: link_style() %>
     </div>
 
     <!-- Title -->
@@ -187,7 +195,10 @@
                      md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block"
                id="post-author-info">
             <div>
-              <%= @user_cache[post.author].name %>
+              <%= live_patch @user_cache[post.author].name,
+                    to: Routes.live_path(@socket, __MODULE__, user: post.author),
+                    class: link_style(),
+                    phx_hook: "ScrollToTop" %>
               <p class="text-sm"><%= @user_cache[post.author].title %></p>
             </div>
             <%= if @user_cache[post.author].avatar do %>
@@ -250,11 +261,11 @@
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: "text-purple-700 hover:underline" %>
+            class: link_style() %>
        >
       <%= live_patch @active_board_name,
             to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
-            class: "text-purple-700 hover:underline" %>
+            class: link_style() %>
     </div>
 
     <!-- Title -->
@@ -333,6 +344,46 @@
     </div>
 
 
+  <% :user_profile -> %>
+
+    <!-- Breadcrumb -->
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8">
+      >
+      <%= live_patch "Board Index",
+            to: Routes.live_path(@socket, __MODULE__),
+            class: link_style() %>
+    </div>
+
+    <div class="text-2xl p-4 md:pl-8" id="user-profile-header">
+      <%= @view_user.username %>
+    </div>
+
+    <div class="w-32 md:ml-8">
+      <%= img_tag @view_user.avatar, class: "max-h-40 w-full object-fill pb-4" %>
+    </div>
+
+    <div class="text-2xl md:pl-8 md:pb-2">
+      Latest 5 posts:
+    </div>
+
+    <%= for post <- @post_history do %>
+      <div class="md:pl-10 md:pt-2">
+        in <%= live_patch post.title,
+                 to: Routes.live_path(@socket, __MODULE__, post: post.id),
+                 class: link_style(),
+                 phx_hook: "ScrollToTop" %>:
+      </div>
+      <div class="md:ml-8 p-2 bg-white w-min rounded-xl">
+        <div class="text-sm text-gray-600 w-40 pb-2">
+          <%= format_time(post.inserted_at, @active_user) %>
+        </div>
+        <div class="pl-2">
+          <%= post.body %>
+        </div>
+      </div>
+    <% end %>
+
+
   <% :settings -> %>
 
     <!-- Breadcrumb -->
@@ -340,7 +391,8 @@
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: "text-purple-700 hover:underline" %>
+            class: link_style(),
+            id: "crumb-index" %>
     </div>
 
     <!-- Change Timezone -->
@@ -391,7 +443,7 @@
         <%= img_tag @active_user.avatar, class: "max-h-40 w-full object-fill pb-4" %>
       </div>
       <%= if @active_user.avatar do %>
-        <button phx-click="remove_avatar" class="text-purple-700 hover:underline pb-4">
+        <button phx-click="remove_avatar" class="<%= link_style() %> pb-4">
           Remove current avatar
         </button>
       <% end %>
@@ -517,7 +569,7 @@
     <div class="text-center pb-8">
       <%= live_patch "Return to Main Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: "text-purple-700 text-lg hover:underline",
+            class: link_style() <> "text-lg",
             id: "return-from-invalid" %>
     </div>
   <% end %>

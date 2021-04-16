@@ -8,9 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- CI now checks coverage % of the test suite with codecov.io
 - Email verification implemented with Swoosh's Mailjet adapter
-- LiveView test suite now covers most major features
+- LiveView test suite - covers most major features
+- Clicking a username now shows user's profile with their five most recent posts
+
+### Changed
+
+- JS Hook auto-scrolls to the top of the page when clicking a live_patch
+- CI now checks coverage % of the test suite with codecov.io
 
 ## [0.3.1] - 2021-04-10
 

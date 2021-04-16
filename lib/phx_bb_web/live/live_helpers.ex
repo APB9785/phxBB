@@ -40,6 +40,10 @@ defmodule PhxBbWeb.LiveHelpers do
     "text-sm md:text-base px-4 md:px-8 py-2 mt-4 mb-4 w-6/12 md:w-3/12 rounded-md bg-purple-700 text-white"
   end
 
+  def link_style do
+    "text-purple-700 hover:underline"
+  end
+
   defp month_abv(n) do
     Map.get(@month_abv_map, n)
   end
