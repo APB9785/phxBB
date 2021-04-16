@@ -218,6 +218,7 @@ defmodule PhxBb.Accounts do
   If the token matches, the user email is updated and the token is deleted.
   The confirmed_at date is also updated to the current time.
   """
+  def update_user_email(nil, _token), do: :error
   def update_user_email(user, token) do
     context = "change:#{user.email}"
 

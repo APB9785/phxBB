@@ -91,12 +91,20 @@ defmodule PhxBbWeb.PageLiveTest do
     assert has_element?(view, "#author-post-count", "2")
     assert has_element?(view, "#author-join-date", user_join_date)
 
+    # Invalid confirmation tokens
+    live(conn, "/?confirm=123456789")
+    |> follow_redirect(conn, "/")
+    live(conn, "/?confirm_email=123456789")
+    |> follow_redirect(conn, "/")
+
     # Invalid params
     {:ok, view, _html} = live(conn, "/?invalidparam=42")
     assert has_element?(view, "#page-not-found-live")
     {:ok, view, _html} = live(conn, "/?board=9999")
     assert has_element?(view, "#page-not-found-live")
     {:ok, view, _html} = live(conn, "/?post=9999")
+    assert has_element?(view, "#page-not-found-live")
+    {:ok, view, _html} = live(conn, "/?user=9999")
     assert has_element?(view, "#page-not-found-live")
 
     # Return to Main Index from 404
