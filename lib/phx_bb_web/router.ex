@@ -13,9 +13,9 @@ defmodule PhxBbWeb.Router do
     plug :fetch_current_user
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
+  # pipeline :api do
+  #   plug :accepts, ["json"]
+  # end
 
   scope "/", PhxBbWeb do
     pipe_through :browser
@@ -36,11 +36,11 @@ defmodule PhxBbWeb.Router do
   # you can use Plug.BasicAuth to set up some basic authentication
   # as long as you are also using SSL (which you should anyway).
   if Mix.env() in [:dev, :test] do
-    import Phoenix.LiveDashboard.Router
+    # import Phoenix.LiveDashboard.Router
 
     scope "/" do
       pipe_through :browser
-      live_dashboard "/dashboard", metrics: PhxBbWeb.Telemetry
+      # live_dashboard "/dashboard", metrics: PhxBbWeb.Telemetry
     end
   end
 
@@ -49,7 +49,7 @@ defmodule PhxBbWeb.Router do
   scope "/", PhxBbWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
-    live "/users/register", UserRegistrationLive.New, :new, as: :user_registration
+    # live "/users/register", UserRegistrationLive.New, :new, as: :user_registration
     # get "/users/register", UserRegistrationController, :new
     # post "/users/register", UserRegistrationController, :create
     get "/users/log_in", UserSessionController, :new

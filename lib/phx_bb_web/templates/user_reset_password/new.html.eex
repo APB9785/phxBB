@@ -18,7 +18,7 @@
 <% end %>
 
 <p>
-  <%= link "Register", to: Routes.user_registration_path(@conn, :new) %> |
+  <%= link "Register", to: Routes.live_path(@conn, PhxBbWeb.PageLive, register: 1) %> |
   <%= link "Log in", to: Routes.user_session_path(@conn, :new) %>
 </p>
 
