@@ -97,6 +97,12 @@ defmodule PhxBbWeb.PageLiveTest do
     live(conn, "/?confirm_email=123456789")
     |> follow_redirect(conn, "/")
 
+    # Visit pages which require login
+    live(conn, "/?settings=1")
+    |> follow_redirect(conn, "/users/log_in")
+    live(conn, "/?board=1&create_post=1")
+    |> follow_redirect(conn, "/users/log_in")
+
     # Invalid params
     {:ok, view, _html} = live(conn, "/?invalidparam=42")
     assert has_element?(view, "#page-not-found-live")
@@ -225,5 +231,8 @@ defmodule PhxBbWeb.PageLiveTest do
     |> render_click
 
     assert has_element?(view, "#user-profile-header")
+
+    {:ok, view, _html} = live(conn, "/?board=9999&create_post=1")
+    assert has_element?(view, "#page-not-found-live")
   end
 end
