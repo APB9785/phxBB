@@ -262,7 +262,8 @@ defmodule PhxBbWeb.PageLive do
 
   def handle_event("upload_avatar", _params, socket) do
     consume_uploaded_entries(socket, :avatar, fn meta, entry ->
-      dest = Path.join("priv/static/uploads", filename(entry))
+      uploads_dir = Application.app_dir(:phx_bb, "priv/static/uploads")
+      dest = Path.join(uploads_dir, filename(entry))
       File.cp!(meta.path, dest)
       Routes.static_path(socket, "/uploads/#{filename(entry)}")
     end)
