@@ -66,10 +66,11 @@ defmodule PhxBb.Accounts do
 
   def get_user(id), do: Repo.get(User, id)
 
-  def get_users(ids) do
-    Repo.all(from u in User,
-             where: u.id in ^ids)
-  end
+  # Deprecated
+  # def get_users(ids) do
+  #   Repo.all(from u in User,
+  #            where: u.id in ^ids)
+  # end
 
   def build_cache(user_ids, cache) do
     Enum.reduce(user_ids, cache, fn id, acc ->

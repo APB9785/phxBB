@@ -54,8 +54,8 @@ defmodule PhxBbWeb.PageLiveTest do
 
       {:ok, view, _html} = live(conn, "/")
 
-      assert has_element?(view, "#board-name", @test_board.name)
-      assert has_element?(view, "#board-description", @test_board.description)
+      assert has_element?(view, "#board-name", board.name)
+      assert has_element?(view, "#board-description", board.description)
       assert has_element?(view, "#board-topic-count", "1 topic")
       assert has_element?(view, "#board-post-count", "1 post")
       assert has_element?(view, "#last-post-by", user.username)
@@ -262,6 +262,33 @@ defmodule PhxBbWeb.PageLiveTest do
       |> render_submit
 
       assert has_element?(view, "#change-user-timezone-form", "did not change")
+    end
+
+    test "Change user avatar", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#user-menu-settings") |> render_click
+
+      refute render(view) =~ "100%"
+      refute has_element?(view, "#remove-avatar-link")
+
+      avatar =
+        file_input(view, "#change-user-avatar-form", :avatar, [
+          %{
+            last_modified: 1_594_171_879_000,
+            name: "elixir.png",
+            content: File.read!("test/support/fixtures/elixir.png"),
+            size: 2_118,
+            type: "image/png"
+          }])
+
+      assert render_upload(avatar, "elixir.png") =~ "100%"
+
+      view |> form("#change-user-avatar-form") |> render_submit
+
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      assert has_element?(view, "#remove-avatar-link")
     end
 
     test "Attempt to change avatar with no file selected", %{conn: conn, user: user} do

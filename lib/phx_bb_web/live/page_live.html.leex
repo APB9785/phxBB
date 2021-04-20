@@ -443,7 +443,8 @@
         <%= img_tag @active_user.avatar, class: "max-h-40 w-full object-fill pb-4" %>
       </div>
       <%= if @active_user.avatar do %>
-        <button phx-click="remove_avatar" class="<%= link_style() %> pb-4">
+        <button phx-click="remove_avatar" class="<%= link_style() %> pb-4"
+                id="remove-avatar-link">
           Remove current avatar
         </button>
       <% end %>
@@ -493,7 +494,10 @@
           </div>
         <% end %>
 
-        <%= submit "Upload", phx_disable_with: "Uploading...", class: button_style() %>
+        <%= submit "Upload",
+              phx_disable_with: "Uploading...",
+              class: button_style(),
+              id: "submit-user-avatar-upload" %>
       </form>
     </div>
 
