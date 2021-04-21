@@ -400,8 +400,23 @@
             id: "crumb-index" %>
     </div>
 
+    <%= if !@active_user.confirmed_at do %>
+      <div class="md:mx-8 px-4 bg-purple-200 py-6 shadow rounded-lg">
+        <div class="pb-4">
+          Please confirm your account by clicking the link in your email.
+          Be sure to check the "Promotions" folder if you use gmail.
+        </div>
+        <div>Current Email: <%= @active_user.email %></div>
+        <button phx-click="resend_verification"
+                class="<%= button_style() %>"
+                id="resend-verification-button">
+          Re-send confirmation link
+        </button>
+      </div>
+    <% end %>
+
     <!-- Change Timezone -->
-    <div class="text-2xl pb-4 md:pl-8">Change timezone</div>
+    <div class="text-2xl py-4 md:pl-8">Change timezone</div>
     <div class="<%= settings_block() %>">
       <%= f = form_for @tz_changeset, "#",
                 phx_submit: "change_timezone",

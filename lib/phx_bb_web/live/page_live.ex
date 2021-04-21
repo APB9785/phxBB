@@ -166,6 +166,22 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
+  def handle_event("resend_verification", _params, socket) do
+    user = socket.assigns.active_user
+    Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
+
+    socket =
+      socket
+      |> put_flash(:info,
+        "Confirmation instructions re-sent.  Please check your email."
+      )
+      |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1),
+        phx_hook: "ScrollToTop"
+      )
+
+    {:noreply, socket}
+  end
+
   def handle_event("update_email", params, socket) do
     %{"current_password" => password, "user" => user_params} = params
     user = socket.assigns.active_user

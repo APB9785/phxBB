@@ -2,8 +2,9 @@
 
 <h1>Resend confirmation instructions</h1>
 
-<%= form_for :user, Routes.user_confirmation_path(@conn, :create),
-             [class: "bg-white px-10 py-8 mb-6 shadow rounded-lg"],
+<%= form_for @changeset, "#",
+             [phx_submit: ,
+               class: "bg-white px-10 py-8 mb-6 shadow rounded-lg"],
              fn f -> %>
   <%= label f, :email, class: "block mb-2 text-sm font-medium text-gray-600" %>
   <%= email_input f, :email, required: true,
