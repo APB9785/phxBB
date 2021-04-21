@@ -325,21 +325,15 @@ defmodule PhxBbWeb.PageLive do
 
     File.rm!("priv/static#{user.avatar}")
 
-    case Accounts.update_user_avatar(user, %{avatar: nil}) do
-      {:ok, _user} ->
-        changeset = Accounts.change_user_avatar(%User{})
-        socket =
-          socket
-          |> assign(avatar_changeset: changeset)
-          |> put_flash(:info, "User avatar removed successfully.")
-          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
+    {:ok, _user} = Accounts.update_user_avatar(user, %{avatar: nil})
+      changeset = Accounts.change_user_avatar(%User{})
+      socket =
+        socket
+        |> assign(avatar_changeset: changeset)
+        |> put_flash(:info, "User avatar removed successfully.")
+        |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
 
-        {:noreply, socket}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        socket = assign(socket, avatar_changeset: changeset)
-        {:noreply, socket}
-    end
+      {:noreply, socket}
   end
 
   defp main_helper(socket) do

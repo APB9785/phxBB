@@ -126,6 +126,43 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#page-not-found-live")
     end
 
+    test "Register new user", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/")
+
+      view |> element("#user-menu-register") |> render_click
+
+      assert has_element?(view, "#register-header")
+
+      view
+      |> form("#register-new-user-form", %{
+        user: %{
+          email: "test_user@example.com",
+          username: "testie",
+          password: "test1234",
+          timezone: "Etc/UTC"
+      }})
+      |> render_submit
+
+      flash = assert_redirected view, "/users/log_in"
+      assert flash["info"] =~ "User created successfully. Please check your email"
+    end
+
+    test "Fail to register new user", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/?register=1")
+
+      view
+      |> form("#register-new-user-form", %{
+        user: %{
+          email: "invalid_tester@example.com",
+          username: "tester2000",
+          password: "short",
+          timezone: "Etc/UTC"
+      }})
+      |> render_submit
+
+      assert has_element?(view, "#register-new-user-form", "should be at least 8 character(s)")
+    end
+
     test "Return to Main Index from 404", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/?invalid=9999")
 
@@ -134,16 +171,6 @@ defmodule PhxBbWeb.PageLiveTest do
       |> render_click
 
       assert has_element?(view, "#main-header")
-    end
-
-    test "Open Register User dialog", %{conn: conn} do
-      {:ok, view, _html} = live(conn, "/")
-
-      view
-      |> element("#user-menu-register")
-      |> render_click
-
-      assert has_element?(view, "#register-header")
     end
 
     test "Visit a user profile from Main Index", %{conn: conn, user: user, board: board} do
@@ -196,6 +223,47 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#post-body", "I love Phoenix")
     end
 
+    test "Re-send user confirmation link", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      view
+      |> element("#resend-verification-button")
+      |> render_click
+
+      assert has_element?(view, "[role=alert]",
+        "Confirmation instructions re-sent.  Please check your email.")
+    end
+
+    test "Update user email address", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      view
+      |> form("#update-user-email-form", %{
+        user: %{email: "another_email@example.com"},
+        current_password: "hello world!"
+      })
+      |> render_submit
+
+      flash = assert_redirected view, "/?settings=1"
+      assert flash["info"] == "A link to confirm your email change has been sent to the new address."
+    end
+
+    test "Fail to update user email address", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      view
+      |> form("#update-user-email-form", %{
+        user: %{email: user.email},
+        current_password: "hello world!"
+      })
+      |> render_submit
+
+      assert has_element?(view, "#update-user-email-form", "did not change")
+    end
+
     test "Update user title", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/")
@@ -245,7 +313,7 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#change-user-timezone-form", "did not change")
     end
 
-    test "Change user avatar", %{conn: conn, user: user} do
+    test "Upload and remove user avatar", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
 
@@ -270,7 +338,12 @@ defmodule PhxBbWeb.PageLiveTest do
         |> render_submit
         |> follow_redirect(conn)
 
-      assert has_element?(view, "#remove-avatar-link")
+      view
+      |> element("#remove-avatar-link")
+      |> render_click
+
+      flash = assert_redirected view, "/?settings=1"
+      assert flash["info"] == "User avatar removed successfully."
     end
 
     test "Attempt to change avatar with no file selected", %{conn: conn, user: user} do
