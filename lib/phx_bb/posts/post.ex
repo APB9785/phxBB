@@ -25,5 +25,7 @@ defmodule PhxBb.Posts.Post do
     post
     |> cast(attrs, [:title, :body, :board_id, :author, :last_user, :view_count, :reply_count])
     |> validate_required([:title, :body, :board_id, :author, :view_count, :reply_count])
+    |> validate_length(:title, min: 3)
+    |> validate_length(:body, min: 3)
   end
 end

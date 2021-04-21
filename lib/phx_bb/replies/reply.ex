@@ -20,5 +20,6 @@ defmodule PhxBb.Replies.Reply do
     reply
     |> cast(attrs, [:body, :author, :post_id])
     |> validate_required([:body, :author, :post_id])
+    |> validate_length(:body, min: 3)
   end
 end

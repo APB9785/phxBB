@@ -27,12 +27,6 @@ defmodule PhxBbWeb.PageLiveTest do
     }
   end
 
-  # test "disconnected and connected render", %{conn: conn} do
-  #   {:ok, page_live, disconnected_html} = live(conn, "/")
-  #   assert disconnected_html =~ "Welcome to the Forum!"
-  #   assert render(page_live) =~ "Welcome to the Forum!"
-  # end
-
   describe "Logged-out User:" do
     test "Main view before any posts are made", %{conn: conn, board: board} do
       {:ok, view, _html} = live(conn, "/")
@@ -105,14 +99,15 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Invalid confirmation tokens", %{conn: conn} do
       live(conn, "/?confirm=123456789")
       |> follow_redirect(conn, "/")
+
       live(conn, "/?confirm_email=123456789")
       |> follow_redirect(conn, "/")
     end
 
     test "Visit pages which require login", %{conn: conn} do
-      # Visit pages which require login
       live(conn, "/?settings=1")
       |> follow_redirect(conn, "/users/log_in")
+
       live(conn, "/?board=1&create_post=1")
       |> follow_redirect(conn, "/users/log_in")
     end
@@ -120,10 +115,13 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Invalid URL params", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/?invalidparam=42")
       assert has_element?(view, "#page-not-found-live")
+
       {:ok, view, _html} = live(conn, "/?board=9999")
       assert has_element?(view, "#page-not-found-live")
+
       {:ok, view, _html} = live(conn, "/?post=9999")
       assert has_element?(view, "#page-not-found-live")
+
       {:ok, view, _html} = live(conn, "/?user=9999")
       assert has_element?(view, "#page-not-found-live")
     end
@@ -169,13 +167,9 @@ defmodule PhxBbWeb.PageLiveTest do
 
       assert has_element?(view, "#logged-in-menu", user.username)
 
-      view
-      |> element("#board-name", board.name)
-      |> render_click
+      view |> element("#board-name", board.name) |> render_click
 
-      view
-      |> element("#new-post-button")
-      |> render_click
+      view |> element("#new-post-button") |> render_click
 
       assert has_element?(view, "#create-topic-header")
 
@@ -330,9 +324,42 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Create new topic in nonexistent board", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
-
       {:ok, view, _html} = live(conn, "/?board=9999&create_post=1")
+
       assert has_element?(view, "#page-not-found-live")
+    end
+
+    test "New topic form via URL", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      url = "/?board=" <> Integer.to_string(board.id) <> "&create_post=1"
+      {:ok, view, _html} = live(conn, url)
+
+      assert has_element?(view, "#new-topic-form")
+    end
+
+    test "Fail to create new topic", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      url = "/?board=" <> Integer.to_string(board.id) <> "&create_post=1"
+      {:ok, view, _html} = live(conn, url)
+
+      view
+      |> form("#new-topic-form", %{post: %{body: "Test body", title: "X"}})
+      |> render_submit
+
+      assert has_element?(view, "#new-topic-form", "should be at least 3 character(s)")
+    end
+
+    test "Fail to create new reply", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      url = "/?post=" <> Integer.to_string(post.id)
+      {:ok, view, _html} = live(conn, url)
+
+      view
+      |> form("#new-reply-form", %{reply: %{body: "OK"}})
+      |> render_submit
+
+      assert has_element?(view, "#new-reply-form", "should be at least 3 character(s)")
     end
   end
 

@@ -246,6 +246,7 @@
                                   transition duration-150 text-sm focus:outline-none focus:ring
                                   focus:border-purple-700 focus:ring-purple-400
                                   md:focus:ring-purple-300" %>
+            <%= error_tag f, :body %>
 
             <%= submit "Post Reply",
                          phx_disable_with: "Posting...",
@@ -286,6 +287,7 @@
                          rounded-md transition duration-150 text-sm focus:outline-none focus:ring
                          focus:border-purple-700 focus:ring-purple-400
                          md:focus:ring-purple-300 md:border-purple-400" %>
+        <%= error_tag f, :title %>
 
         <%= textarea f, :body,
                        placeholder: "Body",
@@ -294,6 +296,7 @@
                        rounded-md transition duration-150 text-sm focus:outline-none focus:ring
                        focus:border-purple-700 focus:ring-purple-400
                        md:focus:ring-purple-300 md:border-purple-400" %>
+        <%= error_tag f, :body %>
 
         <%= submit "Create Post",
                    phx_disable_with: "Posting...",
