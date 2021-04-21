@@ -41,6 +41,8 @@ defmodule PhxBb.Accounts.UserNotifier do
     |> subject("Reset password for your phxBB acount")
     |> text_body(body)
     |> PhxBb.Mailer.deliver
+
+    body
   end
 
   @doc """

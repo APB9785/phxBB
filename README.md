@@ -5,9 +5,9 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/APB9785/phxBB)
 
 **phxBB** is a re-imagining of classic message board software such as phpBB and   
-vBulletin.  It uses Phoenix LiveView to establish a persistent connection with each   
-user, holding and updating state for virtually instantaneous navigation and   
-interaction without any full page reloads.   
+vBulletin.  It uses a single Phoenix LiveView process to establish a persistent   
+connection with each user, providing virtually instantaneous navigation and   
+interaction without any full page reloads after the user is logged in.   
 
 ## What's New - v0.3
 
