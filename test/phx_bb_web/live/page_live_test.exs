@@ -218,8 +218,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Attempt invalid user title update", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
-      {:ok, view, _html} = live(conn, "/")
-      view |> element("#user-menu-settings") |> render_click
+      {:ok, view, _html} = live(conn, "/?settings=1")
 
       view
       |> form("#change-user-title-form", %{user: %{title: "abcdefghijklmnopqrstuvwxyz"}})
@@ -230,8 +229,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Update user timezone", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
-      {:ok, view, _html} = live(conn, "/")
-      view |> element("#user-menu-settings") |> render_click
+      {:ok, view, _html} = live(conn, "/?settings=1")
 
       {:ok, view, _html} =
         view
@@ -244,8 +242,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Attempt invalid timezone update", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
-      {:ok, view, _html} = live(conn, "/")
-      view |> element("#user-menu-settings") |> render_click
+      {:ok, view, _html} = live(conn, "/?settings=1")
 
       view
       |> form("#change-user-timezone-form", %{user: %{timezone: "Etc/UTC"}})
@@ -256,8 +253,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Change user avatar", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
-      {:ok, view, _html} = live(conn, "/")
-      view |> element("#user-menu-settings") |> render_click
+      {:ok, view, _html} = live(conn, "/?settings=1")
 
       refute render(view) =~ "100%"
       refute has_element?(view, "#remove-avatar-link")
@@ -277,8 +273,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Attempt to change avatar with no file selected", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
-      {:ok, view, _html} = live(conn, "/")
-      view |> element("#user-menu-settings") |> render_click
+      {:ok, view, _html} = live(conn, "/?settings=1")
 
       view
       |> form("#change-user-avatar-form", %{})
@@ -298,7 +293,7 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#main-header")
     end
 
-    test "Change password", %{conn: conn, user: user} do
+    test "Change user password", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
 
@@ -314,6 +309,23 @@ defmodule PhxBbWeb.PageLiveTest do
 
       flash = assert_redirected view, "/users/log_in"
       assert flash["info"] == "Password updated successfully.  Please log in again."
+    end
+
+    test "Failure to change user password", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      view
+      |> form("#change-user-password-form", %{
+        user:
+          %{password: "short",
+            password_confirmation: "short"},
+        current_password:
+          "hello world!"
+      })
+      |> render_submit
+
+      assert has_element?(view, "#change-user-password-form", "should be at least 8 character(s)")
     end
 
     test "Create new topic in nonexistent board", %{conn: conn, user: user} do
