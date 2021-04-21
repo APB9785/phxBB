@@ -263,6 +263,14 @@ defmodule PhxBbWeb.PageLiveTest do
           }])
 
       assert render_upload(avatar, "elixir.png") =~ "100%"
+
+      {:ok, view, _html} =
+        view
+        |> element("#change-user-avatar-form")
+        |> render_submit
+        |> follow_redirect(conn)
+
+      assert has_element?(view, "#remove-avatar-link")
     end
 
     test "Attempt to change avatar with no file selected", %{conn: conn, user: user} do

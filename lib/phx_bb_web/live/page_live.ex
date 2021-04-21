@@ -171,13 +171,8 @@ defmodule PhxBbWeb.PageLive do
     Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
 
     socket =
-      socket
-      |> put_flash(:info,
-        "Confirmation instructions re-sent.  Please check your email."
-      )
-      |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1),
-        phx_hook: "ScrollToTop"
-      )
+      put_flash(socket, :info,
+        "Confirmation instructions re-sent.  Please check your email.")
 
     {:noreply, socket}
   end

@@ -15,7 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - JS Hook auto-scrolls to the top of the page when clicking a live_patch
-- CI now checks coverage % of the test suite with codecov.io
+- CI checks coverage % of the test suite with codecov.io
+- User confirmation moved into the LiveView
 
 ## [0.3.1] - 2021-04-10
 
