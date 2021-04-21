@@ -24,10 +24,6 @@ defmodule PhxBb.Replies do
     # |> Enum.sort_by(fn schema -> schema.updated_at end, {:asc, NaiveDateTime})
   end
 
-  def count_by_post_id(post_id) do
-    Repo.one from r in Reply, where: [post_id: ^post_id], select: count()
-  end
-
   @doc """
   Gets a single reply.
 

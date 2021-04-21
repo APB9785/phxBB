@@ -1,2 +1,3 @@
 ignore:
-  - "test"  # ignore folders and all its contents
+  - "test"
+  - "lib/phx_bb/application.ex"

@@ -116,12 +116,6 @@ defmodule PhxBb.Posts do
     Repo.delete(post)
   end
 
-  def delete_post_by_id(id) do
-    id
-    |> get_post!
-    |> delete_post
-  end
-
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking post changes.
 
