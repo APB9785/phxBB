@@ -367,13 +367,13 @@
     </div>
 
     <%= for post <- @post_history do %>
-      <div class="md:pl-10 md:pt-2">
+      <div class="text-sm md:pl-10 md:pt-2">
         in <%= live_patch post.title,
                  to: Routes.live_path(@socket, __MODULE__, post: post.id),
                  class: link_style(),
                  phx_hook: "ScrollToTop" %>:
       </div>
-      <div class="md:ml-8 p-2 bg-white w-min rounded-xl">
+      <div class="md:ml-8 p-2 bg-white w-min rounded-xl shadow-md">
         <div class="text-sm text-gray-600 w-40 pb-2">
           <%= format_time(post.inserted_at, @active_user) %>
         </div>

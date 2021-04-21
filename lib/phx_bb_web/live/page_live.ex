@@ -90,31 +90,25 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_event("new_post", %{"post" => params}, socket) do
-    case socket.assigns.active_user do
-      nil ->
-        socket = push_redirect(socket, to: "/users/log_in")
+    user = socket.assigns.active_user
+    board_id = socket.assigns.active_board_id
+
+    case postmaker(params["body"], params["title"], board_id, user.id) do
+      {:ok, post} ->
+        # Update the last post info for the active board
+        {1, _} = Boards.added_post(board_id, post.id, user.id)
+        # Update the user's post count
+        {1, _} = Accounts.added_post(user.id)
+
+        socket =
+          push_patch(socket,
+            to: Routes.live_path(socket, __MODULE__, board: board_id))
+
         {:noreply, socket}
 
-      user ->
-        b_id = socket.assigns.active_board_id
-
-        case postmaker(params["body"], params["title"], b_id, user.id) do
-          {:ok, post} ->
-            # Update the last post info for the active board
-            {1, _} = Boards.added_post(b_id, post.id, user.id)
-            # Update the user's post count
-            {1, _} = Accounts.added_post(user.id)
-
-            socket =
-              socket
-              |> push_patch(to: Routes.live_path(socket, __MODULE__, board: b_id))
-
-            {:noreply, socket}
-
-          {:error, %Ecto.Changeset{} = changeset} ->
-            socket = assign(socket, changeset: changeset)
-            {:noreply, socket}
-        end
+      {:error, %Ecto.Changeset{} = changeset} ->
+        socket = assign(socket, changeset: changeset)
+        {:noreply, socket}
     end
   end
 
