@@ -289,14 +289,31 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Return to Main Index via breadcrumb", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
-      {:ok, view, _html} = live(conn, "/")
-      view |> element("#user-menu-settings") |> render_click
+      {:ok, view, _html} = live(conn, "/?settings=1")
 
       view
       |> element("#crumb-index")
       |> render_click
 
       assert has_element?(view, "#main-header")
+    end
+
+    test "Change password", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      view
+      |> form("#change-user-password-form", %{
+        user:
+          %{password: "another pass",
+            password_confirmation: "another pass"},
+        current_password:
+          "hello world!"
+      })
+      |> render_submit
+
+      flash = assert_redirected view, "/users/log_in"
+      assert flash["info"] == "Password updated successfully.  Please log in again."
     end
 
     test "Create new topic in nonexistent board", %{conn: conn, user: user} do
