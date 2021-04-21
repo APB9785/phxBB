@@ -46,11 +46,7 @@ defmodule PhxBbWeb.PageLiveTest do
     end
 
     test "Main view after one post is made", %{conn: conn, user: user, board: board} do
-      {:ok, post} = postmaker("Test body", "Test title", board.id, user.id)
-      # Update the last post info for the active board
-      {1, _} = Boards.added_post(board.id, post.id, user.id)
-      # Update the user's post count
-      {1, _} = Accounts.added_post(user.id)
+      post = post_fixture(user, board)
 
       {:ok, view, _html} = live(conn, "/")
 
@@ -59,7 +55,7 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#board-topic-count", "1 topic")
       assert has_element?(view, "#board-post-count", "1 post")
       assert has_element?(view, "#last-post-by", user.username)
-      assert has_element?(view, "#last-post-link", "Test title")
+      assert has_element?(view, "#last-post-link", post.title)
     end
 
     test "Visit a board directly from URL", %{conn: conn, board: board} do
@@ -72,47 +68,38 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Long topic title shortened in Main view", %{conn: conn, user: user, board: board} do
       long_title = String.duplicate("AbcXyz", 20)
       shortened_title = "AbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbc..."
-      {:ok, long_post} = postmaker("Test body", long_title, board.id, user.id)
-      {1, _} = Boards.added_post(board.id, long_post.id, user.id)
-      {1, _} = Accounts.added_post(user.id)
+      _post = post_fixture(user, board, long_title)
       {:ok, view, _html} = live(conn, "/")
 
       assert has_element?(view, "#last-post-link", shortened_title)
     end
 
-    test "Navigation and viewing posts", %{conn: conn, user: user, board: board} do
-      {:ok, post} = postmaker("Test body", "Test title", board.id, user.id)
-      # Update the last post info for the active board
-      {1, _} = Boards.added_post(board.id, post.id, user.id)
-      # Update the user's post count
-      {1, _} = Accounts.added_post(user.id)
-
+    test "Post author info box", %{conn: conn, user: user, board: board} do
+      post = post_fixture(user, board)
       {:ok, view, _html} = live(conn, "/")
 
-      # Navigate to Board
-      view
-      |> element("#board-name", board.name)
-      |> render_click
-
-      assert has_element?(view, "#breadcrumb", "Board Index")
-      assert has_element?(view, "#board-header", board.name)
-      assert has_element?(view, "#post-listing", "Test title")
-
-      # Navigate to Post
-      view
-      |> element("#post-listing-link", "Test title")
-      |> render_click
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
 
       user_join_date_fragment =
         [user.inserted_at.day, user.inserted_at.year]
         |> Enum.map(&Integer.to_string/1)
         |> Enum.join(", ")
 
-      assert has_element?(view, "#post-header", "Test title")
       assert has_element?(view, "#post-author-info", user.username)
       assert has_element?(view, "#post-author-info", user.title)
       assert has_element?(view, "#author-post-count", "1")
       assert has_element?(view, "#author-join-date", user_join_date_fragment)
+    end
+
+    test "Cannot see new reply form", %{conn: conn, user: user, board: board} do
+      post = post_fixture(user, board)
+      {:ok, view, _html} = live(conn, "/")
+
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+
+      refute has_element?(view, "#new-reply-form")
     end
 
     test "Invalid confirmation tokens", %{conn: conn} do
@@ -162,11 +149,7 @@ defmodule PhxBbWeb.PageLiveTest do
     end
 
     test "Visit a user profile from Main Index", %{conn: conn, user: user, board: board} do
-      {:ok, post} = postmaker("Test body", "Test title", board.id, user.id)
-      # Update the last post info for the active board
-      {1, _} = Boards.added_post(board.id, post.id, user.id)
-      # Update the user's post count
-      {1, _} = Accounts.added_post(user.id)
+      _post = post_fixture(user, board)
 
       {:ok, view, _html} = live(conn, "/")
 
@@ -330,5 +313,16 @@ defmodule PhxBbWeb.PageLiveTest do
     |> init_test_session(%{})
     |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
     |> recycle
+  end
+
+  def post_fixture(user, board, title \\ "Test title", body \\ "Test body") do
+    {:ok, post} = postmaker(body, title, board.id, user.id)
+
+    # Update the last post info for the active board
+    {1, _} = Boards.added_post(board.id, post.id, user.id)
+    # Update the user's post count
+    {1, _} = Accounts.added_post(user.id)
+
+    post
   end
 end

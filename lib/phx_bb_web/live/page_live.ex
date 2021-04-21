@@ -113,37 +113,31 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_event("new_reply", %{"reply" => params}, socket) do
-    case socket.assigns.active_user do
-      nil ->
-        socket = push_redirect(socket, to: "/users/log_in")
+    user = socket.assigns.active_user
+    post = socket.assigns.active_post
+
+    case replymaker(params["body"], post.id, user.id) do
+      {:ok, _reply} ->
+        socket =
+          socket
+          |> assign(reply_list: Replies.list_replies(post.id))
+          |> assign(changeset: Replies.change_reply(%Reply{}))
+
+        # Update the last reply info for the active post
+        {1, _} = Posts.added_reply(post.id, user.id)
+
+        # Update the last post info for the active board
+        {1, _} =
+          Boards.added_reply(socket.assigns.active_board_id, post.id, user.id)
+
+        # Update the user's post count
+        {1, _} = Accounts.added_post(user.id)
+
         {:noreply, socket}
 
-      user ->
-        post = socket.assigns.active_post
-
-        case replymaker(params["body"], post.id, user.id) do
-          {:ok, _reply} ->
-            socket =
-              socket
-              |> assign(reply_list: Replies.list_replies(post.id))
-              |> assign(changeset: Replies.change_reply(%Reply{}))
-
-            # Update the last reply info for the active post
-            {1, _} = Posts.added_reply(post.id, user.id)
-
-            # Update the last post info for the active board
-            {1, _} =
-              Boards.added_reply(socket.assigns.active_board_id, post.id, user.id)
-
-            # Update the user's post count
-            {1, _} = Accounts.added_post(user.id)
-
-            {:noreply, socket}
-
-          {:error, %Ecto.Changeset{} = changeset} ->
-            socket = assign(socket, changeset: changeset)
-            {:noreply, socket}
-        end
+      {:error, %Ecto.Changeset{} = changeset} ->
+        socket = assign(socket, changeset: changeset)
+        {:noreply, socket}
     end
   end
 

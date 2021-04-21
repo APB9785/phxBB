@@ -231,27 +231,29 @@
     </div>
 
     <!-- New Reply form -->
-    <div class="flex w-full justify-center pt-2 md:pt-4 pb-2">
-      <%= f = form_for @changeset, "#",
-                [phx_submit: "new_reply",
-                class: "flex-grow mx-4 grid justify-items-auto w-full flex-grow",
-                id: "new-reply-form"] %>
+    <%= if @active_user do %>
+      <div class="flex w-full justify-center pt-2 md:pt-4 pb-2">
+        <%= f = form_for @changeset, "#",
+                  [phx_submit: "new_reply",
+                  class: "flex-grow mx-4 grid justify-items-auto w-full flex-grow",
+                  id: "new-reply-form"] %>
 
-          <%= textarea f, :body,
-                         placeholder: "Type your reply",
-                         autocomplete: "off",
-                         class: "appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 bg-white
-                                justify-self-center rounded-md shadow-md md:border-purple-300
-                                transition duration-150 text-sm focus:outline-none focus:ring
-                                focus:border-purple-700 focus:ring-purple-400
-                                md:focus:ring-purple-300" %>
+            <%= textarea f, :body,
+                           placeholder: "Type your reply",
+                           autocomplete: "off",
+                           class: "appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 bg-white
+                                  justify-self-center rounded-md shadow-md md:border-purple-300
+                                  transition duration-150 text-sm focus:outline-none focus:ring
+                                  focus:border-purple-700 focus:ring-purple-400
+                                  md:focus:ring-purple-300" %>
 
-          <%= submit "Post Reply",
-                       phx_disable_with: "Posting...",
-                       class: "px-8 py-2 m-2 rounded-md justify-self-center
-                              bg-purple-700 md:w-1/6 text-white" %>
-      </form>
-    </div>
+            <%= submit "Post Reply",
+                         phx_disable_with: "Posting...",
+                         class: "px-8 py-2 m-2 rounded-md justify-self-center
+                                bg-purple-700 md:w-1/6 text-white" %>
+        </form>
+      </div>
+    <% end %>
 
 
   <% :create_post -> %> <!-- ###############   CREATE VIEW   ############### -->
