@@ -62,6 +62,13 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#last-post-link", "Test title")
     end
 
+    test "Visit a board directly from URL", %{conn: conn, board: board} do
+      board_link = "/?board=" <> Integer.to_string(board.id)
+      {:ok, view, _html} = live(conn, board_link)
+
+      assert has_element?(view, "#board-header", board.name)
+    end
+
     test "Long topic title shortened in Main view", %{conn: conn, user: user, board: board} do
       long_title = String.duplicate("AbcXyz", 20)
       shortened_title = "AbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbc..."
