@@ -17,14 +17,6 @@ defmodule PhxBbWeb.StyleHelpers do
     }
   end
 
-  def tailwind_bg_map do
-    %{
-      "default" => "bg-gray-100",
-      "dark" => "bg-gray-400"
-    }
-  end
-
-  def settings_block(nil), do: "md:mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg"
   def settings_block(%User{theme: "default"}) do
     "md:mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg"
   end
@@ -62,14 +54,6 @@ defmodule PhxBbWeb.StyleHelpers do
     "block my-2 text-sm font-medium text-gray-800"
   end
 
-  def reply_form_style(nil) do
-    Enum.join([
-      "appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 bg-white",
-      "justify-self-center rounded-md shadow-md md:border-purple-300",
-      "transition duration-150 text-sm focus:outline-none focus:ring",
-      "focus:border-purple-700 focus:ring-purple-400 md:focus:ring-purple-300"],
-      " ")
-  end
   def reply_form_style(%User{theme: "default"}) do
     Enum.join([
       "appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 bg-white",
@@ -87,11 +71,6 @@ defmodule PhxBbWeb.StyleHelpers do
       " ")
   end
 
-  def topic_title_form_style(nil) do
-    "py-2 mb-4 w-11/12 md:w-7/12 bg-white shadow-md rounded-md transition " <>
-      "duration-150 text-sm focus:outline-none focus:ring focus:ring-purple-400" <>
-      " focus:border-purple-700 md:focus:ring-purple-300 md:border-purple-400"
-  end
   def topic_title_form_style(%User{theme: "default"}) do
     "py-2 mb-4 w-11/12 md:w-7/12 bg-white shadow-md rounded-md transition " <>
       "duration-150 text-sm focus:outline-none focus:ring focus:ring-purple-400" <>
@@ -103,11 +82,6 @@ defmodule PhxBbWeb.StyleHelpers do
       " focus:border-gray-900 md:focus:ring-gray-600 md:border-gray-900"
   end
 
-  def topic_body_form_style(nil) do
-    "py-2 w-11/12 md:w-7/12 h-64 bg-white shadow-md rounded-md transition " <>
-      "duration-150 text-sm focus:outline-none focus:ring focus:ring-purple-400" <>
-      " focus:border-purple-700 md:focus:ring-purple-300 md:border-purple-400"
-  end
   def topic_body_form_style(%User{theme: "default"}) do
     "py-2 w-11/12 md:w-7/12 h-64 bg-white shadow-md rounded-md transition " <>
       "duration-150 text-sm focus:outline-none focus:ring focus:ring-purple-400" <>

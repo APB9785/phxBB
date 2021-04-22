@@ -346,7 +346,7 @@ defmodule PhxBbWeb.PageLiveTest do
       assert flash["info"] == "User avatar removed successfully."
     end
 
-    test "Change theme", %{conn: conn, user: user} do
+    test "Change theme", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
 
@@ -356,6 +356,10 @@ defmodule PhxBbWeb.PageLiveTest do
 
       flash = assert_redirected view, "/?settings=1"
       assert flash["info"] == "Theme changed successfully."
+
+      url = "/?create=1&board=" <> Integer.to_string(board.id)
+      {:ok, view, _html} = live(conn, url)
+      assert render(view) =~ "bg-gray-900"
     end
 
     test "Fail to change theme", %{conn: conn, user: user} do
