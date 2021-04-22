@@ -491,16 +491,13 @@ defmodule PhxBbWeb.PageLive do
         Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
         alert_message =
           "User created successfully. Please check your email for confirmation instructions."
-        socket =
-          socket
-          |> put_flash(:info, alert_message)
-          |> redirect(to: Routes.user_session_path(socket, :new))
-
-        {:noreply, socket}
+          
+        socket
+        |> put_flash(:info, alert_message)
+        |> redirect(to: Routes.user_session_path(socket, :new))
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        socket = assign(socket, changeset: changeset)
-        {:noreply, socket}
+        assign(socket, changeset: changeset)
     end
   end
 end
