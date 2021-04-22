@@ -295,7 +295,7 @@ defmodule PhxBbWeb.PageLive do
 
         {:noreply, socket}
 
-      {:error, changeset} ->
+      {:error, _changeset} ->
         socket =
           socket
           |> put_flash(:info, "You are already using that theme.")
