@@ -1,3 +1,4 @@
 ignore:
   - "test"
   - "lib/phx_bb/application.ex"
+  - "lib/phx_bb_web.ex"

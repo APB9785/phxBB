@@ -4,14 +4,11 @@ defmodule PhxBbWeb.LiveHelpers do
   readability within the other LiveView files.
   """
 
+  alias PhxBb.Accounts
   alias PhxBb.Boards.Board
 
   @month_abv_map %{1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun",
     7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec"}
-
-  # def current_user_id(socket) do
-  #   PhxBb.Accounts.get_user_by_session_token(socket.assigns.user_token).id
-  # end
 
   def lookup_token(token) when is_nil(token) do
     nil
@@ -111,13 +108,6 @@ defmodule PhxBbWeb.LiveHelpers do
     |> PhxBb.Replies.create_reply
   end
 
-  def filename(entry) do
-    [ext | _] = MIME.extensions(entry.client_type)
-    "#{entry.uuid}.#{ext}"
-  end
-
-  def display_avatar_error({:avatar, {error, _}}), do: error
-
   def replace_error(changeset, key, message, keys \\ []) when is_binary(message) do
     %{changeset | errors: [{key, {message, keys}}], valid?: false}
   end
@@ -138,5 +128,21 @@ defmodule PhxBbWeb.LiveHelpers do
 
   def add_confirm_email_param(token) do
     PhxBbWeb.Endpoint.url() <> "?confirm_email=" <> token
+  end
+
+  def display_avatar_error({:avatar, {error, _}}), do: error
+
+  def filename(entry) do
+    [ext | _] = MIME.extensions(entry.client_type)
+    "#{entry.uuid}.#{ext}"
+  end
+
+  def remove_avatar(user) do
+    File.rm!("priv/static#{user.avatar}")
+    Accounts.update_user_avatar(user, %{avatar: nil})
+  end
+
+  def no_file_error(socket) do
+    replace_error(socket.assigns.avatar_changeset, :avatar, "no file was selected")
   end
 end
