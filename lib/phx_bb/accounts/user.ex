@@ -19,6 +19,7 @@ defmodule PhxBb.Accounts.User do
     field :timezone, :string
     field :title, :string
     field :avatar, :string
+    field :theme, :string
 
     timestamps()
   end
@@ -42,7 +43,7 @@ defmodule PhxBb.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :username, :post_count, :timezone, :title])
+    |> cast(attrs, [:email, :password, :username, :post_count, :timezone, :title, :theme])
     |> validate_email()
     |> validate_password(opts)
     |> validate_username()
@@ -124,9 +125,9 @@ defmodule PhxBb.Accounts.User do
     user
     |> cast(attrs, [:timezone])
     |> case do
-         %{changes: %{timezone: _}} = changeset -> changeset
-         %{} = changeset -> add_error(changeset, :timezone, "did not change")
-       end
+      %{changes: %{timezone: _}} = changeset -> changeset
+      %{} = changeset -> add_error(changeset, :timezone, "did not change")
+    end
   end
 
   def title_changeset(user, attrs) do
@@ -134,14 +135,23 @@ defmodule PhxBb.Accounts.User do
     |> cast(attrs, [:title])
     |> validate_length(:title, min: 1, max: 25)
     |> case do
-         %{changes: %{title: _}} = changeset -> changeset
-         %{} = changeset -> add_error(changeset, :title, "did not change")
-       end
+      %{changes: %{title: _}} = changeset -> changeset
+      %{} = changeset -> add_error(changeset, :title, "did not change")
+    end
   end
 
   def avatar_changeset(user, attrs) do
     user
     |> cast(attrs, [:avatar])
+  end
+
+  def theme_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:theme])
+    |> case do
+      %{changes: %{theme: _}} = changeset -> changeset
+      %{} = changeset -> add_error(changeset, :theme, "did not change")
+    end
   end
 
   @doc """

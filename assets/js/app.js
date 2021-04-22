@@ -27,6 +27,15 @@ Hooks.ScrollToTop = {
 	}
 }
 
+Hooks.BackgroundColorChange = {
+	value() {
+		return this.el.dataset.value;
+	},
+	mounted() {
+		document.body.style.background = this.value();
+	}
+}
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   hooks: Hooks,

@@ -1,64 +1,75 @@
 <!--   USER MENU   -->
 <%= if @active_user do %>
-  <div class="<%= user_menu() %>" id="logged-in-menu">
+  <div class="<%= user_menu(@active_user) %>" id="logged-in-menu">
     <div class="text-center">
       Logged in as <%= live_patch @active_user.username,
                          to: Routes.live_path(@socket, __MODULE__, user: @active_user.id),
-                         class: link_style() %>
+                         class: link_style(@active_user) %>
       <br>
     </div>
-    <div class="text-purple-700 flex justify-center">
-      <div class="hover:underline">
+    <div class="flex justify-center">
+      <div>
         <%= live_patch "Settings",
               to: Routes.live_path(@socket, __MODULE__, settings: 1),
-              id: "user-menu-settings" %>
+              id: "user-menu-settings",
+              class: link_style(@active_user) %>
       </div>
       &nbsp;&nbsp;&nbsp;&nbsp;
-      <div class="hover:underline">
-        <%= link "Log out", to: Routes.user_session_path(@socket, :delete), method: :delete %>
+      <div>
+        <%= link "Log out",
+              to: Routes.user_session_path(@socket, :delete),
+              method: :delete,
+              class: link_style(@active_user) %>
       </div>
     </div>
   </div>
 <% else %>
-  <div class="<%= user_menu() %>" id="logged-out-menu">
-    <div class="text-purple-700 flex justify-center">
-      <div class="hover:underline">
+  <div class="<%= user_menu(nil) %>" id="logged-out-menu">
+    <div class="flex justify-center">
+      <div>
         <%= live_patch "Register",
               to: Routes.live_path(@socket, __MODULE__, register: 1),
-              id: "user-menu-register" %>
+              id: "user-menu-register",
+              class: link_style(@active_user) %>
       </div>
       &nbsp;&nbsp;&nbsp;&nbsp;
-      <div class="hover:underline">
-        <%= link "Log in", to: Routes.user_session_path(@socket, :new) %>
+      <div>
+        <%= link "Log in",
+              to: Routes.user_session_path(@socket, :new),
+              class: link_style(@active_user) %>
       </div>
     </div>
   </div>
 <% end %>
 
 
+<!-- JS Hook for changing background color -->
+<div id="bg-color-setter"
+     phx-hook="BackgroundColorChange"
+     data-value="<%= @bg_color %>"></div>
+
+
 <!--   DISPLAY FORUM CONTENT BASED ON NAV ASSIGN   -->
-<div class="mx-auto w-11/12 bg-transparent rounded-xl space-y-2 m-4 pb-4
-            antialiased relative font-sans max-w-full
-            md:bg-gray-100 md:shadow-md">
+<div class="<%= content_background(@active_user) %>">
 
   <%= case @nav do %>
 
   <% :main -> %> <!-- #################   MAIN VIEW   ################# -->
 
-    <div class="text-3xl text-purple-700 text-center p-4" id="main-header">
+    <div class="<%= main_header_style(@active_user) %>" id="main-header">
       Welcome to the Forum!
     </div>
 
-    <div class="divide-y-2">
+    <div class="<%= board_dividers(@active_user) %>">
       <%= for board <- @board_list do %>
         <div class="rounded-lg bg-gray-200 m-1
-                    md:bg-gray-100 md:rounded-t-none md:flex md:m-0">
+                    md:bg-transparent md:rounded-t-none md:flex md:m-0">
 
           <div class="py-4 px-4 md:px-8 md:w-7/12">
             <div>
               <%= live_patch board.name,
                     to: Routes.live_path(@socket, __MODULE__, board: board.id),
-                    class: link_style() <> "font-bold text-lg",
+                    class: board_title_style(@active_user),
                     id: "board-name" %>
             </div>
             <div class="text-sm" id="board-description">
@@ -81,13 +92,13 @@
               <div id="last-post-by">
                 Last post by <%= live_patch @user_cache[board.last_user].name,
                                    to: Routes.live_path(@socket, __MODULE__, user: board.last_user),
-                                   class: link_style(), id: "last-post-author-link" %>
+                                   class: link_style(@active_user), id: "last-post-author-link" %>
               </div>
               <div>
                 in
                 <%= live_patch display_title(board.last_post),
                       to: Routes.live_path(@socket, __MODULE__, post: board.last_post),
-                      class: link_style(), id: "last-post-link" %>
+                      class: link_style(@active_user), id: "last-post-link" %>
               </div>
               <div class="hidden md:block">
                 <%= format_time(board.updated_at, @active_user) %>
@@ -111,7 +122,7 @@
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: link_style() %>
+            class: link_style(@active_user) %>
     </div>
 
     <!-- Title -->
@@ -120,19 +131,19 @@
     </div>
 
     <!-- Post listing -->
-    <div class="md:border-t-2 md:border-b-2 md:divide-y-2" id="post-listing">
+    <div class="<%= post_dividers(@active_user) %>" id="post-listing">
       <%= for post <- @post_list do %>
         <div class="p-4 block items-center bg-gray-100 rounded-lg m-1
-                   md:flex md:m-0">
+                   md:flex md:m-0 md:bg-transparent">
 
           <div class="px-4 md:w-7/12">
             <%= live_patch post.title,
                   to: Routes.live_path(@socket, __MODULE__, post: post.id),
-                  class: link_style(), id: "post-listing-link" %>
+                  class: link_style(@active_user), id: "post-listing-link" %>
             <p class="text-sm hidden md:block">
               by <%= live_patch @user_cache[post.author].name,
                        to: Routes.live_path(@socket, __MODULE__, user: post.author),
-                       class: link_style() %> at
+                       class: link_style(@active_user) %> at
               <%= format_time(post.inserted_at, @active_user) %>
             </p>
           </div>
@@ -147,7 +158,7 @@
             <p class="text-sm md:text-base">
               Last post by <%= live_patch @user_cache[post.last_user].name,
                                  to: Routes.live_path(@socket, __MODULE__, user: post.last_user),
-                                 class: link_style() %>
+                                 class: link_style(@active_user) %>
             </p>
             <p class="px-1 text-sm md:hidden">at</p>
             <p class="text-sm"><%= format_time(post.updated_at, @active_user) %></p>
@@ -161,7 +172,7 @@
       <%= live_patch ~L"<button>New Post</button>",
             to: Routes.live_path(@socket, __MODULE__,
                                  [board: @active_board_id, create_post: 1]),
-            class: "px-8 py-2 justify-center rounded-md bg-purple-700 text-white",
+            class: new_post_button_style(@active_user),
             id: "new-post-button" %>
     </div>
 
@@ -173,11 +184,11 @@
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: link_style() %>
+            class: link_style(@active_user) %>
        >
       <%= live_patch @active_board_name,
             to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
-            class: link_style() %>
+            class: link_style(@active_user) %>
     </div>
 
     <!-- Title -->
@@ -186,9 +197,9 @@
     </div>
 
     <!-- Post + replies -->
-    <div class="md:border-t-2 md:border-b-2 md:divide-y-2">
+    <div class="<%= post_dividers(@active_user) %>">
       <%= for post <- [@active_post | @reply_list] do %>
-        <div class="block rounded-xl bg-gray-100 mb-4 md:flex md:rounded-none">
+        <div class="block rounded-xl bg-gray-100 mb-4 md:flex md:rounded-none md:bg-transparent">
 
           <!-- Author info box -->
           <div class="flex justify-end flex-row-reverse pl-4 border-b-2 pb-2 pt-2
@@ -197,7 +208,7 @@
             <div>
               <%= live_patch @user_cache[post.author].name,
                     to: Routes.live_path(@socket, __MODULE__, user: post.author),
-                    class: link_style(),
+                    class: link_style(@active_user),
                     phx_hook: "ScrollToTop" %>
               <p class="text-sm"><%= @user_cache[post.author].title %></p>
             </div>
@@ -241,17 +252,12 @@
             <%= textarea f, :body,
                            placeholder: "Type your reply",
                            autocomplete: "off",
-                           class: "appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 bg-white
-                                  justify-self-center rounded-md shadow-md md:border-purple-300
-                                  transition duration-150 text-sm focus:outline-none focus:ring
-                                  focus:border-purple-700 focus:ring-purple-400
-                                  md:focus:ring-purple-300" %>
+                           class: reply_form_style(@active_user) %>
             <%= error_tag f, :body %>
 
             <%= submit "Post Reply",
                          phx_disable_with: "Posting...",
-                         class: "px-8 py-2 m-2 rounded-md justify-self-center
-                                bg-purple-700 md:w-1/6 text-white" %>
+                         class: reply_button_style(@active_user) %>
         </form>
       </div>
     <% end %>
@@ -264,11 +270,11 @@
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: link_style() %>
+            class: link_style(@active_user) %>
        >
       <%= live_patch @active_board_name,
             to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
-            class: link_style() %>
+            class: link_style(@active_user) %>
     </div>
 
     <!-- Title -->
@@ -283,24 +289,18 @@
         <%= text_input f, :title,
                          placeholder: "Subject",
                          autocomplete: "off",
-                         class: "py-2 mb-4 w-11/12 md:w-7/12 bg-white shadow-md
-                         rounded-md transition duration-150 text-sm focus:outline-none focus:ring
-                         focus:border-purple-700 focus:ring-purple-400
-                         md:focus:ring-purple-300 md:border-purple-400" %>
+                         class: topic_title_form_style(@active_user) %>
         <%= error_tag f, :title %>
 
         <%= textarea f, :body,
                        placeholder: "Body",
                        autocomplete: "off",
-                       class: "py-2 w-11/12 md:w-7/12 h-64 bg-white shadow-md
-                       rounded-md transition duration-150 text-sm focus:outline-none focus:ring
-                       focus:border-purple-700 focus:ring-purple-400
-                       md:focus:ring-purple-300 md:border-purple-400" %>
+                       class: topic_body_form_style(@active_user) %>
         <%= error_tag f, :body %>
 
         <%= submit "Create Post",
                    phx_disable_with: "Posting...",
-                   class: button_style() %>
+                   class: button_style(@active_user) %>
       </form>
     </div>
 
@@ -321,27 +321,30 @@
           </div>
         <% end %>
 
-        <%= label f, :email, class: user_form_label() %>
+        <%= label f, :email, class: user_form_label(@active_user) %>
         <%= email_input f, :email, required: true, type: "email", phx_debounce: "blur",
-                        class: user_form() %>
+                        class: user_form(@active_user) %>
         <%= error_tag f, :email %>
 
-        <%= label f, :username, class: user_form_label() %>
+        <%= label f, :username, class: user_form_label(@active_user) %>
         <%= text_input f, :username, required: true, phx_debounce: "blur",
-                       class: user_form() %>
+                       class: user_form(@active_user) %>
         <%= error_tag f, :username %>
 
-        <%= label f, :password, class: user_form_label() %>
+        <%= label f, :password, class: user_form_label(@active_user) %>
         <%= password_input f, :password, required: true, value: input_value(f, :password),
                            type: "password", phx_debounce: "blur",
-                           class: user_form() %>
+                           class: user_form(@active_user) %>
         <%= error_tag f, :password %>
 
-        <%= label f, :timezone, class: user_form_label() %>
-        <%= select f, :timezone, Tzdata.zone_list(), required: true, class: user_form() %>
+        <%= label f, :timezone, class: user_form_label(@active_user) %>
+        <%= select f, :timezone, Tzdata.zone_list(),
+                   required: true, class: user_form(@active_user) %>
         <%= error_tag f, :timezone %>
 
-        <%= submit "Register", phx_disable_with: "Registering...", class: button_style() %>
+        <%= submit "Register",
+              phx_disable_with: "Registering...",
+              class: button_style(@active_user) %>
       </form>
 
       <p>
@@ -358,7 +361,7 @@
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: link_style() %>
+            class: link_style(@active_user) %>
     </div>
 
     <div class="text-2xl p-4 md:pl-8" id="user-profile-header">
@@ -377,7 +380,7 @@
       <div class="text-sm md:pl-10 md:pt-2">
         in <%= live_patch post.title,
                  to: Routes.live_path(@socket, __MODULE__, post: post.id),
-                 class: link_style(),
+                 class: link_style(@active_user),
                  phx_hook: "ScrollToTop" %>:
       </div>
       <div class="md:ml-8 p-2 bg-white w-min rounded-xl shadow-md">
@@ -398,7 +401,7 @@
       >
       <%= live_patch "Board Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: link_style(),
+            class: link_style(@active_user),
             id: "crumb-index" %>
     </div>
 
@@ -410,7 +413,7 @@
         </div>
         <div>Current Email: <%= @active_user.email %></div>
         <button phx-click="resend_verification"
-                class="<%= button_style() %>"
+                class="<%= button_style(@active_user) %>"
                 id="resend-verification-button">
           Re-send confirmation link
         </button>
@@ -419,7 +422,7 @@
 
     <!-- Change Timezone -->
     <div class="text-2xl py-4 md:pl-8">Change timezone</div>
-    <div class="<%= settings_block() %>">
+    <div class="<%= settings_block(@active_user) %>">
       <%= f = form_for @tz_changeset, "#",
                 phx_submit: "change_timezone",
                 id: "change-user-timezone-form" %>
@@ -429,17 +432,19 @@
           </div>
         <% end %>
 
-        <%= label f, :timezone, class: user_form_label() %>
-        <%= select f, :timezone, Tzdata.zone_list(), class: user_form() %>
+        <%= label f, :timezone, class: user_form_label(@active_user) %>
+        <%= select f, :timezone, Tzdata.zone_list(), class: user_form(@active_user) %>
         <%= error_tag f, :timezone %>
 
-        <%= submit "Change timezone", phx_disable_with: "Changing...", class: button_style() %>
+        <%= submit "Change timezone",
+              phx_disable_with: "Changing...",
+              class: button_style(@active_user) %>
       </form>
     </div>
 
     <!-- Change user title -->
     <div class="text-2xl py-4 md:pl-8">Change user title</div>
-    <div class="<%= settings_block() %>">
+    <div class="<%= settings_block(@active_user) %>">
       <%= f = form_for @title_changeset, "#",
                 phx_submit: "change_user_title",
                 id: "change-user-title-form" %>
@@ -449,23 +454,43 @@
           </div>
         <% end %>
 
-        <%= label f, :title, class: user_form_label() %>
-        <%= text_input f, :title, class: user_form() %>
+        <%= label f, :title, class: user_form_label(@active_user) %>
+        <%= text_input f, :title, class: user_form(@active_user) %>
         <%= error_tag f, :title %>
 
-        <%= submit "Change user title", phx_disable_with: "Changing...", class: button_style() %>
+        <%= submit "Change user title",
+              phx_disable_with: "Changing...",
+              class: button_style(@active_user) %>
+      </form>
+    </div>
+
+    <!-- Change theme -->
+    <div class="text-2xl py-4 md:pl-8">Change theme</div>
+    <div class="<%= settings_block(@active_user) %>">
+      <%= f = form_for @theme_changeset, "#",
+                phx_submit: "change_user_theme",
+                id: "change-user-theme-form" %>
+
+        <%= label f, :theme, class: user_form_label(@active_user) %>
+        <%= select f, :theme, Map.keys(bg_color_map()),
+                   class: user_form(@active_user) %>
+        <%= error_tag f, :theme %>
+
+        <%= submit "Change theme",
+              phx_disable_with: "Changing...",
+              class: button_style(@active_user) %>
       </form>
     </div>
 
     <!-- Change avatar -->
     <div class="text-2xl py-4 md:pl-8">Change avatar</div>
-    <div class="<%= settings_block() %>">
+    <div class="<%= settings_block(@active_user) %>">
       <!-- Current avatar display -->
       <div class="w-32">
         <%= img_tag @active_user.avatar, class: "max-h-40 w-full object-fill pb-4" %>
       </div>
       <%= if @active_user.avatar do %>
-        <button phx-click="remove_avatar" class="<%= link_style() %> pb-4"
+        <button phx-click="remove_avatar" class="<%= link_style(@active_user) %> pb-4"
                 id="remove-avatar-link">
           Remove current avatar
         </button>
@@ -518,14 +543,14 @@
 
         <%= submit "Upload",
               phx_disable_with: "Uploading...",
-              class: button_style(),
+              class: button_style(@active_user),
               id: "submit-user-avatar-upload" %>
       </form>
     </div>
 
     <!-- Change Email -->
     <div class="text-2xl py-4 md:pl-8">Change email</div>
-    <div class="<%= settings_block() %>">
+    <div class="<%= settings_block(@active_user) %>">
       <%= f = form_for @email_changeset, "#",
                 phx_submit: "update_email",
                 id: "update-user-email-form" %>
@@ -537,26 +562,28 @@
 
         <%= hidden_input f, :action, name: "action", value: "update_email" %>
 
-        <%= label f, :email, class: user_form_label() %>
+        <%= label f, :email, class: user_form_label(@active_user) %>
         <%= email_input f, :email, required: true,
-                        class: user_form() %>
+                        class: user_form(@active_user) %>
         <%= error_tag f, :email %>
 
         <%= label f, :current_password, for: "current_password_for_email",
-                  class: user_form_label() %>
+                  class: user_form_label(@active_user) %>
         <%= password_input f, :current_password, required: true,
                            name: "current_password", id: "current_password_for_email",
-                           class: user_form() %>
+                           class: user_form(@active_user) %>
         <%= error_tag f, :current_password %>
 
-        <%= submit "Change email", phx_disable_with: "Changing...", class: button_style() %>
+        <%= submit "Change email",
+              phx_disable_with: "Changing...",
+              class: button_style(@active_user) %>
       </form>
 
     </div>
 
     <!-- Change password -->
     <div class="text-2xl py-4 md:pl-8">Change password</div>
-    <div class="<%= settings_block() %>">
+    <div class="<%= settings_block(@active_user) %>">
       <%= f = form_for @password_changeset, "#",
                 phx_submit: "change_password",
                 id: "change-user-password-form" %>
@@ -568,25 +595,28 @@
 
         <%= hidden_input f, :action, name: "action", value: "update_password" %>
 
-        <%= label f, :password, "New password", class: user_form_label() %>
+        <%= label f, :password, "New password",
+                  class: user_form_label(@active_user) %>
         <%= password_input f, :password, required: true,
-                           class: user_form() %>
+                           class: user_form(@active_user) %>
         <%= error_tag f, :password %>
 
         <%= label f, :password_confirmation, "Confirm new password",
-                  class: user_form_label() %>
+                  class: user_form_label(@active_user) %>
         <%= password_input f, :password_confirmation, required: true,
-                           class: user_form() %>
+                           class: user_form(@active_user) %>
         <%= error_tag f, :password_confirmation %>
 
         <%= label f, :current_password, for: "current_password_for_password",
-                  class: user_form_label() %>
+                  class: user_form_label(@active_user) %>
         <%= password_input f, :current_password, required: true,
                            name: "current_password", id: "current_password_for_password",
-                           class: user_form() %>
+                           class: user_form(@active_user) %>
         <%= error_tag f, :current_password %>
 
-        <%= submit "Change password", phx_disable_with: "Changing...", class: button_style() %>
+        <%= submit "Change password",
+              phx_disable_with: "Changing...",
+              class: button_style(@active_user) %>
       </form>
     </div>
 
@@ -599,7 +629,7 @@
     <div class="text-center pb-8">
       <%= live_patch "Return to Main Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: link_style() <> "text-lg",
+            class: link_style(@active_user) <> "text-lg",
             id: "return-from-invalid" %>
     </div>
   <% end %>

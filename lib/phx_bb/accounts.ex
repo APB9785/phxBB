@@ -186,6 +186,10 @@ defmodule PhxBb.Accounts do
     User.avatar_changeset(user, attrs)
   end
 
+  def change_user_theme(user, attrs \\ %{}) do
+    User.theme_changeset(user, attrs)
+  end
+
   @doc """
   Emulates that the email will change without actually changing
   it in the database.
@@ -313,6 +317,12 @@ defmodule PhxBb.Accounts do
   def update_user_avatar(%User{} = user, attrs) do
     user
     |> User.avatar_changeset(attrs)
+    |> Repo.update
+  end
+
+  def update_user_theme(%User{} = user, attrs) do
+    user
+    |> User.theme_changeset(attrs)
     |> Repo.update
   end
 

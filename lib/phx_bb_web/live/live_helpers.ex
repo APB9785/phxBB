@@ -17,30 +17,6 @@ defmodule PhxBbWeb.LiveHelpers do
     PhxBb.Accounts.get_user_by_session_token(token)
   end
 
-  def settings_block do
-    "md:mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg"
-  end
-
-  def user_form do
-    "mb-4 appearance-none w-full border-purple-300 rounded-md transition duration-150 text-sm focus:outline-none focus:ring focus:ring-purple-300 focus:border-purple-300"
-  end
-
-  def user_form_label do
-    "block my-2 text-sm font-medium text-gray-600"
-  end
-
-  def user_menu do
-    "py-2 max-w-sm mx-auto rounded-xl shadow-md antialiased relative opacity-100 font-sans bg-gray-100"
-  end
-
-  def button_style do
-    "text-sm md:text-base px-4 md:px-8 py-2 mt-4 mb-4 w-6/12 md:w-3/12 rounded-md bg-purple-700 text-white"
-  end
-
-  def link_style do
-    "text-purple-700 hover:underline"
-  end
-
   defp month_abv(n) do
     Map.get(@month_abv_map, n)
   end

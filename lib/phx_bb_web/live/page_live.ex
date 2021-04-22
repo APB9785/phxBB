@@ -6,6 +6,7 @@ defmodule PhxBbWeb.PageLive do
   use PhxBbWeb, :live_view
 
   import PhxBbWeb.LiveHelpers
+  import PhxBbWeb.StyleHelpers
 
   alias PhxBb.Accounts
   alias PhxBb.Accounts.User
@@ -23,6 +24,7 @@ defmodule PhxBbWeb.PageLive do
           socket
           |> assign(active_user: nil)
           |> assign(user_cache: %{})
+          |> assign(bg_color: "#C4B5FD")
 
         {:ok, socket}
 
@@ -37,6 +39,7 @@ defmodule PhxBbWeb.PageLive do
 
         socket =
           socket
+          |> assign(bg_color: get_theme_background(user))
           |> assign(active_user: user)
           |> assign(user_cache: %{user.id => user_info})
           |> allow_upload(:avatar,
@@ -143,6 +146,7 @@ defmodule PhxBbWeb.PageLive do
       user_params
       |> Map.put("post_count", 0)
       |> Map.put("title", "Registered User")
+      |> Map.put("theme", "default")
       |> register_new_user(socket)
 
     {:noreply, socket}
@@ -279,6 +283,28 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
 
+  def handle_event("change_user_theme", %{"user" => params}, socket) do
+    user = socket.assigns.active_user
+
+    case Accounts.update_user_theme(user, params) do
+      {:ok, _user} ->
+        socket =
+          socket
+          |> put_flash(:info, "Theme changed successfully.")
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
+
+        {:noreply, socket}
+
+      {:error, changeset} ->
+        socket =
+          socket
+          |> put_flash(:info, "You are already using that theme.")
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__, settings: 1))
+
+        {:noreply, socket}
+    end
+  end
+
   defp main_loader(socket) do
     boards = Boards.list_boards()
     users =
@@ -402,6 +428,7 @@ defmodule PhxBbWeb.PageLive do
         |> assign(tz_changeset: Accounts.change_user_timezone(user))
         |> assign(title_changeset: Accounts.change_user_title(user))
         |> assign(avatar_changeset: Accounts.change_user_avatar(user))
+        |> assign(theme_changeset: Accounts.change_user_theme(user))
     end
   end
 

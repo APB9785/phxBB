@@ -18,7 +18,8 @@ defmodule PhxBb.AccountsFixtures do
         password: valid_user_password(),
         username: unique_username,
         post_count: 0,
-        title: "Registered User"
+        title: "Registered User",
+        theme: "default"
       })
       |> PhxBb.Accounts.register_user()
 

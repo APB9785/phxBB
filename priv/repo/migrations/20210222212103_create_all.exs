@@ -13,6 +13,7 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
       add :timezone, :string
       add :title, :string
       add :avatar, :string
+      add :theme, :string
       timestamps()
     end
 

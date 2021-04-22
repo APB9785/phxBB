@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Email verification implemented with Swoosh's Mailjet adapter
 - LiveView test suite - covers most major features
 - Clicking a username now shows user's profile with their five most recent posts
+- Registered users can now select an alternate "dark" theme in the settings menu
 
 ### Changed
 
@@ -92,7 +93,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - User cache for reduced DB queries
 - Page title updates to reflect current view
 
-[Unreleased]: ttps://github.com/APB9785/phxBB/compare/0.3.1...HEAD
+[Unreleased]: https://github.com/APB9785/phxBB/compare/0.3.1...HEAD
 [0.3.1]: https://github.com/APB9785/phxBB/compare/0.3...0.3.1
 [0.3]: https://github.com/APB9785/phxBB/compare/0.2...0.3
 [0.2]: https://github.com/APB9785/phxBB/compare/0.1...0.2

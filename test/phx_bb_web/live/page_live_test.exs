@@ -346,6 +346,30 @@ defmodule PhxBbWeb.PageLiveTest do
       assert flash["info"] == "User avatar removed successfully."
     end
 
+    test "Change theme", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      view
+      |> form("#change-user-theme-form", %{user: %{theme: "dark"}})
+      |> render_submit
+
+      flash = assert_redirected view, "/?settings=1"
+      assert flash["info"] == "Theme changed successfully."
+    end
+
+    test "Fail to change theme", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      view
+      |> form("#change-user-theme-form", %{user: %{theme: "default"}})
+      |> render_submit
+
+      flash = assert_redirected view, "/?settings=1"
+      assert flash["info"] == "You are already using that theme."
+    end
+
     test "Attempt to change avatar with no file selected", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
