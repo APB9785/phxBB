@@ -1,3 +1,7 @@
+<script>
+  document.body.style.backgroundColor = "#C4B5FD";
+</script>
+
 <div class="px-6 mt-8 mx-auto w-full max-w-md">
 
 <h1>Forgot your password?</h1>
@@ -13,7 +17,7 @@
 
   <div>
     <%= submit "Send instructions to reset password",
-               class: "mt-8 justify-center rounded-md bg-purple-700 text-white w-full h-8" %>
+               class: "mt-2 justify-center rounded-md bg-purple-700 text-sm text-white w-full h-8" %>
   </div>
 <% end %>
 

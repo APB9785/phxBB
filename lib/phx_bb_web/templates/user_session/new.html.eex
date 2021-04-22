@@ -1,3 +1,7 @@
+<script>
+  document.body.style.backgroundColor = "#C4B5FD";
+</script>
+
 <div class="px-6 mt-8 mx-auto w-full max-w-md" id="login-page">
 
 <h1>Log in</h1>

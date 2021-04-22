@@ -24,7 +24,7 @@ defmodule PhxBbWeb.PageLive do
           socket
           |> assign(active_user: nil)
           |> assign(user_cache: %{})
-          |> assign(bg_color: "#C4B5FD")
+          |> assign(bg_color: get_default_background())
 
         {:ok, socket}
 

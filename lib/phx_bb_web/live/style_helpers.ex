@@ -5,23 +5,36 @@ defmodule PhxBbWeb.StyleHelpers do
 
   alias PhxBb.Accounts.User
 
-  def get_theme_background(user) do
-    bg_color_map()
-    |> Map.fetch!(user.theme)
-  end
+  @bg_color_map %{
+    "default" => "#C4B5FD",
+    "dark" => "#374151"
+  }
 
-  def bg_color_map do
-    %{
-      "default" => "#C4B5FD",
-      "dark" => "#374151"
-    }
-  end
+  def get_theme_background(user), do: Map.fetch!(@bg_color_map, user.theme)
+
+  def get_default_background, do: Map.fetch!(@bg_color_map, "default")
+
+  def theme_list, do: Map.keys(@bg_color_map)
 
   def settings_block(%User{theme: "default"}) do
-    "md:mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg"
+    "px-4 py-8 mb-6 shadow rounded-lg md:mx-8 bg-white"
   end
   def settings_block(%User{theme: "dark"}) do
-    "md:mx-8 px-4 bg-gray-200 py-8 mb-6 shadow rounded-lg"
+    "px-4 py-8 mb-6 shadow rounded-lg md:mx-8 bg-gray-200"
+  end
+
+  def post_timestamp_style(nil), do: "text-sm text-gray-500"
+  def post_timestamp_style(%User{theme: "default"}), do: "text-sm text-gray-500"
+  def post_timestamp_style(%User{theme: "dark"}), do: "text-sm text-gray-800"
+
+  def user_history_timestamp_style(nil) do
+    "text-sm w-40 pb-2 text-gray-500"
+  end
+  def user_history_timestamp_style(%User{theme: "default"}) do
+    "text-sm w-40 pb-2 text-gray-500"
+  end
+  def user_history_timestamp_style(%User{theme: "dark"}) do
+    "text-sm w-40 pb-2 text-gray-800"
   end
 
   def user_form(nil) do
@@ -123,7 +136,7 @@ defmodule PhxBbWeb.StyleHelpers do
   def post_dividers(nil), do: "md:border-t-2 md:border-b-2 md:divide-y-2"
   def post_dividers(%User{theme: "default"}), do: "md:border-t-2 md:border-b-2 md:divide-y-2"
   def post_dividers(%User{theme: "dark"}) do
-    "md:border-t-2 md:border-b-2 md:divide-y-2 md:border-gray-500"
+    "md:border-t-2 md:border-b-2 md:divide-y-2 md:border-gray-500 md:divide-gray-500"
   end
 
   def button_style(nil) do
@@ -145,13 +158,13 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   def reply_button_style(nil) do
-    "px-8 py-2 m-2 rounded-md justify-self-center bg-purple-700 md:w-1/6 text-white"
+    "px-8 py-2 m-2 rounded-md justify-self-center md:w-1/6 bg-purple-700 text-white"
   end
   def reply_button_style(%User{theme: "default"}) do
-    "px-8 py-2 m-2 rounded-md justify-self-center bg-purple-700 md:w-1/6 text-white"
+    "px-8 py-2 m-2 rounded-md justify-self-center md:w-1/6 bg-purple-700 text-white"
   end
   def reply_button_style(%User{theme: "dark"}) do
-    "px-8 py-2 m-2 rounded-md justify-self-center bg-gray-900 md:w-1/6 text-gray-100"
+    "px-8 py-2 m-2 rounded-md justify-self-center md:w-1/6 bg-gray-900 text-gray-100"
   end
 
   def link_style, do: "text-purple-700 hover:underline"
@@ -160,15 +173,27 @@ defmodule PhxBbWeb.StyleHelpers do
   def link_style(%User{theme: "default"}), do: "text-purple-700 hover:underline"
   def link_style(%User{theme: "dark"}), do: "text-gray-900 hover:underline font-bold"
 
-  def board_title_style(nil), do: "text-purple-700 hover:underline font-bold text-lg"
+  def board_title_style(nil) do
+    "hover:underline font-bold text-lg text-purple-700"
+  end
   def board_title_style(%User{theme: "default"}) do
-    "text-purple-700 hover:underline font-bold text-lg"
+    "hover:underline font-bold text-lg text-purple-700"
   end
   def board_title_style(%User{theme: "dark"}) do
-    "text-gray-900 hover:underline font-bold text-lg"
+    "hover:underline font-bold text-lg text-gray-900"
   end
 
   def main_header_style(nil), do: "text-3xl text-purple-700 text-center p-4"
   def main_header_style(%User{theme: "default"}), do: "text-3xl text-purple-700 text-center p-4"
   def main_header_style(%User{theme: "dark"}), do: "text-3xl text-gray-900 text-center p-4"
+
+  def user_history_bubble_style(nil) do
+    "p-2 pb-4 pr-4 w-min rounded-xl shadow-md md:ml-8 bg-white"
+  end
+  def user_history_bubble_style(%User{theme: "default"}) do
+    "p-2 pb-4 pr-4 w-min rounded-xl shadow-md md:ml-8 bg-white"
+  end
+  def user_history_bubble_style(%User{theme: "dark"}) do
+    "p-2 pb-4 pr-4 w-min rounded-xl shadow-md md:ml-8 bg-gray-300"
+  end
 end

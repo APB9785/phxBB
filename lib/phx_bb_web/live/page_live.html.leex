@@ -229,7 +229,7 @@
 
           <!-- Post contents -->
           <div class="md:w-10/12 pt-2 block pl-4">
-            <p class="text-sm text-gray-500">
+            <p class="<%= post_timestamp_style(@active_user) %>">
               <%= format_time(post.inserted_at, @active_user) %>
             </p>
             <div class="py-4 pr-4" id="post-body">
@@ -383,11 +383,11 @@
                  class: link_style(@active_user),
                  phx_hook: "ScrollToTop" %>:
       </div>
-      <div class="md:ml-8 p-2 bg-white w-min rounded-xl shadow-md">
-        <div class="text-sm text-gray-600 w-40 pb-2">
+      <div class="<%= user_history_bubble_style(@active_user) %>">
+        <div class="<%= user_history_timestamp_style(@active_user) %>">
           <%= format_time(post.inserted_at, @active_user) %>
         </div>
-        <div class="pl-2">
+        <div class="pl-2 w-max">
           <%= post.body %>
         </div>
       </div>
@@ -472,7 +472,7 @@
                 id: "change-user-theme-form" %>
 
         <%= label f, :theme, class: user_form_label(@active_user) %>
-        <%= select f, :theme, Map.keys(bg_color_map()),
+        <%= select f, :theme, theme_list(),
                    class: user_form(@active_user) %>
         <%= error_tag f, :theme %>
 
