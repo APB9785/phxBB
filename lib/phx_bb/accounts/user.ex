@@ -20,6 +20,7 @@ defmodule PhxBb.Accounts.User do
     field :title, :string
     field :avatar, :string
     field :theme, :string
+    field :admin, :boolean
 
     timestamps()
   end

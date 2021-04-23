@@ -73,24 +73,26 @@ defmodule PhxBbWeb.StyleHelpers do
     |> Map.fetch!(theme)
   end
 
-  # Reply form
+  # New Topic + Reply form
 
-  def reply_form_style(user) do
-    [reply_form_base(), reply_form_theme(user)]
+  def topic_title_form_style(user) do
+    ["mb-4", new_topic_form_base(), post_form_theme(user)]
     |> Enum.join(" ")
   end
 
-  defp reply_form_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
-    all_size =
-      %{"default" => "bg-white focus:border-purple-700 focus:ring-purple-400",
-        "dark" => "bg-gray-100 focus:border-gray-900 focus:ring-gray-600"}
-    desktop_size =
-      %{"default" => "md:focus:ring-purple-300 md:border-purple-300",
-        "dark" => "md:focus:ring-gray-600 md:border-gray-700"}
+  def topic_body_form_style(user) do
+    ["h-64", new_topic_form_base(), post_form_theme(user)]
+    |> Enum.join(" ")
+  end
 
-    [all_size, desktop_size]
-    |> Enum.map(&Map.fetch!(&1, theme))
+  defp new_topic_form_base do
+    ["py-2 w-11/12 rounded-md transition shadow-md duration-150 text-sm",
+      "focus:outline-none focus:ring md:w-7/12"]
+    |> Enum.join(" ")
+  end
+
+  def reply_form_style(user) do
+    [reply_form_base(), post_form_theme(user)]
     |> Enum.join(" ")
   end
 
@@ -100,19 +102,7 @@ defmodule PhxBbWeb.StyleHelpers do
     |> Enum.join(" ")
   end
 
-  # New topic form
-
-  def topic_title_form_style(user) do
-    ["mb-4", new_topic_form_base(), new_topic_form_theme(user)]
-    |> Enum.join(" ")
-  end
-
-  def topic_body_form_style(user) do
-    ["h-64", new_topic_form_base(), new_topic_form_theme(user)]
-    |> Enum.join(" ")
-  end
-
-  defp new_topic_form_theme(user) do
+  defp post_form_theme(user) do
     theme = if is_nil(user) do "default" else user.theme end
     all_size =
       %{"default" => "bg-white focus:border-purple-700 focus:ring-purple-400",
@@ -123,12 +113,6 @@ defmodule PhxBbWeb.StyleHelpers do
 
     [all_size, desktop_size]
     |> Enum.map(&Map.fetch!(&1, theme))
-    |> Enum.join(" ")
-  end
-
-  defp new_topic_form_base do
-    ["py-2 w-11/12 rounded-md transition shadow-md duration-150 text-sm",
-      "focus:outline-none focus:ring md:w-7/12"]
     |> Enum.join(" ")
   end
 

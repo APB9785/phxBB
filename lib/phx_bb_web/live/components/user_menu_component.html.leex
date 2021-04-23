@@ -1,0 +1,42 @@
+<%= if @active_user do %>
+  <div class="<%= user_menu(@active_user) %>" id="logged-in-menu">
+    <div class="text-center">
+      Logged in as <%= live_patch @active_user.username,
+                         to: Routes.live_path(@socket, PhxBbWeb.PageLive, user: @active_user.id),
+                         class: link_style(@active_user) %>
+      <br>
+    </div>
+    <div class="flex justify-center">
+      <div>
+        <%= live_patch "Settings",
+              to: Routes.live_path(@socket, PhxBbWeb.PageLive, settings: 1),
+              id: "user-menu-settings",
+              class: link_style(@active_user) %>
+      </div>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <div>
+        <%= link "Log out",
+              to: Routes.user_session_path(@socket, :delete),
+              method: :delete,
+              class: link_style(@active_user) %>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="<%= user_menu(nil) %>" id="logged-out-menu">
+    <div class="flex justify-center">
+      <div>
+        <%= live_patch "Register",
+              to: Routes.live_path(@socket, PhxBbWeb.PageLive, register: 1),
+              id: "user-menu-register",
+              class: link_style(@active_user) %>
+      </div>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <div>
+        <%= link "Log in",
+              to: Routes.user_session_path(@socket, :new),
+              class: link_style(@active_user) %>
+      </div>
+    </div>
+  </div>
+<% end %>

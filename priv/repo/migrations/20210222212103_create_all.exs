@@ -14,6 +14,7 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
       add :title, :string
       add :avatar, :string
       add :theme, :string
+      add :admin, :boolean
       timestamps()
     end
 

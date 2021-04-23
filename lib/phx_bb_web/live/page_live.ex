@@ -15,6 +15,7 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBb.Posts.Post
   alias PhxBb.Replies
   alias PhxBb.Replies.Reply
+  alias PhxBbWeb.UserMenuComponent
 
   def mount(_params, session, socket) do
     case lookup_token(session["user_token"]) do

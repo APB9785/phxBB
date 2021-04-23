@@ -1,53 +1,10 @@
-<!--   USER MENU   -->
-<%= if @active_user do %>
-  <div class="<%= user_menu(@active_user) %>" id="logged-in-menu">
-    <div class="text-center">
-      Logged in as <%= live_patch @active_user.username,
-                         to: Routes.live_path(@socket, __MODULE__, user: @active_user.id),
-                         class: link_style(@active_user) %>
-      <br>
-    </div>
-    <div class="flex justify-center">
-      <div>
-        <%= live_patch "Settings",
-              to: Routes.live_path(@socket, __MODULE__, settings: 1),
-              id: "user-menu-settings",
-              class: link_style(@active_user) %>
-      </div>
-      &nbsp;&nbsp;&nbsp;&nbsp;
-      <div>
-        <%= link "Log out",
-              to: Routes.user_session_path(@socket, :delete),
-              method: :delete,
-              class: link_style(@active_user) %>
-      </div>
-    </div>
-  </div>
-<% else %>
-  <div class="<%= user_menu(nil) %>" id="logged-out-menu">
-    <div class="flex justify-center">
-      <div>
-        <%= live_patch "Register",
-              to: Routes.live_path(@socket, __MODULE__, register: 1),
-              id: "user-menu-register",
-              class: link_style(@active_user) %>
-      </div>
-      &nbsp;&nbsp;&nbsp;&nbsp;
-      <div>
-        <%= link "Log in",
-              to: Routes.user_session_path(@socket, :new),
-              class: link_style(@active_user) %>
-      </div>
-    </div>
-  </div>
-<% end %>
-
+<!--   User Menu   -->
+<%= live_component @socket, UserMenuComponent, active_user: @active_user %>
 
 <!-- JS Hook for changing background color -->
 <div id="bg-color-setter"
      phx-hook="BackgroundColorChange"
      data-value="<%= @bg_color %>"></div>
-
 
 <!--   DISPLAY FORUM CONTENT BASED ON NAV ASSIGN   -->
 <div class="<%= content_background(@active_user) %>">
@@ -134,7 +91,7 @@
     <div class="<%= post_dividers(@active_user) %>" id="post-listing">
       <%= for post <- @post_list do %>
         <div class="p-4 block items-center bg-gray-100 rounded-lg m-1
-                   md:flex md:m-0 md:bg-transparent">
+                   md:flex md:m-0 md:bg-transparent md:rounded-none">
 
           <div class="px-4 md:w-7/12">
             <%= live_patch post.title,
