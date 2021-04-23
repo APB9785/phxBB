@@ -1,0 +1,40 @@
+<!-- Breadcrumb -->
+<div class="pt-4 pb-4 md:pl-8 md:pt-8">
+  >
+  <%= live_patch "Board Index",
+        to: Routes.live_path(@socket, PhxBbWeb.PageLive),
+        class: link_style(@active_user) %>
+</div>
+
+<div class="text-2xl p-4 pb-0 md:pl-8" id="user-profile-header">
+  <%= @view_user.username %>
+</div>
+
+<div class="pb-4 md:pl-8" id="user-profile-title">
+  <%= @view_user.title %>
+</div>
+
+<div class="w-32 md:ml-8">
+  <%= img_tag @view_user.avatar, class: "max-h-40 w-full object-fill pb-4" %>
+</div>
+
+<div class="text-2xl md:pl-8 md:pb-2">
+  Latest 5 posts:
+</div>
+
+<%= for post <- @post_history do %>
+  <div class="text-sm md:pl-10 md:pt-2">
+    in <%= live_patch post.title,
+             to: Routes.live_path(@socket, PhxBbWeb.PageLive, post: post.id),
+             class: link_style(@active_user),
+             phx_hook: "ScrollToTop" %>:
+  </div>
+  <div class="<%= user_history_bubble_style(@active_user) %>">
+    <div class="<%= user_history_timestamp_style(@active_user) %>">
+      <%= format_time(post.inserted_at, @active_user) %>
+    </div>
+    <div class="pl-2 w-max">
+      <%= post.body %>
+    </div>
+  </div>
+<% end %>

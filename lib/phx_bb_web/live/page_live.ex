@@ -15,7 +15,9 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBb.Posts.Post
   alias PhxBb.Replies
   alias PhxBb.Replies.Reply
+  alias PhxBbWeb.MainIndexComponent
   alias PhxBbWeb.UserMenuComponent
+  alias PhxBbWeb.UserProfileComponent
 
   def mount(_params, session, socket) do
     case lookup_token(session["user_token"]) do
@@ -85,7 +87,7 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
   def handle_params(params, _url, socket) when params == %{} do
-    socket = main_loader(socket)
+    socket = assign(socket, [nav: :main, page_title: "Board Index"])
     {:noreply, socket}
   end
   def handle_params(_params, _url, socket) do
@@ -304,28 +306,6 @@ defmodule PhxBbWeb.PageLive do
 
         {:noreply, socket}
     end
-  end
-
-  defp main_loader(socket) do
-    boards = Boards.list_boards()
-    users =
-      Enum.reduce(boards, [], fn b, acc ->
-        case b.last_user do
-          nil -> acc
-          last_user -> [last_user | acc]
-        end
-      end)
-    cache = Accounts.build_cache(users, socket.assigns.user_cache)
-
-    socket
-    |> assign(page_title: "Board Index")
-    |> assign(nav: :main)
-    |> assign(board_list: boards)
-    |> assign(post_list: [])
-    |> assign(active_board_id: nil)
-    |> assign(active_board_name: nil)
-    |> assign(active_post: nil)
-    |> assign(user_cache: cache)
   end
 
   defp board_loader(socket, board_id) do

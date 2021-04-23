@@ -1,0 +1,57 @@
+<div class="<%= main_header_style(@active_user) %>" id="main-header">
+  Welcome to the Forum!
+</div>
+
+<div class="<%= board_dividers(@active_user) %>">
+  <%= for board <- @board_list do %>
+    <div class="rounded-lg bg-gray-200 m-1
+                md:bg-transparent md:rounded-t-none md:flex md:m-0">
+
+      <div class="py-4 px-4 md:px-8 md:w-7/12">
+        <div>
+          <%= live_patch board.name,
+                to: Routes.live_path(@socket, PhxBbWeb.PageLive, board: board.id),
+                class: board_title_style(@active_user),
+                id: "board-name" %>
+        </div>
+        <div class="text-sm" id="board-description">
+          <%= board.description %>
+        </div>
+      </div>
+
+      <div class="pl-4 pt-2 text-sm border-t-2 flex border-gray-300
+                  md:p-4 md:text-base md:block md:border-0 md:w-1/12">
+        <div id="board-topic-count">
+          <%= topic_count_display(board) %>
+        </div>
+        <div class="ml-2 md:ml-0 md:mt-2" id="board-post-count">
+          <%= post_count_display(board) %>
+        </div>
+      </div>
+
+      <%= if board.last_post != nil do %>
+        <div class="pl-4 pb-2 md:p-4 text-sm md:w-1/3">
+          <div id="last-post-by">
+            Last post by <%= live_patch @user_cache[board.last_user].name,
+                               to: Routes.live_path(@socket, PhxBbWeb.PageLive, user: board.last_user),
+                               class: link_style(@active_user), id: "last-post-author-link" %>
+          </div>
+          <div>
+            in
+            <%= live_patch display_title(board.last_post),
+                  to: Routes.live_path(@socket, PhxBbWeb.PageLive, post: board.last_post),
+                  class: link_style(@active_user), id: "last-post-link" %>
+          </div>
+          <div class="hidden md:block">
+            <%= format_time(board.updated_at, @active_user) %>
+          </div>
+        </div>
+      <% else %>
+        <div class="pb-4 pl-4 md:p-4 text-sm md:text-base md:w-1/3" id="no-posts-yet">
+          No posts yet!
+        </div>
+      <% end %>
+    </div>
+
+  <% end %>
+</div>
