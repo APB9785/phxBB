@@ -386,6 +386,19 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#avatar-submit-error", "no file was selected")
     end
 
+    test "Reply form live validations", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      url = "/?post=" <> Integer.to_string(post.id)
+      {:ok, view, _html} = live(conn, url)
+
+      view
+      |> element("#new-reply-form")
+      |> render_change(%{reply: %{body: "X"}})
+
+      assert has_element?(view, "#new-reply-form", "should be at least 3 character(s)")
+    end
+
     test "Return to Main Index via breadcrumb", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
@@ -395,6 +408,14 @@ defmodule PhxBbWeb.PageLiveTest do
       |> render_click
 
       assert has_element?(view, "#main-header")
+    end
+
+    test "Register link leads to Main Index", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?register=1") |> follow_redirect(conn)
+
+      assert has_element?(view, "#main-header")
+      assert render(view) =~ "You are already registered and logged in."
     end
 
     test "Change user password", %{conn: conn, user: user} do
