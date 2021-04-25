@@ -1,0 +1,42 @@
+<div class="mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg">
+  <%= f = form_for @changeset, "#",
+            phx_submit: "new_user",
+            phx_target: @myself,
+            id: "register-new-user-form" %>
+    <%= if @changeset.action do %>
+      <div class="alert alert-danger">
+        <p>Oops, something went wrong! Please check the errors below.</p>
+      </div>
+    <% end %>
+
+    <%= label f, :email, class: user_form_label(@active_user) %>
+    <%= email_input f, :email, required: true, type: "email", phx_debounce: "blur",
+                    class: user_form(@active_user) %>
+    <%= error_tag f, :email %>
+
+    <%= label f, :username, class: user_form_label(@active_user) %>
+    <%= text_input f, :username, required: true, phx_debounce: "blur",
+                   class: user_form(@active_user) %>
+    <%= error_tag f, :username %>
+
+    <%= label f, :password, class: user_form_label(@active_user) %>
+    <%= password_input f, :password, required: true, value: input_value(f, :password),
+                       type: "password", phx_debounce: "blur",
+                       class: user_form(@active_user) %>
+    <%= error_tag f, :password %>
+
+    <%= label f, :timezone, class: user_form_label(@active_user) %>
+    <%= select f, :timezone, Tzdata.zone_list(),
+               required: true, class: user_form(@active_user) %>
+    <%= error_tag f, :timezone %>
+
+    <%= submit "Register",
+          phx_disable_with: "Registering...",
+          class: button_style(@active_user) %>
+  </form>
+
+  <p>
+    <%= link "Login", to: Routes.user_session_path(@socket, :new) %> |
+    <%= link "Forgot your password?", to: Routes.user_reset_password_path(@socket, :new) %>
+  </p>
+</div>

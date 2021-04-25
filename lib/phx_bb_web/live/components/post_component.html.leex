@@ -1,0 +1,44 @@
+<div class="<%= post_dividers(@active_user) %>">
+  <%= for post <- [@active_post | @reply_list] do %>
+    <div class="block rounded-xl bg-gray-100 mb-4 md:flex md:rounded-none md:bg-transparent">
+
+      <!-- Author info box -->
+      <div class="flex justify-end flex-row-reverse pl-4 border-b-2 pb-2 pt-2
+                 md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block"
+           id="post-author-info">
+        <div>
+          <%= live_patch @user_cache[post.author].name,
+                to: Routes.live_path(@socket, PhxBbWeb.PageLive, user: post.author),
+                class: link_style(@active_user),
+                phx_hook: "ScrollToTop" %>
+          <p class="text-sm"><%= @user_cache[post.author].title %></p>
+        </div>
+        <%= if @user_cache[post.author].avatar do %>
+          <%= img_tag @user_cache[post.author].avatar,
+                      class: "max-h-40 object-fill mr-4 h-10 w-10 md:h-auto md:w-32 md:mx-auto md:pt-2" %>
+        <% end %>
+
+        <!-- This block hidden on devices with small screens -->
+        <div class="hidden md:block">
+          <p class="text-sm mt-4" id="author-post-count">
+            Posts: <%= Accounts.post_count(post.author) %>
+          </p>
+          <p class="text-sm" id="author-join-date">
+            Joined: <%= format_date(@user_cache[post.author].joined, @active_user) %>
+          </p>
+        </div>
+      </div>
+
+      <!-- Post contents -->
+      <div class="md:w-10/12 pt-2 block pl-4">
+        <p class="<%= post_timestamp_style(@active_user) %>">
+          <%= format_time(post.inserted_at, @active_user) %>
+        </p>
+        <div class="py-4 pr-4" id="post-body">
+          <%= text_to_html(post.body) %>
+        </div>
+      </div>
+
+    </div>
+  <% end %>
+</div>

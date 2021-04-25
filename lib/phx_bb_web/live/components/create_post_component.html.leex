@@ -1,0 +1,24 @@
+<div class="flex w-full md:ml-8">
+  <%= f = form_for @changeset, "#",
+            phx_submit: "new_post",
+            phx_target: @myself,
+            class: "grid w-full",
+            id: "new-topic-form" %>
+
+    <%= text_input f, :title,
+                     placeholder: "Subject",
+                     autocomplete: "off",
+                     class: topic_title_form_style(@active_user) %>
+    <%= error_tag f, :title %>
+
+    <%= textarea f, :body,
+                   placeholder: "Body",
+                   autocomplete: "off",
+                   class: topic_body_form_style(@active_user) %>
+    <%= error_tag f, :body %>
+
+    <%= submit "Create Post",
+               phx_disable_with: "Posting...",
+               class: button_style(@active_user) %>
+  </form>
+</div>

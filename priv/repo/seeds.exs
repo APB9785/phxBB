@@ -21,7 +21,7 @@ alias PhxBb.Repo
   post_count: 9000,
   title: "Forum Administrator",
   theme: "dark",
-  admin: true,
+  admin: :true,
   timezone: "US/Central"
 }
 |> Accounts.register_user()

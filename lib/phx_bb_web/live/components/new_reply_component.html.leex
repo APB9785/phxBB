@@ -1,0 +1,20 @@
+<div class="flex w-full justify-center pt-2 md:pt-4 pb-2">
+  <%= f = form_for @changeset, "#",
+            phx_submit: "new_reply",
+            phx_change: "validate",
+            phx_target: @myself,
+            class: "flex-grow mx-4 grid justify-items-auto w-full flex-grow",
+            id: "new-reply-form" %>
+
+      <%= textarea f, :body,
+                     placeholder: "Type your reply",
+                     phx_debounce: "blur",
+                     autocomplete: "off",
+                     class: reply_form_style(@active_user) %>
+      <div class="text-center mt-4"><%= error_tag f, :body %></div>
+
+      <%= submit "Post Reply",
+                   phx_disable_with: "Posting...",
+                   class: reply_button_style(@active_user) %>
+  </form>
+</div>

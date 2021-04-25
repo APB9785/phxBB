@@ -11,13 +11,17 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBb.Accounts
   alias PhxBb.Accounts.User
   alias PhxBb.Boards
+  alias PhxBb.Boards.Board
   alias PhxBb.Posts
-  alias PhxBb.Posts.Post
-  alias PhxBb.Replies
-  alias PhxBb.Replies.Reply
+  alias PhxBbWeb.BoardComponent
+  alias PhxBbWeb.BreadcrumbComponent
+  alias PhxBbWeb.CreatePostComponent
   alias PhxBbWeb.MainIndexComponent
+  alias PhxBbWeb.NewReplyComponent
+  alias PhxBbWeb.PostComponent
   alias PhxBbWeb.UserMenuComponent
   alias PhxBbWeb.UserProfileComponent
+  alias PhxBbWeb.UserRegistrationComponent
 
   def mount(_params, session, socket) do
     case lookup_token(session["user_token"]) do
@@ -28,6 +32,7 @@ defmodule PhxBbWeb.PageLive do
           |> assign(active_user: nil)
           |> assign(user_cache: %{})
           |> assign(bg_color: get_default_background())
+          |> assign_defaults
 
         {:ok, socket}
 
@@ -45,6 +50,7 @@ defmodule PhxBbWeb.PageLive do
           |> assign(bg_color: get_theme_background(user))
           |> assign(active_user: user)
           |> assign(user_cache: %{user.id => user_info})
+          |> assign_defaults
           |> allow_upload(:avatar,
             accept: ~w(.png .jpeg .jpg),
             max_entries: 1,
@@ -54,25 +60,85 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
-  def handle_params(%{"create_post" => "1", "board" => board_id}, _url, socket) do
-    socket = create_post_loader(socket, board_id)
+  def handle_params(%{"create_post" => "1", "board" => _}, _url, socket)
+  when is_nil(socket.assigns.active_user) do
+    socket = push_redirect(socket, to: "/users/log_in")
     {:noreply, socket}
+  end
+  def handle_params(%{"create_post" => "1", "board" => board_id}, _url, socket) do
+    active_board = socket.assigns.active_board
+    if !is_nil(active_board) and String.to_integer(board_id) == active_board.id do
+      socket = assign(socket, [nav: :create_post, page_title: "Create Post"])
+      {:noreply, socket}
+    else
+      case Boards.get_board(board_id) do
+        nil ->
+          socket = invalid_loader(socket)
+          {:noreply, socket}
+
+        board ->
+          socket =
+            assign(socket,
+              nav: :create_post,
+              page_title: "Create Post",
+              active_board: board)
+
+          {:noreply, socket}
+      end
+    end
   end
   def handle_params(%{"post" => post_id}, _url, socket) do
-    socket = post_loader(socket, post_id)
-    {:noreply, socket}
+    case Posts.get_post(post_id) do
+      nil ->
+        socket = invalid_loader(socket)
+        {:noreply, socket}
+
+      post ->
+        {1, _} = Posts.viewed(post_id)  # Increments post view count
+
+        socket =
+          check_board_change(socket, post.board_id)
+          |> assign([nav: :post, active_post: post, page_title: post.title])
+
+        {:noreply, socket}
+    end
   end
   def handle_params(%{"board" => board_id}, _url, socket) do
-    socket = board_loader(socket, board_id)
-    {:noreply, socket}
+    case Boards.get_name(board_id) do
+      nil ->
+        socket = invalid_loader(socket)
+        {:noreply, socket}
+
+      name ->
+        socket =
+          check_board_change(socket, board_id)
+          |> assign([nav: :board, page_title: name])
+
+        {:noreply, socket}
+    end
   end
   def handle_params(%{"user" => user_id}, _url, socket) do
-    socket = user_profile_loader(socket, user_id)
-    {:noreply, socket}
+    case Accounts.get_user(user_id) do
+      nil ->
+        socket = invalid_loader(socket)
+        {:noreply, socket}
+      user ->
+        socket = assign(socket, [nav: :user_profile, page_title: user.username, view_user: user])
+        {:noreply, socket}
+    end
   end
   def handle_params(%{"register" => "1"}, _url, socket) do
-    socket = registration_loader(socket)
-    {:noreply, socket}
+    if is_nil(socket.assigns.active_user) do
+      socket = assign(socket, [nav: :register, page_title: "Register"])
+      {:noreply, socket}
+    else
+      socket =
+        socket
+        |> put_flash(:info, "You are already registered and logged in.")
+        |> push_patch(to: Routes.live_path(socket, __MODULE__))
+
+      {:noreply, socket}
+    end
   end
   def handle_params(%{"settings" => "1"}, _url, socket) do
     socket = settings_loader(socket)
@@ -92,66 +158,6 @@ defmodule PhxBbWeb.PageLive do
   end
   def handle_params(_params, _url, socket) do
     socket = invalid_loader(socket)
-    {:noreply, socket}
-  end
-
-  def handle_event("new_post", %{"post" => params}, socket) do
-    user = socket.assigns.active_user
-    board_id = socket.assigns.active_board_id
-
-    case postmaker(params["body"], params["title"], board_id, user.id) do
-      {:ok, post} ->
-        # Update the last post info for the active board
-        {1, _} = Boards.added_post(board_id, post.id, user.id)
-        # Update the user's post count
-        {1, _} = Accounts.added_post(user.id)
-
-        socket =
-          push_patch(socket,
-            to: Routes.live_path(socket, __MODULE__, board: board_id))
-
-        {:noreply, socket}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        socket = assign(socket, changeset: changeset)
-        {:noreply, socket}
-    end
-  end
-
-  def handle_event("new_reply", %{"reply" => params}, socket) do
-    user = socket.assigns.active_user
-    post = socket.assigns.active_post
-
-    case replymaker(params["body"], post.id, user.id) do
-      {:ok, _reply} ->
-        # Update the last reply info for the active post
-        {1, _} = Posts.added_reply(post.id, user.id)
-        # Update the last post info for the active board
-        {1, _} = Boards.added_reply(socket.assigns.active_board_id, post.id, user.id)
-        # Update the user's post count
-        {1, _} = Accounts.added_post(user.id)
-
-        socket =
-          socket
-          |> assign(reply_list: Replies.list_replies(post.id))
-          |> assign(changeset: Replies.change_reply(%Reply{}))
-
-        {:noreply, socket}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        socket = assign(socket, changeset: changeset)
-        {:noreply, socket}
-    end
-  end
-
-  def handle_event("new_user", %{"user" => user_params}, socket) do
-    socket =
-      user_params
-      |> Map.put("post_count", 0)
-      |> Map.put("title", "Registered User")
-      |> Map.put("theme", "default")
-      |> register_new_user(socket)
-
     {:noreply, socket}
   end
 
@@ -308,92 +314,10 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
-  defp board_loader(socket, board_id) do
-    case Boards.get_name(board_id) do
-      nil ->
-        invalid_loader(socket)
-      name ->
-        posts = Posts.list_posts(board_id)
-        cache =
-          Enum.reduce(posts, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
-          |> Accounts.build_cache(socket.assigns.user_cache)
-
-        socket
-        |> assign(nav: :board)
-        |> assign(post_list: posts)
-        |> assign(changeset: Posts.change_post(%Post{}))
-        |> assign(page_title: name)
-        |> assign(user_cache: cache)
-        |> assign(active_board_id: board_id)
-        |> assign(active_board_name: name)
-    end
-  end
-
-  defp post_loader(socket, post_id) do
-    case Posts.get_post(post_id) do
-      nil ->
-        invalid_loader(socket)
-      post ->
-        replies = Replies.list_replies(post_id)
-        user_ids = Enum.map(replies, fn reply -> reply.author end)
-        cache = Accounts.build_cache([post.author | user_ids], socket.assigns.user_cache)
-
-        # Increments post view count
-        {1, _} = Posts.viewed(post_id)
-
-        socket
-        |> assign(nav: :post)
-        |> assign(user_cache: cache)
-        |> assign(page_title: post.title)
-        |> assign(changeset: Replies.change_reply(%Reply{}))
-        |> assign(reply_list: replies)
-        |> assign(active_post: post)
-        |> assign(active_board_id: post.board_id)
-        |> assign(active_board_name: Boards.get_name(post.board_id))
-    end
-  end
-
-  defp create_post_loader(socket, board_id) do
-    cond do
-      is_nil(socket.assigns.active_user) ->
-        # User is not logged in
-        push_redirect(socket, to: "/users/log_in")
-
-      socket.assigns[:active_board_id] != board_id ->
-        # User got here via external link - must query DB for board info
-        case Boards.get_name(board_id) do
-          nil ->  # Board does not exist
-            invalid_loader(socket)
-
-          name ->  # Board exists, need to store info in assigns
-            socket
-            |> assign(active_board_id: board_id)
-            |> assign(active_board_name: name)
-            |> assign(nav: :create_post)
-            |> assign(page_title: "Create Post")
-            |> assign(changeset: Posts.change_post(%Post{}))
-        end
-
-      true ->
-        # User got here from a valid board, no need to query DB or update assigns
-        socket
-        |> assign(nav: :create_post)
-        |> assign(page_title: "Create Post")
-        |> assign(changeset: Posts.change_post(%Post{}))
-    end
-  end
-
   defp invalid_loader(socket) do
     socket
     |> assign(nav: :invalid)
     |> assign(page_title: "404 Page Not Found")
-  end
-
-  defp registration_loader(socket) do
-    socket
-    |> assign(nav: :register)
-    |> assign(page_title: "Register")
-    |> assign(changeset: Accounts.change_user_registration(%User{}))
   end
 
   defp settings_loader(socket) do
@@ -453,19 +377,6 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
-  defp user_profile_loader(socket, user_id) do
-    case Accounts.get_user(user_id) do
-      nil ->
-        invalid_loader(socket)
-      user ->
-        socket
-        |> assign(nav: :user_profile)
-        |> assign(page_title: user.username)
-        |> assign(view_user: user)
-        |> assign(post_history: Accounts.last_five_posts(user_id))
-    end
-  end
-
   defp copy_avatar_links(socket) do
     consume_uploaded_entries(socket, :avatar, fn meta, entry ->
       uploads_dir = Application.app_dir(:phx_bb, "priv/static/uploads")
@@ -493,19 +404,20 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
-  defp register_new_user(user_params, socket) do
-    case Accounts.register_user(user_params) do
-      {:ok, user} ->
-        Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
-        alert_message =
-          "User created successfully. Please check your email for confirmation instructions."
+  defp assign_defaults(socket) do
+    socket
+    |> assign(active_board: nil)
+    |> assign(active_post: nil)
+  end
 
+  defp check_board_change(socket, new_board_id) do
+    case socket.assigns[:active_board] do
+      nil ->
+        assign(socket, active_board: Boards.get_board!(new_board_id))
+      %Board{id: current_id} when current_id != new_board_id ->
+        assign(socket, active_board: Boards.get_board!(new_board_id))
+      %Board{} ->
         socket
-        |> put_flash(:info, alert_message)
-        |> redirect(to: Routes.user_session_path(socket, :new))
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        assign(socket, changeset: changeset)
     end
   end
 end

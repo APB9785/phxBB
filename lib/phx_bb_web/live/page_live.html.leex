@@ -6,9 +6,18 @@
      phx-hook="BackgroundColorChange"
      data-value="<%= @bg_color %>"></div>
 
-<!--   DISPLAY FORUM CONTENT BASED ON NAV ASSIGN   -->
 <div class="<%= content_background(@active_user) %>">
 
+  <!-- Breadcrumb -->
+  <%= if @nav != :main do %>
+    <%= live_component @socket, BreadcrumbComponent,
+          active_user: @active_user,
+          active_board: @active_board,
+          active_post: @active_post,
+          nav: @nav %>
+  <% end %>
+
+  <!--   DISPLAY FORUM CONTENT BASED ON NAV ASSIGN   -->
   <%= case @nav do %>
 
   <% :main -> %>
@@ -17,263 +26,64 @@
           active_user: @active_user,
           user_cache: @user_cache %>
 
-  <% :board -> %> <!-- #################   BOARD VIEW   ################# -->
+  <% :board -> %>
 
-    <!-- Breadcrumb -->
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-      >
-      <%= live_patch "Board Index",
-            to: Routes.live_path(@socket, __MODULE__),
-            class: link_style(@active_user) %>
-    </div>
-
-    <!-- Title -->
     <div class="text-2xl pb-4 md:pl-8" id="board-header">
-      <%= @active_board_name %>
+      <%= @active_board.name %>
     </div>
 
-    <!-- Post listing -->
-    <div class="<%= post_dividers(@active_user) %>" id="post-listing">
-      <%= for post <- @post_list do %>
-        <div class="p-4 block items-center bg-gray-100 rounded-lg m-1
-                   md:flex md:m-0 md:bg-transparent md:rounded-none">
+    <%= live_component @socket, BoardComponent,
+          active_user: @active_user,
+          user_cache: @user_cache,
+          active_board: @active_board %>
 
-          <div class="px-4 md:w-7/12">
-            <%= live_patch post.title,
-                  to: Routes.live_path(@socket, __MODULE__, post: post.id),
-                  class: link_style(@active_user), id: "post-listing-link" %>
-            <p class="text-sm hidden md:block">
-              by <%= live_patch @user_cache[post.author].name,
-                       to: Routes.live_path(@socket, __MODULE__, user: post.author),
-                       class: link_style(@active_user) %> at
-              <%= format_time(post.inserted_at, @active_user) %>
-            </p>
-          </div>
+  <% :post -> %>
 
-          <div class="px-4 w-2/12 text-center hidden md:block">
-            <%= post.reply_count %> replies
-            <br>
-            <%= post.view_count %> views
-          </div>
-
-          <div class="px-4 flex md:block md:w-3/12">
-            <p class="text-sm md:text-base">
-              Last post by <%= live_patch @user_cache[post.last_user].name,
-                                 to: Routes.live_path(@socket, __MODULE__, user: post.last_user),
-                                 class: link_style(@active_user) %>
-            </p>
-            <p class="px-1 text-sm md:hidden">at</p>
-            <p class="text-sm"><%= format_time(post.updated_at, @active_user) %></p>
-          </div>
-
-        </div>
-      <% end %>
-    </div>
-
-    <div class="pb-6 pl-2 md:pl-8 pt-4">
-      <%= live_patch ~L"<button>New Post</button>",
-            to: Routes.live_path(@socket, __MODULE__,
-                                 [board: @active_board_id, create_post: 1]),
-            class: new_post_button_style(@active_user),
-            id: "new-post-button" %>
-    </div>
-
-
-  <% :post -> %> <!-- #################   POST VIEW   ################# -->
-
-    <!-- Breadcrumb -->
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-      >
-      <%= live_patch "Board Index",
-            to: Routes.live_path(@socket, __MODULE__),
-            class: link_style(@active_user) %>
-       >
-      <%= live_patch @active_board_name,
-            to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
-            class: link_style(@active_user) %>
-    </div>
-
-    <!-- Title -->
     <div class="text-2xl pb-4 md:pl-8" id="post-header">
       <%= @active_post.title %>
     </div>
 
-    <!-- Post + replies -->
-    <div class="<%= post_dividers(@active_user) %>">
-      <%= for post <- [@active_post | @reply_list] do %>
-        <div class="block rounded-xl bg-gray-100 mb-4 md:flex md:rounded-none md:bg-transparent">
-
-          <!-- Author info box -->
-          <div class="flex justify-end flex-row-reverse pl-4 border-b-2 pb-2 pt-2
-                     md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block"
-               id="post-author-info">
-            <div>
-              <%= live_patch @user_cache[post.author].name,
-                    to: Routes.live_path(@socket, __MODULE__, user: post.author),
-                    class: link_style(@active_user),
-                    phx_hook: "ScrollToTop" %>
-              <p class="text-sm"><%= @user_cache[post.author].title %></p>
-            </div>
-            <%= if @user_cache[post.author].avatar do %>
-              <%= img_tag @user_cache[post.author].avatar,
-                          class: "max-h-40 object-fill mr-4 h-10 w-10 md:h-auto md:w-32 md:mx-auto md:pt-2" %>
-            <% end %>
-
-            <div class="hidden md:block">
-              <p class="text-sm mt-4" id="author-post-count">
-                Posts: <%= Accounts.post_count(post.author) %>
-              </p>
-              <p class="text-sm" id="author-join-date">
-                Joined: <%= format_date(@user_cache[post.author].joined, @active_user) %>
-              </p>
-            </div>
-          </div>
-
-          <!-- Post contents -->
-          <div class="md:w-10/12 pt-2 block pl-4">
-            <p class="<%= post_timestamp_style(@active_user) %>">
-              <%= format_time(post.inserted_at, @active_user) %>
-            </p>
-            <div class="py-4 pr-4" id="post-body">
-              <%= text_to_html(post.body) %>
-            </div>
-          </div>
-
-        </div>
-      <% end %>
-    </div>
+    <%= live_component @socket, PostComponent,
+          active_user: @active_user,
+          active_post: @active_post,
+          user_cache: @user_cache %>
 
     <!-- New Reply form -->
     <%= if @active_user do %>
-      <div class="flex w-full justify-center pt-2 md:pt-4 pb-2">
-        <%= f = form_for @changeset, "#",
-                  [phx_submit: "new_reply",
-                  class: "flex-grow mx-4 grid justify-items-auto w-full flex-grow",
-                  id: "new-reply-form"] %>
-
-            <%= textarea f, :body,
-                           placeholder: "Type your reply",
-                           autocomplete: "off",
-                           class: reply_form_style(@active_user) %>
-            <%= error_tag f, :body %>
-
-            <%= submit "Post Reply",
-                         phx_disable_with: "Posting...",
-                         class: reply_button_style(@active_user) %>
-        </form>
-      </div>
+      <%= live_component @socket, NewReplyComponent,
+            active_user: @active_user,
+            active_post: @active_post,
+            id: "new-reply-component" %>
     <% end %>
 
+  <% :create_post -> %>
 
-  <% :create_post -> %> <!-- ###############   CREATE VIEW   ############### -->
-
-    <!-- Breadcrumb -->
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8">
-      >
-      <%= live_patch "Board Index",
-            to: Routes.live_path(@socket, __MODULE__),
-            class: link_style(@active_user) %>
-       >
-      <%= live_patch @active_board_name,
-            to: Routes.live_path(@socket, __MODULE__, board: @active_board_id),
-            class: link_style(@active_user) %>
-    </div>
-
-    <!-- Title -->
     <div class="text-2xl pb-4 md:pl-8" id="create-topic-header">
       Create New Topic
     </div>
 
-    <div class="flex w-full md:ml-8">
-      <%= f = form_for @changeset, "#",
-                [phx_submit: "new_post", class: "grid w-full", id: "new-topic-form"] %>
+    <%= live_component @socket, CreatePostComponent,
+          active_user: @active_user,
+          active_board: @active_board,
+          id: "create-post-component" %>
 
-        <%= text_input f, :title,
-                         placeholder: "Subject",
-                         autocomplete: "off",
-                         class: topic_title_form_style(@active_user) %>
-        <%= error_tag f, :title %>
-
-        <%= textarea f, :body,
-                       placeholder: "Body",
-                       autocomplete: "off",
-                       class: topic_body_form_style(@active_user) %>
-        <%= error_tag f, :body %>
-
-        <%= submit "Create Post",
-                   phx_disable_with: "Posting...",
-                   class: button_style(@active_user) %>
-      </form>
-    </div>
-
-
-  <% :register -> %> <!-- ###############   REGISTER VIEW   ############### -->
+  <% :register -> %>
 
     <div class="text-2xl p-4 md:pl-8" id="register-header">
       Register
     </div>
 
-    <div class="mx-8 px-4 bg-white py-8 mb-6 shadow rounded-lg">
-      <%= f = form_for @changeset, "#",
-                phx_submit: "new_user",
-                id: "register-new-user-form" %>
-        <%= if @changeset.action do %>
-          <div class="alert alert-danger">
-            <p>Oops, something went wrong! Please check the errors below.</p>
-          </div>
-        <% end %>
-
-        <%= label f, :email, class: user_form_label(@active_user) %>
-        <%= email_input f, :email, required: true, type: "email", phx_debounce: "blur",
-                        class: user_form(@active_user) %>
-        <%= error_tag f, :email %>
-
-        <%= label f, :username, class: user_form_label(@active_user) %>
-        <%= text_input f, :username, required: true, phx_debounce: "blur",
-                       class: user_form(@active_user) %>
-        <%= error_tag f, :username %>
-
-        <%= label f, :password, class: user_form_label(@active_user) %>
-        <%= password_input f, :password, required: true, value: input_value(f, :password),
-                           type: "password", phx_debounce: "blur",
-                           class: user_form(@active_user) %>
-        <%= error_tag f, :password %>
-
-        <%= label f, :timezone, class: user_form_label(@active_user) %>
-        <%= select f, :timezone, Tzdata.zone_list(),
-                   required: true, class: user_form(@active_user) %>
-        <%= error_tag f, :timezone %>
-
-        <%= submit "Register",
-              phx_disable_with: "Registering...",
-              class: button_style(@active_user) %>
-      </form>
-
-      <p>
-        <%= link "Login", to: Routes.user_session_path(@socket, :new) %> |
-        <%= link "Forgot your password?", to: Routes.user_reset_password_path(@socket, :new) %>
-      </p>
-    </div>
-
+    <%= live_component @socket, UserRegistrationComponent,
+          active_user: @active_user,
+          id: "user-registration-component" %>
 
   <% :user_profile -> %>
 
     <%= live_component @socket, UserProfileComponent,
           active_user: @active_user,
-          view_user: @view_user,
-          post_history: @post_history %>
-
+          view_user: @view_user %>
 
   <% :settings -> %>
-
-    <!-- Breadcrumb -->
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8">
-      >
-      <%= live_patch "Board Index",
-            to: Routes.live_path(@socket, __MODULE__),
-            class: link_style(@active_user),
-            id: "crumb-index" %>
-    </div>
 
     <%= if !@active_user.confirmed_at do %>
       <div class="md:mx-8 px-4 bg-purple-200 py-6 shadow rounded-lg">
@@ -499,7 +309,7 @@
     <div class="text-center pb-8">
       <%= live_patch "Return to Main Index",
             to: Routes.live_path(@socket, __MODULE__),
-            class: link_style(@active_user) <> "text-lg",
+            class: link_style(@active_user),
             id: "return-from-invalid" %>
     </div>
   <% end %>
