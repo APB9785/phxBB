@@ -10,9 +10,6 @@ defmodule PhxBbWeb.PageLive do
 
   alias PhxBb.Accounts
   alias PhxBb.Accounts.User
-  alias PhxBb.Boards
-  alias PhxBb.Boards.Board
-  alias PhxBb.Posts
   alias PhxBbWeb.BoardComponent
   alias PhxBbWeb.BreadcrumbComponent
   alias PhxBbWeb.CreatePostComponent
@@ -38,18 +35,11 @@ defmodule PhxBbWeb.PageLive do
 
       user ->
         # User is logged in
-        user_info = %{
-          name: user.username,
-          joined: user.inserted_at,
-          title: user.title,
-          avatar: user.avatar
-        }
-
         socket =
           socket
           |> assign(bg_color: get_theme_background(user))
           |> assign(active_user: user)
-          |> assign(user_cache: %{user.id => user_info})
+          |> assign(user_cache: %{user.id => cache_self(user)})
           |> assign_defaults
           |> allow_upload(:avatar,
             accept: ~w(.png .jpeg .jpg),
@@ -66,61 +56,36 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
   def handle_params(%{"create_post" => "1", "board" => board_id}, _url, socket) do
-    active_board = socket.assigns.active_board
-    if !is_nil(active_board) and String.to_integer(board_id) == active_board.id do
+    if active_assign_outdated?(:board, board_id, socket) do
+      socket = assign_create_full_query(socket, board_id)
+      {:noreply, socket}
+    else  # No need to query database for Board info
       socket = assign(socket, [nav: :create_post, page_title: "Create Post"])
       {:noreply, socket}
-    else
-      case Boards.get_board(board_id) do
-        nil ->
-          socket = invalid_loader(socket)
-          {:noreply, socket}
-
-        board ->
-          socket =
-            assign(socket,
-              nav: :create_post,
-              page_title: "Create Post",
-              active_board: board)
-
-          {:noreply, socket}
-      end
     end
   end
   def handle_params(%{"post" => post_id}, _url, socket) do
-    case Posts.get_post(post_id) do
-      nil ->
-        socket = invalid_loader(socket)
-        {:noreply, socket}
-
-      post ->
-        {1, _} = Posts.viewed(post_id)  # Increments post view count
-
-        socket =
-          check_board_change(socket, post.board_id)
-          |> assign([nav: :post, active_post: post, page_title: post.title])
-
-        {:noreply, socket}
+    if active_assign_outdated?(:post, post_id, socket) do
+      socket = assign_post_full_query(socket, post_id)
+      {:noreply, socket}
+    else  # No need to query database for Post info
+      socket = assign_post_nav(socket, socket.assigns.active_post)
+      {:noreply, socket}
     end
   end
   def handle_params(%{"board" => board_id}, _url, socket) do
-    case Boards.get_name(board_id) do
-      nil ->
-        socket = invalid_loader(socket)
-        {:noreply, socket}
-
-      name ->
-        socket =
-          check_board_change(socket, board_id)
-          |> assign([nav: :board, page_title: name])
-
-        {:noreply, socket}
+    if active_assign_outdated?(:board, board_id, socket) do
+      socket = assign_board_full_query(socket, board_id)
+      {:noreply, socket}
+    else  # No need to query database for Board info
+      socket = assign(socket, [nav: :board, page_title: socket.assigns.active_board.name])
+      {:noreply, socket}
     end
   end
   def handle_params(%{"user" => user_id}, _url, socket) do
     case Accounts.get_user(user_id) do
       nil ->
-        socket = invalid_loader(socket)
+        socket = assign_invalid(socket)
         {:noreply, socket}
       user ->
         socket = assign(socket, [nav: :user_profile, page_title: user.username, view_user: user])
@@ -136,7 +101,6 @@ defmodule PhxBbWeb.PageLive do
         socket
         |> put_flash(:info, "You are already registered and logged in.")
         |> push_patch(to: Routes.live_path(socket, __MODULE__))
-
       {:noreply, socket}
     end
   end
@@ -145,19 +109,44 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
   def handle_params(%{"confirm" => token}, _url, socket) do
-    socket = user_confirmation_loader(socket, token)
-    {:noreply, socket}
+    # Do not log in the user after confirmation to avoid a
+    # leaked token giving the user access to the account.
+    case Accounts.confirm_user(token) do
+      {:ok, _} ->
+        socket =
+          socket
+          |> put_flash(:info, "Account confirmed successfully.")
+          |> redirect(to: "/users/log_in")
+        {:noreply, socket}
+
+      :error ->
+        socket = user_confirm_error_redirect(socket)
+        {:noreply, socket}
+    end
   end
   def handle_params(%{"confirm_email" => token}, _url, socket) do
-    socket = email_update_loader(socket, token)
-    {:noreply, socket}
+    case Accounts.update_user_email(socket.assigns.active_user, token) do
+      :ok ->
+        socket =
+          socket
+          |> put_flash(:info, "Email changed successfully.")
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__))
+        {:noreply, socket}
+
+      :error ->
+        socket =
+          socket
+          |> put_flash(:error, "Email change link is invalid or it has expired.")
+          |> push_redirect(to: Routes.live_path(socket, __MODULE__))
+        {:noreply, socket}
+    end
   end
   def handle_params(params, _url, socket) when params == %{} do
     socket = assign(socket, [nav: :main, page_title: "Board Index"])
     {:noreply, socket}
   end
   def handle_params(_params, _url, socket) do
-    socket = invalid_loader(socket)
+    socket = assign_invalid(socket)
     {:noreply, socket}
   end
 
@@ -314,12 +303,6 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
-  defp invalid_loader(socket) do
-    socket
-    |> assign(nav: :invalid)
-    |> assign(page_title: "404 Page Not Found")
-  end
-
   defp settings_loader(socket) do
     case socket.assigns.active_user do
       nil ->
@@ -334,46 +317,6 @@ defmodule PhxBbWeb.PageLive do
         |> assign(title_changeset: Accounts.change_user_title(user))
         |> assign(avatar_changeset: Accounts.change_user_avatar(user))
         |> assign(theme_changeset: Accounts.change_user_theme(user))
-    end
-  end
-
-  defp user_confirmation_loader(socket, token) do
-    # Do not log in the user after confirmation to avoid a
-    # leaked token giving the user access to the account.
-    case Accounts.confirm_user(token) do
-      {:ok, _} ->
-        socket
-        |> put_flash(:info, "Account confirmed successfully.")
-        |> redirect(to: "/users/log_in")
-
-      :error ->
-        # If there is a current user and the account was already confirmed,
-        # then odds are that the confirmation link was already visited, either
-        # by some automation or by the user themselves, so we redirect without
-        # a warning message.
-        case socket.assigns do
-          %{active_user: %{confirmed_at: confirmed_at}} when not is_nil(confirmed_at) ->
-            redirect(socket, to: "/")
-
-          %{} ->
-            socket
-            |> put_flash(:error, "Account confirmation link is invalid or it has expired.")
-            |> redirect(to: "/")
-        end
-    end
-  end
-
-  defp email_update_loader(socket, token) do
-    case Accounts.update_user_email(socket.assigns.active_user, token) do
-      :ok ->
-        socket
-        |> put_flash(:info, "Email changed successfully.")
-        |> push_redirect(to: Routes.live_path(socket, __MODULE__))
-
-      :error ->
-        socket
-        |> put_flash(:error, "Email change link is invalid or it has expired.")
-        |> push_redirect(to: Routes.live_path(socket, __MODULE__))
     end
   end
 
@@ -401,23 +344,6 @@ defmodule PhxBbWeb.PageLive do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         assign(socket, avatar_changeset: changeset)
-    end
-  end
-
-  defp assign_defaults(socket) do
-    socket
-    |> assign(active_board: nil)
-    |> assign(active_post: nil)
-  end
-
-  defp check_board_change(socket, new_board_id) do
-    case socket.assigns[:active_board] do
-      nil ->
-        assign(socket, active_board: Boards.get_board!(new_board_id))
-      %Board{id: current_id} when current_id != new_board_id ->
-        assign(socket, active_board: Boards.get_board!(new_board_id))
-      %Board{} ->
-        socket
     end
   end
 end
