@@ -232,8 +232,7 @@ defmodule PhxBbWeb.PageLiveTest do
       |> element("#resend-verification-button")
       |> render_click
 
-      assert has_element?(view, "[role=alert]",
-        "Confirmation instructions re-sent.  Please check your email.")
+      assert has_element?(view, "#confirmation-resent-ok")
     end
 
     test "Update user email address", %{conn: conn, user: user} do
@@ -270,13 +269,11 @@ defmodule PhxBbWeb.PageLiveTest do
       {:ok, view, _html} = live(conn, "/")
       view |> element("#user-menu-settings") |> render_click
 
-      {:ok, view, _html} =
-        view
-        |> form("#change-user-title-form", %{user: %{title: "Expert"}})
-        |> render_submit
-        |> follow_redirect(conn)
+      view
+      |> form("#change-user-title-form", %{user: %{title: "Expert"}})
+      |> render_submit
 
-      assert has_element?(view, "[role=alert]", "User title updated successfully.")
+      assert has_element?(view, "#title-updated-ok")
     end
 
     test "Attempt invalid user title update", %{conn: conn, user: user} do
@@ -287,6 +284,7 @@ defmodule PhxBbWeb.PageLiveTest do
       |> form("#change-user-title-form", %{user: %{title: "abcdefghijklmnopqrstuvwxyz"}})
       |> render_submit
 
+      assert has_element?(view, "#title-update-failed")
       assert has_element?(view, "#change-user-title-form", "should be at most")
     end
 
@@ -294,13 +292,11 @@ defmodule PhxBbWeb.PageLiveTest do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
 
-      {:ok, view, _html} =
-        view
-        |> form("#change-user-timezone-form", %{user: %{timezone: "US/Central"}})
-        |> render_submit
-        |> follow_redirect(conn)
+      view
+      |> form("#change-user-timezone-form", %{user: %{timezone: "US/Central"}})
+      |> render_submit
 
-      assert has_element?(view, "[role=alert]", "Timezone updated successfully.")
+      assert has_element?(view, "#timezone-update-ok")
     end
 
     test "Attempt invalid timezone update", %{conn: conn, user: user} do
@@ -355,8 +351,7 @@ defmodule PhxBbWeb.PageLiveTest do
       |> form("#change-user-theme-form", %{user: %{theme: "dark"}})
       |> render_submit
 
-      flash = assert_redirected view, "/?settings=1"
-      assert flash["info"] == "Theme changed successfully."
+      assert has_element?(view, "#theme-changed-ok")
 
       url = "/?create=1&board=" <> Integer.to_string(board.id)
       {:ok, view, _html} = live(conn, url)
@@ -371,8 +366,7 @@ defmodule PhxBbWeb.PageLiveTest do
       |> form("#change-user-theme-form", %{user: %{theme: "default"}})
       |> render_submit
 
-      flash = assert_redirected view, "/?settings=1"
-      assert flash["info"] == "You are already using that theme."
+      assert has_element?(view, "#theme-change-failed")
     end
 
     test "Attempt to change avatar with no file selected", %{conn: conn, user: user} do

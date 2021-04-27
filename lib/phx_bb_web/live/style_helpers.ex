@@ -271,4 +271,18 @@ defmodule PhxBbWeb.StyleHelpers do
     }
     |> Map.fetch!(theme)
   end
+
+  def confirmation_reminder_style(user) do
+    ["md:mx-8 px-4 py-6 shadow rounded-lg", confirmation_reminder_theme(user)]
+    |> Enum.join(" ")
+  end
+
+  defp confirmation_reminder_theme(user) do
+    theme = if is_nil(user) do "default" else user.theme end
+    %{
+      "default" => "bg-purple-200",
+      "dark" => "bg-purple-900 text-gray-300"
+    }
+    |> Map.fetch!(theme)
+  end
 end

@@ -33,6 +33,9 @@ Hooks.BackgroundColorChange = {
 	},
 	mounted() {
 		document.body.style.background = this.value();
+	},
+	updated() {
+		document.body.style.background = this.value();
 	}
 }
 
