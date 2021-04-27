@@ -11,6 +11,7 @@ defmodule PhxBbWeb.LiveHelpers do
   alias PhxBb.Boards
   alias PhxBb.Boards.Board
   alias PhxBb.Posts
+  alias PhxBb.Replies
 
   @month_abv_map %{1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun",
     7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec"}
@@ -41,9 +42,13 @@ defmodule PhxBbWeb.LiveHelpers do
         assign_invalid(socket)
 
       post ->
+        replies = Replies.list_replies(post.id)
+        user_ids = Enum.map(replies, fn reply -> reply.author end)
+        cache = Accounts.build_cache([post.author | user_ids], socket.assigns.user_cache)
+
         socket
         |> assign_post_nav(post)
-        |> assign(active_post: post)
+        |> assign(active_post: post, user_cache: cache, reply_list: replies)
     end
   end
 

@@ -29,13 +29,16 @@ defmodule PhxBbWeb.NewReplyComponent do
     post = socket.assigns.active_post
 
     case replymaker(params["body"], post.id, user.id) do
-      {:ok, _reply} ->
+      {:ok, reply} ->
         # Update the last reply info for the active post
         {1, _} = Posts.added_reply(post.id, user.id)
         # Update the last post info for the active board
         {1, _} = Boards.added_reply(post.board_id, post.id, user.id)
         # Update the user's post count
         {1, _} = Accounts.added_post(user.id)
+
+        message = {:new_reply, post.id, reply}
+        Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
 
         socket = assign(socket, changeset: Replies.change_reply(%Reply{}))
 

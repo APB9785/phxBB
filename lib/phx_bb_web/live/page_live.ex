@@ -9,6 +9,7 @@ defmodule PhxBbWeb.PageLive do
   import PhxBbWeb.StyleHelpers
 
   alias PhxBb.Accounts
+  alias PhxBb.Replies
   alias PhxBbWeb.BoardComponent
   alias PhxBbWeb.BreadcrumbComponent
   alias PhxBbWeb.CreatePostComponent
@@ -21,6 +22,8 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBbWeb.UserSettingsComponent
 
   def mount(_params, session, socket) do
+    if connected?(socket), do: Replies.subscribe()
+
     case lookup_token(session["user_token"]) do
       nil ->
         # User is logged out
@@ -178,5 +181,14 @@ defmodule PhxBbWeb.PageLive do
         bg_color: get_theme_background(user)
       )
     {:noreply, socket}
+  end
+
+  def handle_info({:new_reply, post_id, reply}, socket) do
+    if post_id == socket.assigns.active_post.id do
+      socket = assign(socket, reply_list: socket.assigns.reply_list ++ [reply])
+      {:noreply, socket}
+    else
+      {:noreply, socket}
+    end
   end
 end

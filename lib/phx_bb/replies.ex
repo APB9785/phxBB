@@ -8,6 +8,10 @@ defmodule PhxBb.Replies do
   alias PhxBb.Replies.Reply
   alias PhxBb.Repo
 
+  def subscribe do
+    Phoenix.PubSub.subscribe(PhxBb.PubSub, "replies")
+  end
+
   @doc """
   Returns the sorted list of replies.
 
