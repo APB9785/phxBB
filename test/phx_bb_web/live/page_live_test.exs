@@ -246,8 +246,7 @@ defmodule PhxBbWeb.PageLiveTest do
       })
       |> render_submit
 
-      flash = assert_redirected view, "/?settings=1"
-      assert flash["info"] == "A link to confirm your email change has been sent to the new address."
+      assert has_element?(view, "#email-updated-ok")
     end
 
     test "Fail to update user email address", %{conn: conn, user: user} do
