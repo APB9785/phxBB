@@ -234,7 +234,8 @@ defmodule PhxBbWeb.LiveHelpers do
       name: user.username,
       joined: user.inserted_at,
       title: user.title,
-      avatar: user.avatar
+      avatar: user.avatar,
+      post_count: user.post_count
     }
   end
 end

@@ -37,7 +37,7 @@ defmodule PhxBbWeb.NewReplyComponent do
         # Update the user's post count
         {1, _} = Accounts.added_post(user.id)
 
-        message = {:new_reply, post.id, reply}
+        message = {:new_reply, post.id, reply, user.id}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
 
         socket = assign(socket, changeset: Replies.change_reply(%Reply{}))

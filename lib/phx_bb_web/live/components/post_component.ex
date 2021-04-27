@@ -7,7 +7,4 @@ defmodule PhxBbWeb.PostComponent do
 
   import PhxBbWeb.LiveHelpers
   import PhxBbWeb.StyleHelpers
-
-  alias PhxBb.Accounts
-  alias PhxBb.Replies
 end

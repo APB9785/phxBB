@@ -183,12 +183,31 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
 
-  def handle_info({:new_reply, post_id, reply}, socket) do
+  def handle_info({:new_reply, post_id, reply, author_id}, socket) do
+    socket =
+      socket
+      |> update_reply_list(post_id, reply)
+      |> update_cache_post_count(author_id)
+
+    {:noreply, socket}
+  end
+
+  defp update_reply_list(socket, post_id, reply) do
     if post_id == socket.assigns.active_post.id do
-      socket = assign(socket, reply_list: socket.assigns.reply_list ++ [reply])
-      {:noreply, socket}
+      assign(socket, reply_list: socket.assigns.reply_list ++ [reply])
     else
-      {:noreply, socket}
+      socket
+    end
+  end
+
+  defp update_cache_post_count(socket, author_id) do
+    case socket.assigns.user_cache do
+      %{^author_id => user_info} = cache ->
+        new_user_info = Map.update!(user_info, :post_count, &(&1 + 1))
+        assign(socket, user_cache: Map.put(cache, author_id, new_user_info))
+
+      _ ->
+        socket
     end
   end
 end

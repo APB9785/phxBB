@@ -21,7 +21,7 @@
         <!-- This block hidden on devices with small screens -->
         <div class="hidden md:block">
           <p class="text-sm mt-4" id="author-post-count">
-            Posts: <%= Accounts.post_count(post.author) %>
+            Posts: <%= @user_cache[post.author].post_count %>
           </p>
           <p class="text-sm" id="author-join-date">
             Joined: <%= format_date(@user_cache[post.author].joined, @active_user) %>

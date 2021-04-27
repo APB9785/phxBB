@@ -66,12 +66,8 @@ defmodule PhxBb.Accounts do
 
   def get_user(id), do: Repo.get(User, id)
 
-  # Deprecated
-  # def get_users(ids) do
-  #   Repo.all(from u in User,
-  #            where: u.id in ^ids)
-  # end
-
+  # Leverages Map.put_new_lazy/3 to check every ID and only run the query
+  # for previously unseen IDs
   def build_cache(user_ids, cache) do
     Enum.reduce(user_ids, cache, fn id, acc ->
       fun = fn ->
@@ -80,16 +76,18 @@ defmodule PhxBb.Accounts do
                  select: %{name: u.username,
                            joined: u.inserted_at,
                            title: u.title,
-                           avatar: u.avatar}
+                           avatar: u.avatar,
+                           post_count: u.post_count}
       end
 
       Map.put_new_lazy(acc, id, fun)
     end)
   end
 
-  def post_count(user_id) do
-    Repo.one from u in User, select: u.post_count, where: u.id == ^user_id
-  end
+  # Replaced by user cache.
+  # def post_count(user_id) do
+  #   Repo.one from u in User, select: u.post_count, where: u.id == ^user_id
+  # end
 
   def added_post(user_id) do
     from(u in User,
