@@ -238,4 +238,10 @@ defmodule PhxBbWeb.LiveHelpers do
       post_count: user.post_count
     }
   end
+
+  def parse_post_body(content) do
+    content
+    |> Earmark.as_html!()
+    |> PhoenixHtmlSanitizer.Helpers.sanitize
+  end
 end
