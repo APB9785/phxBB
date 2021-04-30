@@ -406,7 +406,7 @@ defmodule PhxBb.Accounts do
   ## Examples
 
       iex> deliver_user_reset_password_instructions(user, &Routes.user_reset_password_url(conn, :edit, &1))
-      {:ok, %{to: ..., body: ...}}
+      token
 
   """
   def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)

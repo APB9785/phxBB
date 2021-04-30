@@ -187,7 +187,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp new_post_button_base do
-    "px-8 py-2 justify-center rounded-md"
+    "px-8 py-2 justify-center rounded-md text-sm"
   end
 
   def reply_button_style(user) do

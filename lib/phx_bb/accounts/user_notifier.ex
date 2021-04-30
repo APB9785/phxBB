@@ -24,6 +24,8 @@ defmodule PhxBb.Accounts.UserNotifier do
     |> subject("Please confirm your phxBB acount")
     |> text_body(body)
     |> PhxBb.Mailer.deliver
+
+    return_token(url)  # Returns for LiveView testing
   end
 
   @doc """
@@ -42,7 +44,7 @@ defmodule PhxBb.Accounts.UserNotifier do
     |> text_body(body)
     |> PhxBb.Mailer.deliver
 
-    body
+    body  # Returns for controller testing
   end
 
   @doc """
@@ -60,6 +62,8 @@ defmodule PhxBb.Accounts.UserNotifier do
     |> subject("Change the email for your phxBB acount")
     |> text_body(body)
     |> PhxBb.Mailer.deliver
+
+    return_token(url)  # Returns for LiveView testing
   end
 
   defp greeting(user), do: "Hi #{user.username},\n\n"
@@ -67,4 +71,9 @@ defmodule PhxBb.Accounts.UserNotifier do
   defp change_ignore, do: "\n\nIf you didn't request this change, please ignore this."
 
   defp create_ignore, do: "\n\nIf you didn't create an account with us, please ignore this.\n"
+
+  defp return_token(url) do
+    [_, token] = String.split(url, "=")
+    token
+  end
 end

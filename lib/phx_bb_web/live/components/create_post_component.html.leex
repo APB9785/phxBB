@@ -12,7 +12,7 @@
     <%= error_tag f, :title %>
 
     <%= textarea f, :body,
-                   placeholder: "Body",
+                   placeholder: "You may user Markdown to format your post",
                    autocomplete: "off",
                    class: topic_body_form_style(@active_user) %>
     <%= error_tag f, :body %>

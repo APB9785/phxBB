@@ -184,6 +184,14 @@ defmodule PhxBbWeb.PageLiveTest do
 
       assert has_element?(view, "#user-profile-header")
     end
+
+    test "Confirm a user account", %{conn: conn, user: user} do
+      token = Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
+      url = "/?confirm=" <> token
+      {:ok, conn} = live(conn, url) |> follow_redirect(conn)
+
+      assert html_response(conn, 200) =~ "Account confirmed successfully."
+    end
   end
 
   describe "Logged-in User:" do
@@ -196,7 +204,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
       view |> element("#board-name", board.name) |> render_click
 
-      view |> element("#new-post-button") |> render_click
+      view |> element("#new-post-button-top") |> render_click
 
       assert has_element?(view, "#create-topic-header")
 
@@ -220,8 +228,7 @@ defmodule PhxBbWeb.PageLiveTest do
       |> form("#new-reply-form", %{reply: %{body: "I love Phoenix"}})
       |> render_submit
 
-      # UNCOMMENT THIS WHEN FUNCTIONALITY IS COMPLETE
-      # assert has_element?(view, "#post-body", "I love Phoenix")
+      assert has_element?(view, "#post-body", "I love Phoenix")
     end
 
     test "Re-send user confirmation link", %{conn: conn, user: user} do
@@ -484,6 +491,20 @@ defmodule PhxBbWeb.PageLiveTest do
       |> render_submit
 
       assert has_element?(view, "#new-reply-form", "should be at least 3 character(s)")
+    end
+
+    test "Confirm an email change", %{conn: conn, user: user} do
+      {:ok, applied_user} =
+        Accounts.apply_user_email(user, "hello world!", %{email: "newemail@example.com"})
+      token =
+        Accounts.deliver_update_email_instructions(applied_user, user.email,
+          &add_confirm_email_param/1)
+      url = "/?confirm_email=" <> token
+
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, url) |> follow_redirect(conn)
+
+      assert render(view) =~ "Email changed successfully."
     end
   end
 

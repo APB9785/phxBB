@@ -7,7 +7,7 @@
             id: "new-reply-form" %>
 
       <%= textarea f, :body,
-                     placeholder: "Type your reply",
+                     placeholder: "You may use Markdown to format your reply",
                      phx_debounce: "blur",
                      autocomplete: "off",
                      class: reply_form_style(@active_user) %>

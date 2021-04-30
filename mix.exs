@@ -42,6 +42,7 @@ defmodule PhxBb.MixProject do
       {:phoenix_live_view, "~> 0.15.5"},
       {:floki, ">= 0.27.0", only: :test},
       {:phoenix_html, "~> 2.14.3"},
+      {:phoenix_html_sanitizer, github: "APB9785/phoenix_html_sanitizer", tag: "1.1.2"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_dashboard, "~> 0.4"},
       {:telemetry_metrics, "~> 0.4"},
@@ -55,7 +56,6 @@ defmodule PhxBb.MixProject do
       {:excoveralls, "~> 0.14.0"},
       {:swoosh, "~> 1.3.4"},
       {:hackney, "~> 1.17"},
-      {:phoenix_html_sanitizer, github: "APB9785/phoenix_html_sanitizer"},
       {:earmark, "~> 1.4"}
     ]
   end

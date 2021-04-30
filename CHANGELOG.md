@@ -12,10 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - LiveView test suite - covers most major features
 - Clicking a username now shows user's profile with their five most recent posts
 - Registered users can now select an alternate "dark" theme in the settings menu
+- Markdown parsing for posts with Earmark
 
 ### Changed
 
-- JS Hook auto-scrolls to the top of the page when clicking a live_patch
+- Auto-scroll to the top of the page when clicking a live_patch
 - CI checks coverage % of the test suite with codecov.io
 - User confirmation moved into the LiveView
 - Forum display, user menu, and settings now separated into Live Components

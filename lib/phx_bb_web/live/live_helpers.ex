@@ -242,6 +242,6 @@ defmodule PhxBbWeb.LiveHelpers do
   def parse_post_body(content) do
     content
     |> Earmark.as_html!()
-    |> PhoenixHtmlSanitizer.Helpers.sanitize
+    |> PhoenixHtmlSanitizer.Helpers.sanitize(:markdown_html)
   end
 end

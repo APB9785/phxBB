@@ -16,11 +16,11 @@
       </div>
 
       <div class="pl-4 pt-2 text-sm border-t-2 flex border-gray-300
-                  md:p-4 md:text-base md:block md:border-0 md:w-1/12">
-        <div id="board-topic-count">
+                  md:p-4 md:text-base md:grid md:border-0 md:w-1/12 md:content-evenly">
+        <div id="board-topic-count" class="text-sm">
           <%= topic_count_display(board) %>
         </div>
-        <div class="ml-2 md:ml-0 md:mt-2" id="board-post-count">
+        <div class="text-sm ml-2 md:ml-0 md:mt-2" id="board-post-count">
           <%= post_count_display(board) %>
         </div>
       </div>
