@@ -153,8 +153,10 @@
             </div>
           </div>
 
-          <a href="#" phx-click="cancel_upload" phx-value-ref="<%= entry.ref %>"
-             phx-target="<%= @myself %>">
+          <a href="#" phx-click="cancel_upload"
+             phx-value-ref="<%= entry.ref %>"
+             phx-target="<%= @myself %>"
+             id="cancel-upload">
             &times;
           </a>
         </div>

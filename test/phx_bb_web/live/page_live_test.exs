@@ -375,6 +375,44 @@ defmodule PhxBbWeb.PageLiveTest do
       assert flash["info"] == "User avatar removed successfully."
     end
 
+    test "Discard avatar before uploading", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      avatar =
+        file_input(view, "#change-user-avatar-form", :avatar, [
+          %{
+            last_modified: 1_594_171_879_000,
+            name: "elixir.png",
+            content: File.read!("test/support/fixtures/elixir.png"),
+            size: 2_118,
+            type: "image/png"
+          }])
+
+      render_upload(avatar, "elixir.png")
+
+      view |> element("#cancel-upload") |> render_click
+
+      assert_redirected(view, "/?settings=1")
+    end
+
+    test "Attempt to upload oversized avatar", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      avatar =
+        file_input(view, "#change-user-avatar-form", :avatar, [
+          %{
+            last_modified: 1_594_171_879_000,
+            name: "elixir.png",
+            content: File.read!("test/support/fixtures/elixir.png"),
+            size: 200_000,
+            type: "image/png"
+          }])
+
+      assert {:error, [[_, :too_large]]} = render_upload(avatar, "elixir.png")
+    end
+
     test "Change theme", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
