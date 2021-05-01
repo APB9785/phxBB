@@ -8,6 +8,7 @@
    >
   <%= live_patch @active_board.name,
         to: Routes.live_path(@socket, PhxBbWeb.PageLive, board: @active_board.id),
-        class: link_style(@active_user) %>
+        class: link_style(@active_user),
+        id: "crumb-board" %>
   <% end %>
 </div>

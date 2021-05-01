@@ -52,6 +52,32 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#last-post-link", post.title)
     end
 
+    test "Revisit the active post", %{conn: conn, user: user, board: board} do
+      post = post_fixture(user, board)
+      {:ok, view, _html} = live(conn, "/")
+
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+      view |> element("#crumb-board") |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+    end
+
+    test "Irrelevant PubSub message", %{conn: conn, user: user, board: board} do
+      alt_user = user_fixture(%{timezone: "Etc/UTC"})
+      post = post_fixture(user, board, "First Title")
+      alt_post = post_fixture(user, board, "Second Title")
+      {:ok, view, _html} = live(conn, "/")
+
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+
+      {:ok, reply} = replymaker("Test reply", alt_post.id, alt_user.id)
+      message = {:new_reply, alt_post.id, reply, alt_user.id}
+      Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
+
+      # This should run OK but have no visible effect
+    end
+
     test "Visit a board directly from URL", %{conn: conn, board: board} do
       board_link = "/?board=" <> Integer.to_string(board.id)
       {:ok, view, _html} = live(conn, board_link)
@@ -491,6 +517,20 @@ defmodule PhxBbWeb.PageLiveTest do
       |> render_submit
 
       assert has_element?(view, "#new-reply-form", "should be at least 3 character(s)")
+    end
+
+    test "Confirm a user account", %{conn: conn, user: user} do
+      token = Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
+      url = "/?confirm=" <> token
+      {:ok, new_conn} = live(conn, url) |> follow_redirect(conn)
+
+      assert html_response(new_conn, 200) =~ "Account confirmed successfully."
+
+      # Log in and try the same confirmation link again
+      conn = login_fixture(conn, user)
+      {:ok, final_conn} = live(conn, url) |> follow_redirect(conn)
+
+      assert html_response(final_conn, 200) =~ "Welcome to the Forum!"
     end
 
     test "Confirm an email change", %{conn: conn, user: user} do

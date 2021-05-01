@@ -12,14 +12,14 @@ defmodule PhxBb.ForumFixtures do
     reply
   end
 
-  def post_fixture(attrs \\ %{}) do
-    {:ok, post} =
-      attrs
-      |> Enum.into(%{board_id: 1, body: "some body", title: "some title", reply_count: 0, view_count: 0})
-      |> PhxBb.Posts.create_post()
-
-    post
-  end
+  # def post_fixture(attrs \\ %{}) do
+  #   {:ok, post} =
+  #     attrs
+  #     |> Enum.into(%{board_id: 1, body: "some body", title: "some title", reply_count: 0, view_count: 0})
+  #     |> PhxBb.Posts.create_post()
+  #
+  #   post
+  # end
 
   def board_fixture(attrs \\ %{}) do
     {:ok, board} =
