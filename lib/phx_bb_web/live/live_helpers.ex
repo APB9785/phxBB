@@ -220,11 +220,6 @@ defmodule PhxBbWeb.LiveHelpers do
     "#{entry.uuid}.#{ext}"
   end
 
-  def remove_avatar(user) do
-    File.rm!("priv/static#{user.avatar}")
-    Accounts.update_user_avatar(user, %{avatar: nil})
-  end
-
   def no_file_error(socket) do
     replace_error(socket.assigns.avatar_changeset, :avatar, "no file was selected")
   end

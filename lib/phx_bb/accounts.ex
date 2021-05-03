@@ -12,6 +12,10 @@ defmodule PhxBb.Accounts do
   alias PhxBb.Replies.Reply
   alias PhxBb.Repo
 
+  def subscribe do
+    Phoenix.PubSub.subscribe(PhxBb.PubSub, "accounts")
+  end
+
   ## Database getters
 
   @doc """

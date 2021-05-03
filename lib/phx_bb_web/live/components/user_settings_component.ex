@@ -18,7 +18,9 @@ defmodule PhxBbWeb.UserSettingsComponent do
         timezone_updated: false,
         theme_updated: false,
         confirmation_resent: false,
-        email_updated: false)
+        email_updated: false,
+        avatar_updated: false,
+        avatar_removed: false)
 
     {:ok, socket}
   end
@@ -91,23 +93,12 @@ defmodule PhxBbWeb.UserSettingsComponent do
   end
 
   def handle_event("cancel_upload", %{"ref" => ref}, socket) do
-    socket =
-      socket
-      |> cancel_upload(:avatar, ref)
-      |> push_redirect(to: Routes.live_path(socket, PhxBbWeb.PageLive, settings: 1))
-
+    socket = cancel_upload(socket, :avatar, ref)
     {:noreply, socket}
   end
 
   def handle_event("remove_avatar", _params, socket) do
-    remove_avatar(socket.assigns.active_user)
-
-    socket =
-      socket
-      |> assign(avatar_changeset: Accounts.change_user_avatar(%User{}))
-      |> put_flash(:info, "User avatar removed successfully.")
-      |> push_redirect(to: Routes.live_path(socket, PhxBbWeb.PageLive, settings: 1))
-
+    socket = assign_remove_avatar(socket)
     {:noreply, socket}
   end
 
@@ -120,14 +111,22 @@ defmodule PhxBbWeb.UserSettingsComponent do
     user = socket.assigns.active_user
 
     # If the user is replacing an existing avatar, delete the old file
-    if user.avatar, do: File.rm!("priv/static#{user.avatar}")
+    if user.avatar, do: Application.app_dir(:phx_bb, "priv/static") <> user.avatar |> File.rm!
 
-    Accounts.update_user_avatar(user, %{avatar: avatar_link})
+    # Update DB with new avatar link
+    {:ok, user} = Accounts.update_user_avatar(user, %{avatar: avatar_link})
 
-    socket
-    |> assign(avatar_changeset: Accounts.change_user_avatar(%User{}))
-    |> put_flash(:info, "User avatar updated successfully.")
-    |> push_redirect(to: Routes.live_path(socket, PhxBbWeb.PageLive, settings: 1))
+    # Update active_user assign
+    send(self(), {:updated_user, user})
+
+    # Broadcast the new avatar to other users to update their caches
+    message = {:user_avatar_change, user.id, user.avatar}
+    Phoenix.PubSub.broadcast(PhxBb.PubSub, "accounts", message)
+
+    assign(socket,
+      avatar_changeset: Accounts.change_user_avatar(%User{}),
+      avatar_updated: true,
+      avatar_removed: false)
   end
 
   defp copy_avatar_links(socket) do
@@ -200,5 +199,23 @@ defmodule PhxBbWeb.UserSettingsComponent do
       {:error, changeset} ->
         assign(socket, password_changeset: changeset)
     end
+  end
+
+  defp assign_remove_avatar(socket) do
+    user = socket.assigns.active_user
+    Application.app_dir(:phx_bb, "priv/static") <> user.avatar |> File.rm!
+    {:ok, user} = Accounts.update_user_avatar(user, %{avatar: nil})
+
+    # Update active_user assign
+    send(self(), {:updated_user, user})
+
+    # Broadcast the new avatar to other users to update their caches
+    message = {:user_avatar_change, user.id, user.avatar}
+    Phoenix.PubSub.broadcast(PhxBb.PubSub, "accounts", message)
+
+    assign(socket,
+      avatar_changeset: Accounts.change_user_avatar(%User{}),
+      avatar_removed: true,
+      avatar_updated: false)
   end
 end

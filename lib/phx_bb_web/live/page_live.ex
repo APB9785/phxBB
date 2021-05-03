@@ -22,7 +22,10 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBbWeb.UserSettingsComponent
 
   def mount(_params, session, socket) do
-    if connected?(socket), do: Replies.subscribe()
+    if connected?(socket) do
+      Replies.subscribe()
+      Accounts.subscribe()
+    end
 
     case lookup_token(session["user_token"]) do
       nil ->
@@ -180,6 +183,20 @@ defmodule PhxBbWeb.PageLive do
         active_user: user,
         bg_color: get_theme_background(user)
       )
+    {:noreply, socket}
+  end
+
+  # PubSub messages
+
+  def handle_info({:user_avatar_change, user_id, avatar}, socket) do
+    cache = socket.assigns.user_cache
+    socket =
+      if Map.has_key?(cache, user_id) do
+        new_user_cache = Map.update!(cache, user_id, &Map.put(&1, :avatar, avatar))
+        assign(socket, user_cache: new_user_cache)
+      else
+        socket
+      end
     {:noreply, socket}
   end
 

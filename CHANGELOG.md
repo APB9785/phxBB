@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Email verification implemented with Swoosh's Mailjet adapter
-- LiveView test suite - covers most major features
+- Test suite for all app features
 - Clicking a username now shows user's profile with their five most recent posts
 - Registered users can now select an alternate "dark" theme in the settings menu
 - Markdown parsing for posts with Earmark

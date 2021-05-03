@@ -108,6 +108,17 @@
   <!-- Change avatar -->
   <div class="text-2xl py-4 md:pl-8">Change avatar</div>
   <div class="<%= settings_block(@active_user) %>">
+    <%= if @avatar_updated do %>
+      <div class="alert alert-info" id="avatar-updated-ok">
+        <p>User avatar updated successfully.</p>
+      </div>
+    <% end %>
+    <%= if @avatar_removed do %>
+      <div class="alert alert-info" id="avatar-removed-ok">
+        <p>User avatar removed successfully.</p>
+      </div>
+    <% end %>
+
     <!-- Current avatar display -->
     <div class="w-32">
       <%= img_tag @active_user.avatar, class: "max-h-40 w-full object-fill pb-4" %>
@@ -139,7 +150,7 @@
       <% end %>
 
       <%= for entry <- @uploads.avatar.entries do %>
-        <div class="entry">
+        <div class="entry" id="avatar-preview">
           <div class="w-32">
             <%= live_img_preview entry, class: "max-h-40 w-full object-fill" %>
           </div>

@@ -382,18 +382,15 @@ defmodule PhxBbWeb.PageLiveTest do
 
       assert render_upload(avatar, "elixir.png") =~ "100%"
 
-      {:ok, view, _html} =
-        view
-        |> element("#change-user-avatar-form")
-        |> render_submit
-        |> follow_redirect(conn)
+      view
+      |> element("#change-user-avatar-form")
+      |> render_submit
 
       view
       |> element("#remove-avatar-link")
       |> render_click
 
-      flash = assert_redirected view, "/?settings=1"
-      assert flash["info"] == "User avatar removed successfully."
+      assert render(view) =~ "User avatar removed successfully."
     end
 
     test "Discard avatar before uploading", %{conn: conn, user: user} do
@@ -412,9 +409,11 @@ defmodule PhxBbWeb.PageLiveTest do
 
       render_upload(avatar, "elixir.png")
 
+      assert has_element?(view, "#avatar-preview")
+
       view |> element("#cancel-upload") |> render_click
 
-      assert_redirected(view, "/?settings=1")
+      refute has_element?(view, "#avatar-preview")
     end
 
     test "Attempt to upload oversized avatar", %{conn: conn, user: user} do
