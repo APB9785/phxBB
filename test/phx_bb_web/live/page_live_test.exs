@@ -404,13 +404,15 @@ defmodule PhxBbWeb.PageLiveTest do
         file_input(view, "#change-user-avatar-form", :avatar, [
           %{
             last_modified: 1_594_171_879_000,
-            name: "elixir.png",
+            name: "too_large.jpg",
             content: File.read!("test/support/fixtures/elixir.png"),
-            size: 200_000,
+            size: 158_894,
             type: "image/png"
           }])
 
-      assert {:error, [[_, :too_large]]} = render_upload(avatar, "elixir.png")
+      assert view
+             |> element("#change-user-avatar-form")
+             |> render_change(avatar) =~ "Too large"
     end
 
     test "Change theme", %{conn: conn, user: user, board: board} do
