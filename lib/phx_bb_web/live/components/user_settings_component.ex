@@ -142,6 +142,11 @@ defmodule PhxBbWeb.UserSettingsComponent do
     case Accounts.update_user_title(socket.assigns.active_user, params) do
       {:ok, user} ->
         send(self(), {:updated_user, user})
+
+        # Broadcast the new title to other users to update their caches
+        message = {:user_title_change, user.id, user.title}
+        Phoenix.PubSub.broadcast(PhxBb.PubSub, "accounts", message)
+
         assign(socket, title_updated: true)
 
       {:error, changeset} ->

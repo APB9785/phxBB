@@ -9,6 +9,7 @@ defmodule PhxBbWeb.PageLive do
   import PhxBbWeb.StyleHelpers
 
   alias PhxBb.Accounts
+  alias PhxBb.Posts
   alias PhxBb.Replies
   alias PhxBbWeb.BoardComponent
   alias PhxBbWeb.BreadcrumbComponent
@@ -25,6 +26,7 @@ defmodule PhxBbWeb.PageLive do
     if connected?(socket) do
       Replies.subscribe()
       Accounts.subscribe()
+      Posts.subscribe()
     end
 
     case lookup_token(session["user_token"]) do
@@ -189,14 +191,12 @@ defmodule PhxBbWeb.PageLive do
   # PubSub messages
 
   def handle_info({:user_avatar_change, user_id, avatar}, socket) do
-    cache = socket.assigns.user_cache
-    socket =
-      if Map.has_key?(cache, user_id) do
-        new_user_cache = Map.update!(cache, user_id, &Map.put(&1, :avatar, avatar))
-        assign(socket, user_cache: new_user_cache)
-      else
-        socket
-      end
+    socket = update_cache(socket, user_id, :avatar, avatar)
+    {:noreply, socket}
+  end
+
+  def handle_info({:user_title_change, user_id, title}, socket) do
+    socket = update_cache(socket, user_id, :title, title)
     {:noreply, socket}
   end
 
@@ -206,6 +206,11 @@ defmodule PhxBbWeb.PageLive do
       |> update_reply_list(post_id, reply)
       |> update_cache_post_count(author_id)
 
+    {:noreply, socket}
+  end
+
+  def handle_info({:new_post, author_id}, socket) do
+    socket = update_cache_post_count(socket, author_id)
     {:noreply, socket}
   end
 
@@ -222,6 +227,17 @@ defmodule PhxBbWeb.PageLive do
       %{^author_id => user_info} = cache ->
         new_user_info = Map.update!(user_info, :post_count, &(&1 + 1))
         assign(socket, user_cache: Map.put(cache, author_id, new_user_info))
+
+      _ ->
+        socket
+    end
+  end
+
+  defp update_cache(socket, user_id, key, value) do
+    case socket.assigns.user_cache do
+      %{^user_id => _} = cache ->
+        new_cache = Map.update!(cache, user_id, &Map.put(&1, key, value))
+        assign(socket, user_cache: new_cache)
 
       _ ->
         socket

@@ -8,6 +8,10 @@ defmodule PhxBb.Posts do
   alias PhxBb.Posts.Post
   alias PhxBb.Repo
 
+  def subscribe do
+    Phoenix.PubSub.subscribe(PhxBb.PubSub, "posts")
+  end
+
   @doc """
   Returns the list of posts.
 

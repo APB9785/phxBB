@@ -9,14 +9,13 @@ vBulletin.  It uses a single Phoenix LiveView process to establish a persistent
 connection with each user, providing virtually instantaneous navigation and   
 interaction without any full page reloads after the user is logged in.   
 
-## What's New - v0.3
+## What's New - v0.4
 
-- Topic view count
-- Custom 404 page
-- Timezone selection
-- User titles
-- User avatars
-- User settings now handled within the LiveView
+- Email verification with Swoosh
+- User profiles
+- "Dark" theme
+- Markdown enabled in posts and replies
+- Live content updates with PubSub
 
 See [CHANGELOG.md](https://github.com/APB9785/phxBB/blob/master/CHANGELOG.md) for the full list of changes
 
