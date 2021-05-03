@@ -218,6 +218,25 @@ defmodule PhxBbWeb.PageLiveTest do
 
       assert html_response(conn, 200) =~ "Account confirmed successfully."
     end
+
+    test "Navigate from Board to Board", %{conn: conn, board: board} do
+      new_board = Repo.insert!(%Board{
+        name: "Sample Topic", description: "Test Board #2",
+        post_count: 0, topic_count: 0, last_post: nil, last_user: nil})
+
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+
+      assert has_element?(view, "#board-header", board.name)
+
+      view |> element("#crumb-index") |> render_click
+
+      assert has_element?(view, "#main-header")
+
+      view |> element("#board-name", new_board.name) |> render_click
+
+      assert has_element?(view, "#board-header", new_board.name)
+    end
   end
 
   describe "Logged-in User:" do

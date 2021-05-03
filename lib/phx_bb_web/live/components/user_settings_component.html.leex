@@ -107,6 +107,9 @@
 
   <!-- Change avatar -->
   <div class="text-2xl py-4 md:pl-8">Change avatar</div>
+
+  <%= inspect(@uploads.avatar) %>
+
   <div class="<%= settings_block(@active_user) %>">
     <!-- Current avatar display -->
     <div class="w-32">
@@ -133,7 +136,7 @@
       </div>
 
       <%= for {_ref, err} <- @uploads.avatar.errors do %>
-        <div class="error">
+        <div class="error text-red-500">
           <%= humanize(err) %>
         </div>
       <% end %>

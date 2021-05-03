@@ -122,16 +122,12 @@ defmodule PhxBbWeb.UserSettingsComponent do
     # If the user is replacing an existing avatar, delete the old file
     if user.avatar, do: File.rm!("priv/static#{user.avatar}")
 
-    case Accounts.update_user_avatar(user, %{avatar: avatar_link}) do
-      {:ok, _user} ->
-        socket
-        |> assign(avatar_changeset: Accounts.change_user_avatar(%User{}))
-        |> put_flash(:info, "User avatar updated successfully.")
-        |> push_redirect(to: Routes.live_path(socket, PhxBbWeb.PageLive, settings: 1))
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        assign(socket, avatar_changeset: changeset)
-    end
+    Accounts.update_user_avatar(user, %{avatar: avatar_link})
+    
+    socket
+    |> assign(avatar_changeset: Accounts.change_user_avatar(%User{}))
+    |> put_flash(:info, "User avatar updated successfully.")
+    |> push_redirect(to: Routes.live_path(socket, PhxBbWeb.PageLive, settings: 1))
   end
 
   defp copy_avatar_links(socket) do
