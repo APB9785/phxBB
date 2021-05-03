@@ -219,23 +219,25 @@ defmodule PhxBbWeb.PageLiveTest do
       assert html_response(conn, 200) =~ "Account confirmed successfully."
     end
 
-    test "Navigate from Board to Board", %{conn: conn, board: board} do
+    test "Board updated when navigating between posts", %{conn: conn, user: user, board: board} do
       new_board = Repo.insert!(%Board{
         name: "Sample Topic", description: "Test Board #2",
         post_count: 0, topic_count: 0, last_post: nil, last_user: nil})
-
+      post = post_fixture(user, new_board)
       {:ok, view, _html} = live(conn, "/")
-      view |> element("#board-name", board.name) |> render_click
 
+      # Active board is set by navigating to board 1
+      view |> element("#board-name", board.name) |> render_click
       assert has_element?(view, "#board-header", board.name)
 
+      # Return to Main Index
       view |> element("#crumb-index") |> render_click
-
       assert has_element?(view, "#main-header")
 
-      view |> element("#board-name", new_board.name) |> render_click
-
-      assert has_element?(view, "#board-header", new_board.name)
+      # Visiting a post in another board changes the active board
+      view |> element("#last-post-link", post.title) |> render_click
+      assert has_element?(view, "#post-header", post.title)
+      assert has_element?(view, "#crumb-board", new_board.name)
     end
   end
 
