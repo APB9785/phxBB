@@ -242,7 +242,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Title change by an unknown user", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/")
-      send(view.pid, {:user_title_change, 99999, "irrelevant"})
+      send(view.pid, {:user_title_change, 9999, "irrelevant"})
 
       # Nothing happens
     end
