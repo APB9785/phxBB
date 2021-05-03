@@ -123,7 +123,7 @@ defmodule PhxBbWeb.UserSettingsComponent do
     if user.avatar, do: File.rm!("priv/static#{user.avatar}")
 
     Accounts.update_user_avatar(user, %{avatar: avatar_link})
-    
+
     socket
     |> assign(avatar_changeset: Accounts.change_user_avatar(%User{}))
     |> put_flash(:info, "User avatar updated successfully.")
