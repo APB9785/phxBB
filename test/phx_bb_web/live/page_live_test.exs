@@ -239,6 +239,13 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#post-header", post.title)
       assert has_element?(view, "#crumb-board", new_board.name)
     end
+
+    test "Title change by an unknown user", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/")
+      send(view.pid, {:user_title_change, 99999, "irrelevant"})
+
+      # Nothing happens
+    end
   end
 
   describe "Logged-in User:" do
