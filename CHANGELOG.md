@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- Markdown is now properly parsed in user profiles' last 5 posts
+
 ## [0.4] - 2021-05-03
 
 ### Added
@@ -98,6 +104,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - User cache for reduced DB queries
 - Page title updates to reflect current view
 
+[Unreleased]: https://github.com/APB9785/phxBB/compare/0.4...HEAD
 [0.4]: https://github.com/APB9785/phxBB/compare/0.3.1...0.4
 [0.3.1]: https://github.com/APB9785/phxBB/compare/0.3...0.3.1
 [0.3]: https://github.com/APB9785/phxBB/compare/0.2...0.3

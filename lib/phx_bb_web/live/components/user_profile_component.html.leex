@@ -27,7 +27,7 @@
         <%= format_time(post.inserted_at, @active_user) %>
       </div>
       <div class="pl-2 w-max">
-        <%= post.body %>
+        <%= parse_post_body(post.body) %>
       </div>
     </div>
   <% end %>
