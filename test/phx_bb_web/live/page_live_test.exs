@@ -679,10 +679,11 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
       view |> element("#edit-post-link-" <> post_id) |> render_click
+      view |> element("#edit-post-form-" <> post_id) |> render_change(%{post: %{body: "X"}})
 
-      view
-      |> element("#edit-post-form-" <> post_id)
-      |> render_change(%{post: %{body: "X"}})
+      assert has_element?(view, "#edit-post-form-" <> post_id, "should be at least 3 character(s)")
+
+      view |> form("#edit-post-form-" <> post_id, %{post: %{body: "X"}}) |> render_submit
 
       assert has_element?(view, "#edit-post-form-" <> post_id, "should be at least 3 character(s)")
     end
@@ -697,10 +698,13 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
       view |> element("#edit-reply-link-" <> reply_id) |> render_click
+      view |> element("#edit-reply-form-" <> reply_id) |> render_change(%{reply: %{body: "X"}})
 
-      view
-      |> element("#edit-reply-form-" <> reply_id)
-      |> render_change(%{reply: %{body: "X"}})
+      assert has_element?(view,
+        "#edit-reply-form-" <> reply_id,
+        "should be at least 3 character(s)")
+
+      view |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "X"}}) |> render_submit
 
       assert has_element?(view,
         "#edit-reply-form-" <> reply_id,
@@ -728,8 +732,22 @@ defmodule PhxBbWeb.PageLiveTest do
       refute has_element?(view, "#edit-reply-form")
       assert render(view) =~ "Finished editing."
     end
-    # TO DO: test blur, validation
-    # LiveHelpers should be tested 100% already
+
+    test "Cancel a post edit", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      post_id = Integer.to_string(post.id)
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+      view |> element("#edit-post-link-" <> post_id) |> render_click
+
+      assert has_element?(view, "#edit-post-form-" <> post_id)
+
+      view |> element("#cancel-post-edit-" <> post_id) |> render_click
+
+      refute has_element?(view, "#edit-post-form")
+    end
   end
 
   def login_fixture(conn, user) do

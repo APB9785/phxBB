@@ -63,7 +63,8 @@
         <button phx-click="cancel_edit"
                 type="button"
                 phx-target="<%= @myself %>"
-                class="<%= post_edit_link_style(@active_user) %>">
+                class="<%= post_edit_link_style(@active_user) %>"
+                id="<%= id_maker("cancel", @type, "edit", @post.id) %>">
           Cancel
         </button>
     <% else %>
