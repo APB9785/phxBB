@@ -5,7 +5,6 @@ defmodule PhxBbWeb.PostComponent do
 
   use PhxBbWeb, :live_component
 
-  import PhxBbWeb.LiveHelpers
   import PhxBbWeb.StyleHelpers
 
   alias PhxBbWeb.PostAuthorComponent
