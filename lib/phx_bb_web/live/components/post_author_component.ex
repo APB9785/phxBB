@@ -24,7 +24,8 @@ defmodule PhxBbWeb.PostAuthorComponent do
 
       <%= if @user_cache[@post.author].avatar do %>
         <%= img_tag @user_cache[@post.author].avatar,
-                    class: "max-h-40 object-fill mr-4 h-10 w-10 md:h-auto md:w-32 md:mx-auto md:pt-2" %>
+                    class: "max-h-40 object-fill mr-4 h-10 w-10 md:h-auto md:w-32 md:mx-auto md:pt-2",
+                    id: id_maker(@type, "author", "avatar", @post.id) %>
       <% end %>
 
       <!-- This block hidden on devices with small screens -->

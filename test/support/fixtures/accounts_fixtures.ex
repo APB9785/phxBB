@@ -20,7 +20,7 @@ defmodule PhxBb.AccountsFixtures do
         post_count: 0,
         title: "Registered User",
         theme: "default",
-        admin: true
+        admin: false
       })
       |> PhxBb.Accounts.register_user()
 

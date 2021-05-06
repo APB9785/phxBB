@@ -5,6 +5,7 @@ defmodule PhxBbWeb.PostComponent do
 
   use PhxBbWeb, :live_component
 
+  import PhxBbWeb.LiveHelpers
   import PhxBbWeb.StyleHelpers
 
   alias PhxBbWeb.PostAuthorComponent
@@ -16,11 +17,13 @@ defmodule PhxBbWeb.PostComponent do
       <%= live_component @socket, PostAuthorComponent,
             active_user: @active_user,
             post: @active_post,
+            type: "post",
             user_cache: @user_cache %>
 
       <%= live_component @socket, PostContentComponent,
             active_user: @active_user,
             post: @active_post,
+            type: "post",
             id: "post-content-component" %>
     </div>
 
@@ -31,12 +34,14 @@ defmodule PhxBbWeb.PostComponent do
           <%= live_component @socket, PostAuthorComponent,
                 active_user: @active_user,
                 post: reply,
+                type: "reply",
                 user_cache: @user_cache %>
 
           <%= live_component @socket, PostContentComponent,
                 active_user: @active_user,
                 post: reply,
-                id: "reply-content-comp-" <> Integer.to_string(reply.id) %>
+                type: "reply",
+                id: id_maker("reply", "content", "comp", reply.id) %>
         </div>
 
       <% end %>

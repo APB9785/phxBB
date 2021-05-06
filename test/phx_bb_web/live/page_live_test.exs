@@ -371,8 +371,10 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#change-user-timezone-form", "did not change")
     end
 
-    test "Upload and remove user avatar", %{conn: conn, user: user} do
+    test "Upload, view, and remove user avatar", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      post_id = Integer.to_string(post.id)
       {:ok, view, _html} = live(conn, "/?settings=1")
 
       refute render(view) =~ "100%"
@@ -390,13 +392,17 @@ defmodule PhxBbWeb.PageLiveTest do
 
       assert render_upload(avatar, "elixir.png") =~ "100%"
 
-      view
-      |> element("#change-user-avatar-form")
-      |> render_submit
+      view |> element("#change-user-avatar-form") |> render_submit
 
-      view
-      |> element("#remove-avatar-link")
-      |> render_click
+      # Avatar should be uploaded OK, now see if it displays
+
+      {:ok, view, _html} = live(conn, "/?post=" <> post_id)
+
+      assert has_element?(view, "#post-author-avatar-" <> post_id)
+
+      {:ok, view, _html} = live(conn, "/?settings=1")
+
+      view |> element("#remove-avatar-link") |> render_click
 
       assert render(view) =~ "User avatar removed successfully."
     end
@@ -618,12 +624,12 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Edit a post", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      hash = :erlang.phash2(post.inserted_at) |> Integer.to_string
+      post_id = Integer.to_string(post.id)
       {:ok, view, _html} = live(conn, "/")
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
-      view |> element("#edit-post-link-" <> hash) |> render_click
-      view |> form("#edit-post-form", %{post: %{body: "Edited text"}}) |> render_submit
+      view |> element("#edit-post-link-" <> post_id) |> render_click
+      view |> form("#edit-post-form-" <> post_id, %{post: %{body: "Edited text"}}) |> render_submit
 
       assert render(view) =~ "Edited text"
       refute has_element?(view, "#edit-post-form")
@@ -632,26 +638,25 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Delete a post", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      hash = :erlang.phash2(post.inserted_at) |> Integer.to_string
+      post_id = Integer.to_string(post.id)
       {:ok, view, _html} = live(conn, "/")
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
 
-      refute has_element?(view, "#delete-post-final-" <> hash)
+      refute has_element?(view, "#delete-post-final-" <> post_id)
 
-      view |> element("#delete-post-link-" <> hash) |> render_click
-      view |> element("#delete-post-final-" <> hash) |> render_click
+      view |> element("#delete-post-link-" <> post_id) |> render_click
+      view |> element("#delete-post-final-" <> post_id) |> render_click
 
       assert render(view) =~ "Post deleted."
-      refute has_element?(view, "#delete-post-final-" <> hash)
+      refute has_element?(view, "#delete-post-final-" <> post_id)
     end
 
     test "Delete a reply", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      :timer.sleep(1000)
       reply = reply_fixture(user, post, "Get rid of me!")
-      hash = :erlang.phash2(reply.inserted_at) |> Integer.to_string
+      reply_id = Integer.to_string(reply.id)
       {:ok, view, _html} = live(conn, "/")
 
       view |> element("#board-name", board.name) |> render_click
@@ -659,11 +664,72 @@ defmodule PhxBbWeb.PageLiveTest do
 
       assert render(view) =~ "Get rid of me!"
 
-      view |> element("#delete-post-link-" <> hash) |> render_click
-      view |> element("#delete-post-final-" <> hash) |> render_click
+      view |> element("#delete-reply-link-" <> reply_id) |> render_click
+      view |> element("#delete-reply-final-" <> reply_id) |> render_click
 
       refute render(view) =~ "Get rid of me!"
     end
+
+    test "Validate post edits", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      post_id = Integer.to_string(post.id)
+
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+      view |> element("#edit-post-link-" <> post_id) |> render_click
+
+      view
+      |> element("#edit-post-form-" <> post_id)
+      |> render_change(%{post: %{body: "X"}})
+
+      assert has_element?(view, "#edit-post-form-" <> post_id, "should be at least 3 character(s)")
+    end
+
+    test "Validate reply edits", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      reply = reply_fixture(user, post)
+      reply_id = Integer.to_string(reply.id)
+
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+      view |> element("#edit-reply-link-" <> reply_id) |> render_click
+
+      view
+      |> element("#edit-reply-form-" <> reply_id)
+      |> render_change(%{reply: %{body: "X"}})
+
+      assert has_element?(view,
+        "#edit-reply-form-" <> reply_id,
+        "should be at least 3 character(s)")
+    end
+
+    test "Edit a reply", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      reply = reply_fixture(user, post, "Please edit me!")
+      reply_id = Integer.to_string(reply.id)
+
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+
+      assert render(view) =~ "Please edit me!"
+
+      view |> element("#edit-reply-link-" <> reply_id) |> render_click
+
+      view
+      |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "Finished editing."}})
+      |> render_submit
+
+      refute has_element?(view, "#edit-reply-form")
+      assert render(view) =~ "Finished editing."
+    end
+    # TO DO: test blur, validation
+    # LiveHelpers should be tested 100% already
   end
 
   def login_fixture(conn, user) do

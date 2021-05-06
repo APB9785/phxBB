@@ -10,28 +10,32 @@
       <button phx-click="edit_post"
               phx-target="<%= @myself %>"
               class="<%= post_edit_link_style(@active_user) %>"
-              id="edit-post-link-<%= :erlang.phash2(@post.inserted_at) %>">
+              id="<%= id_maker("edit", @type, "link", @post.id) %>">
         Edit Post
       </button>
       <div class="<%= post_timestamp_style(@active_user) %>">&nbsp-&nbsp</div>
+
       <%= case @delete do %>
+
       <% false -> %>
         <button phx-click="delete_prompt"
                 phx-value-id="<%= @post.id %>"
                 phx-target="<%= @myself %>"
                 class="<%= post_edit_link_style(@active_user) %>"
-                id="delete-post-link-<%= :erlang.phash2(@post.inserted_at) %>">
+                id="<%= id_maker("delete", @type, "link", @post.id) %>">
           Delete Post
         </button>
+
       <% true -> %>
         <div class="<%= post_timestamp_style(@active_user) %>"> Confirm ->&nbsp&nbsp </div>
-        <button phx-click="<%= delete_click_event(@post) %>"
+        <button phx-click="delete_<%= @type %>"
                 phx-value-id="<%= @post.id %>"
                 phx-target="<%= @myself %>"
                 class="text-sm font-bold text-red-500 hover:underline"
-                id="delete-post-final-<%= :erlang.phash2(@post.inserted_at) %>">
+                id="<%= id_maker("delete", @type, "final", @post.id) %>">
           Delete Post
         </button>
+
       <% end %>
     <% end %>
   </div>
@@ -42,7 +46,7 @@
                 phx_submit: "save_edit",
                 phx_change: "validate",
                 phx_target: @myself,
-                id: "edit-post-form" %>
+                id: id_maker("edit", @type, "form", @post.id) %>
 
         <%= textarea f, :body,
               value: edit_post_form_value(@changeset),

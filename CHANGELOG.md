@@ -11,6 +11,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Administrator account: can edit and delete posts
 - Users can now edit and delete their own posts
 
+### Fixed
+
+- Login prompt now positioned properly on all screen sizes
+- A post and reply with the same database ID will no longer have HTML ID conflicts
+
 ## [0.4.1] - 2021-05-04
 
 ### Fixed

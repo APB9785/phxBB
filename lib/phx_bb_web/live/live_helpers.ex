@@ -246,5 +246,8 @@ defmodule PhxBbWeb.LiveHelpers do
     |> PhoenixHtmlSanitizer.Helpers.sanitize(:markdown_html)
   end
 
-  def post_is_reply?(post), do: post.__struct__ == PhxBb.Replies.Reply
+  def id_maker(action, type, element, content_id) do
+    content_id = Integer.to_string(content_id)
+    [action, type, element, content_id] |> Enum.join("-")
+  end
 end

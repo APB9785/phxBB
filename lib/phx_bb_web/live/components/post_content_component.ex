@@ -19,12 +19,11 @@ defmodule PhxBbWeb.PostContentComponent do
   def update(assigns, socket) do
     socket = assign(socket, assigns)
     post = socket.assigns.post
-    socket =
-      if post_is_reply?(post) do
-        assign(socket, changeset: Replies.change_reply(post))
-      else
-        assign(socket, changeset: Posts.change_post(post))
-      end
+    socket = case socket.assigns.type do
+      "reply" -> assign(socket, changeset: Replies.change_reply(post))
+      "post" -> assign(socket, changeset: Posts.change_post(post))
+    end
+
     {:ok, socket}
   end
 
@@ -124,14 +123,6 @@ defmodule PhxBbWeb.PostContentComponent do
     case changeset.changes[:body] do
       nil -> changeset.data.body
       changed_body -> changed_body
-    end
-  end
-
-  def delete_click_event(post) do
-    if post_is_reply?(post) do
-      "delete_reply"
-    else
-      "delete_post"
     end
   end
 end
