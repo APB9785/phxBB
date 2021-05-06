@@ -27,6 +27,7 @@ defmodule PhxBbWeb.UserRegistrationComponent do
       |> Map.put("post_count", 0)
       |> Map.put("title", "Registered User")
       |> Map.put("theme", "default")
+      |> Map.put("admin", false)
       |> register_new_user(socket)
 
     {:noreply, socket}

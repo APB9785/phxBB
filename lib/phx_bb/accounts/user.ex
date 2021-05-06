@@ -44,7 +44,7 @@ defmodule PhxBb.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password, :username, :post_count, :timezone, :title, :theme])
+    |> cast(attrs, [:email, :password, :username, :post_count, :timezone, :title, :theme, :admin])
     |> validate_email()
     |> validate_password(opts)
     |> validate_username()

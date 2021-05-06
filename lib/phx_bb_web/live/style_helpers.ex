@@ -32,6 +32,11 @@ defmodule PhxBbWeb.StyleHelpers do
     |> Enum.join(" ")
   end
 
+  def post_edit_link_style(user) do
+    ["text-sm hover:underline", timestamp_theme(user)]
+    |> Enum.join(" ")
+  end
+
   def user_history_timestamp_style(user) do
     ["text-sm w-40 pb-2", timestamp_theme(user)]
     |> Enum.join(" ")
@@ -206,6 +211,11 @@ defmodule PhxBbWeb.StyleHelpers do
       "dark" => "bg-gray-900 text-gray-100"
     }
     |> Map.fetch!(theme)
+  end
+
+  def small_button_style(user) do
+    ["rounded-md text-sm px-2 mx-2", button_theme(user)]
+    |> Enum.join(" ")
   end
 
   # Links

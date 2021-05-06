@@ -188,6 +188,12 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
 
+  def handle_info({:delete_reply, reply_id}, socket) do
+    new_reply_list = Enum.reject(socket.assigns.reply_list, &(&1.id == reply_id))
+    socket = assign(socket, reply_list: new_reply_list)
+    {:noreply, socket}
+  end
+
   # PubSub messages
 
   def handle_info({:user_avatar_change, user_id, avatar}, socket) do

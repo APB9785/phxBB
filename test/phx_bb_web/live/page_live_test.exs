@@ -8,6 +8,7 @@ defmodule PhxBbWeb.PageLiveTest do
   alias PhxBb.Accounts
   alias PhxBb.Boards
   alias PhxBb.Boards.Board
+  alias PhxBb.Posts
   alias PhxBb.Repo
   alias PhxBbWeb.UserAuth
 
@@ -282,7 +283,7 @@ defmodule PhxBbWeb.PageLiveTest do
       |> form("#new-reply-form", %{reply: %{body: "I love Phoenix"}})
       |> render_submit
 
-      assert has_element?(view, "#post-body", "I love Phoenix")
+      assert render(view) =~ "I love Phoenix"
     end
 
     test "Re-send user confirmation link", %{conn: conn, user: user} do
@@ -613,6 +614,56 @@ defmodule PhxBbWeb.PageLiveTest do
 
       assert render(view) =~ "Email changed successfully."
     end
+
+    test "Edit a post", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      hash = :erlang.phash2(post.inserted_at) |> Integer.to_string
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+      view |> element("#edit-post-link-" <> hash) |> render_click
+      view |> form("#edit-post-form", %{post: %{body: "Edited text"}}) |> render_submit
+
+      assert render(view) =~ "Edited text"
+      refute has_element?(view, "#edit-post-form")
+    end
+
+    test "Delete a post", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      hash = :erlang.phash2(post.inserted_at) |> Integer.to_string
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+
+      refute has_element?(view, "#delete-post-final-" <> hash)
+
+      view |> element("#delete-post-link-" <> hash) |> render_click
+      view |> element("#delete-post-final-" <> hash) |> render_click
+
+      assert render(view) =~ "Post deleted."
+      refute has_element?(view, "#delete-post-final-" <> hash)
+    end
+
+    test "Delete a reply", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      :timer.sleep(1000)
+      reply = reply_fixture(user, post, "Get rid of me!")
+      hash = :erlang.phash2(reply.inserted_at) |> Integer.to_string
+      {:ok, view, _html} = live(conn, "/")
+
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+
+      assert render(view) =~ "Get rid of me!"
+
+      view |> element("#delete-post-link-" <> hash) |> render_click
+      view |> element("#delete-post-final-" <> hash) |> render_click
+
+      refute render(view) =~ "Get rid of me!"
+    end
   end
 
   def login_fixture(conn, user) do
@@ -632,5 +683,21 @@ defmodule PhxBbWeb.PageLiveTest do
     {1, _} = Accounts.added_post(user.id)
 
     post
+  end
+
+  def reply_fixture(user, post, body \\ "Test reply") do
+    {:ok, reply} = replymaker(body, post.id, user.id)
+
+    # Update the last reply info for the active post
+    {1, _} = Posts.added_reply(post.id, user.id)
+    # Update the last post info for the active board
+    {1, _} = Boards.added_reply(post.board_id, post.id, user.id)
+    # Update the user's post count
+    {1, _} = Accounts.added_post(user.id)
+
+    message = {:new_reply, post.id, reply, user.id}
+    Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
+
+    reply
   end
 end

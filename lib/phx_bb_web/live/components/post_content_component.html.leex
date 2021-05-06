@@ -1,0 +1,69 @@
+<div class="md:w-10/12 pt-2 block pl-4">
+  <div class="flex">
+
+    <div class="<%= post_timestamp_style(@active_user) %>">
+      <%= format_time(@post.inserted_at, @active_user) %>
+    </div>
+
+    <%= if admin?(@active_user) or author?(@active_user, @post) do %>
+      <div class="<%= post_timestamp_style(@active_user) %>">&nbsp-&nbsp</div>
+      <button phx-click="edit_post"
+              phx-target="<%= @myself %>"
+              class="<%= post_edit_link_style(@active_user) %>"
+              id="edit-post-link-<%= :erlang.phash2(@post.inserted_at) %>">
+        Edit Post
+      </button>
+      <div class="<%= post_timestamp_style(@active_user) %>">&nbsp-&nbsp</div>
+      <%= case @delete do %>
+      <% false -> %>
+        <button phx-click="delete_prompt"
+                phx-value-id="<%= @post.id %>"
+                phx-target="<%= @myself %>"
+                class="<%= post_edit_link_style(@active_user) %>"
+                id="delete-post-link-<%= :erlang.phash2(@post.inserted_at) %>">
+          Delete Post
+        </button>
+      <% true -> %>
+        <div class="<%= post_timestamp_style(@active_user) %>"> Confirm ->&nbsp&nbsp </div>
+        <button phx-click="<%= delete_click_event(@post) %>"
+                phx-value-id="<%= @post.id %>"
+                phx-target="<%= @myself %>"
+                class="text-sm font-bold text-red-500 hover:underline"
+                id="delete-post-final-<%= :erlang.phash2(@post.inserted_at) %>">
+          Delete Post
+        </button>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="py-4 pr-4">
+    <%= if @edit do %>
+      <%= f = form_for @changeset, "#",
+                phx_submit: "save_edit",
+                phx_change: "validate",
+                phx_target: @myself,
+                id: "edit-post-form" %>
+
+        <%= textarea f, :body,
+              value: edit_post_form_value(@changeset),
+              phx_debounce: "blur",
+              autocomplete: "off",
+              class: reply_form_style(@active_user) %>
+
+        <div class="ml-2 mt-2"><%= error_tag f, :body %></div>
+
+        <%= submit "Save Reply",
+              phx_disable_with: "Saving...",
+              class: small_button_style(@active_user) %>
+
+        <button phx-click="cancel_edit"
+                type="button"
+                phx-target="<%= @myself %>"
+                class="<%= post_edit_link_style(@active_user) %>">
+          Cancel
+        </button>
+    <% else %>
+      <%= parse_post_body(@post.body) %>
+    <% end %>
+  </div>
+</div>

@@ -234,9 +234,17 @@ defmodule PhxBbWeb.LiveHelpers do
     }
   end
 
+  def admin?(nil), do: false
+  def admin?(user), do: user.admin
+
+  def author?(nil, _), do: false
+  def author?(user, post), do: user.id == post.author
+
   def parse_post_body(content) do
     content
     |> Earmark.as_html!()
     |> PhoenixHtmlSanitizer.Helpers.sanitize(:markdown_html)
   end
+
+  def post_is_reply?(post), do: post.__struct__ == PhxBb.Replies.Reply
 end
