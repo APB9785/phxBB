@@ -176,6 +176,8 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
 
+  # Local LiveView helpers for Components
+
   def handle_info({:updated_user, user}, socket) do
     socket = assign(socket, active_user: user)
     {:noreply, socket}
@@ -236,7 +238,7 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
 
-  # PubSub messages
+  # Global PubSub message handlers
 
   def handle_info({:deleted_reply, new_reply_list, post_id, next_post}, socket) do
     new_board_list = update_board_list(socket.assigns.board_list, next_post.board_id, [
@@ -304,6 +306,8 @@ defmodule PhxBbWeb.PageLive do
 
     {:noreply, socket}
   end
+
+  # Helpers for the above handlers
 
   def update_board_list(board_list, board_id, changes) do
     Enum.map(board_list, fn b ->

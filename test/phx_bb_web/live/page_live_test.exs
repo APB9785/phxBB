@@ -249,7 +249,7 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#main-header")
     end
 
-    test "New post by an unknown user", %{conn: conn, user: user, board: board} do
+    test "New unseen post by an unknown user", %{conn: conn, user: user, board: board} do
       post = post_fixture(user, board)
       user_2 = user_fixture(%{timezone: "Etc/UTC"})
       {:ok, view, _html} = live(conn, "/")
@@ -989,6 +989,9 @@ defmodule PhxBbWeb.PageLiveTest do
     {1, _} = Boards.added_post(board.id, post.id, user.id)
     # Update the user's post count
     {1, _} = Accounts.added_post(user.id)
+
+    message = {:new_topic, post.author, post.id, post.board_id}
+    Phoenix.PubSub.broadcast(PhxBb.PubSub, "posts", message)
 
     post
   end
