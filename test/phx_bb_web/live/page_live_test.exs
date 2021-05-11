@@ -245,7 +245,20 @@ defmodule PhxBbWeb.PageLiveTest do
       {:ok, view, _html} = live(conn, "/")
       send(view.pid, {:user_title_change, 9999, "irrelevant"})
 
-      # Nothing happens
+      # Nothing happens, LV still alive
+      assert has_element?(view, "#main-header")
+    end
+
+    test "New post by an unknown user", %{conn: conn, user: user, board: board} do
+      post = post_fixture(user, board)
+      user_2 = user_fixture(%{timezone: "Etc/UTC"})
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+      _post_2 = post_fixture(user_2, board)
+
+      # Nothing happens, LV still alive
+      assert has_element?(view, "#post-header", post.title)
     end
   end
 
@@ -921,7 +934,7 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#post-listing-link", post_2.title) |> render_click
 
       # Test new reply added
-      reply = reply_fixture(user, post, "Test Reply")
+      reply = reply_fixture(user, post)
       reply_id = Integer.to_string(reply.id)
 
       {:ok, view_2, _html} = live(conn, "/")
@@ -940,6 +953,24 @@ defmodule PhxBbWeb.PageLiveTest do
 
       # Original LV is still alive with no other changes
       assert has_element?(view, "#post-header", post_2.title)
+    end
+
+    test "User cache parses IDs from Edit footers", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      post_id = Integer.to_string(post.id)
+      reply = reply_fixture(user, post)
+      reply_id = Integer.to_string(reply.id)
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+      view |> element("#edit-reply-link-" <> reply_id) |> render_click
+      view |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}}) |> render_submit
+      view |> element("#edit-post-link-" <> post_id) |> render_click
+      view |> form("#edit-post-form-" <> post_id, %{post: %{body: "POSTEDIT"}}) |> render_submit
+
+      {:ok, view, _html} = live(conn, "/?post=" <> post_id)
+      assert render(view) =~ "Edited by " <> user.username
     end
   end
 
