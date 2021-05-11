@@ -868,6 +868,75 @@ defmodule PhxBbWeb.PageLiveTest do
 
       refute has_element?(view, "#edit-reply-form-" <> reply_id)
     end
+
+    test "Post/reply changes as seen from Main Index", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      Repo.insert!(%Board{
+        name: "Sample Topic", description: "Test Board #2",
+        post_count: 0, topic_count: 0, last_post: nil, last_user: nil})
+      post = post_fixture(user, board)
+      post_id = Integer.to_string(post.id)
+
+      # Test new reply added
+      {:ok, view, _html} = live(conn, "/")
+      reply = reply_fixture(user, post, "Test Reply")
+      reply_id = Integer.to_string(reply.id)
+
+      {:ok, view_2, _html} = live(conn, "/")
+      view_2 |> element("#board-name", board.name) |> render_click
+      view_2 |> element("#post-listing-link", post.title) |> render_click
+
+      # Test reply edit
+      view_2 |> element("#edit-reply-link-" <> reply_id) |> render_click
+      view_2 |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}}) |> render_submit
+      # Test OP edit
+      view_2 |> element("#edit-post-link-" <> post_id) |> render_click
+      view_2 |> form("#edit-post-form-" <> post_id, %{post: %{body: "POSTEDIT"}}) |> render_submit
+      # Test reply delete
+      view_2 |> element("#delete-reply-link-" <> reply_id) |> render_click
+      view_2 |> element("#delete-reply-final-" <> reply_id) |> render_click
+
+      # Original LV is still alive and was updated
+      assert has_element?(view, "#main-header")
+      assert render(view) =~ "1 post"
+
+      # Board 2 still has not changed
+      assert render(view) =~ "No posts yet!"
+    end
+
+    test "Post/reply changes as seen from another post", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      Repo.insert!(%Board{
+        name: "Sample Topic", description: "Test Board #2",
+        post_count: 0, topic_count: 0, last_post: nil, last_user: nil})
+      post = post_fixture(user, board)
+      post_id = Integer.to_string(post.id)
+      post_2 = post_fixture(user, board, "Second Post")
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post_2.title) |> render_click
+
+      # Test new reply added
+      reply = reply_fixture(user, post, "Test Reply")
+      reply_id = Integer.to_string(reply.id)
+
+      {:ok, view_2, _html} = live(conn, "/")
+      view_2 |> element("#board-name", board.name) |> render_click
+      view_2 |> element("#post-listing-link", post.title) |> render_click
+
+      # Test reply edit
+      view_2 |> element("#edit-reply-link-" <> reply_id) |> render_click
+      view_2 |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}}) |> render_submit
+      # Test OP edit
+      view_2 |> element("#edit-post-link-" <> post_id) |> render_click
+      view_2 |> form("#edit-post-form-" <> post_id, %{post: %{body: "POSTEDIT"}}) |> render_submit
+      # Test reply delete
+      view_2 |> element("#delete-reply-link-" <> reply_id) |> render_click
+      view_2 |> element("#delete-reply-final-" <> reply_id) |> render_click
+
+      # Original LV is still alive with no other changes
+      assert has_element?(view, "#post-header", post_2.title)
+    end
   end
 
   def login_fixture(conn, user) do
@@ -899,7 +968,7 @@ defmodule PhxBbWeb.PageLiveTest do
     # Update the user's post count
     {1, _} = Accounts.added_post(user.id)
 
-    message = {:new_reply, post.id, reply, user.id}
+    message = {:new_reply, reply, post.board_id}
     Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
 
     reply
