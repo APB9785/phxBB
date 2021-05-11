@@ -12,6 +12,8 @@ defmodule PhxBb.Posts.Post do
     field :body, :string
     field :title, :string
     field :last_user, :integer
+    field :last_reply_at, :naive_datetime
+    field :edited_by, :integer
     field :view_count, :integer
     field :reply_count, :integer
     has_many :replies, PhxBb.Replies.Reply, on_delete: :delete_all
@@ -23,7 +25,8 @@ defmodule PhxBb.Posts.Post do
   @doc false
   def changeset(post, attrs) do
     post
-    |> cast(attrs, [:title, :body, :board_id, :author, :last_user, :view_count, :reply_count])
+    |> cast(attrs,
+      [:title, :body, :board_id, :author, :last_user, :view_count, :reply_count, :last_reply_at, :edited_by])
     |> validate_required([:title, :body, :board_id, :author, :view_count, :reply_count])
     |> validate_length(:title, min: 3)
     |> validate_length(:body, min: 3)

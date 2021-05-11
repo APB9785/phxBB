@@ -9,6 +9,7 @@ defmodule PhxBb.Replies.Reply do
 
   schema "replies" do
     field :author, :integer
+    field :edited_by, :integer
     field :body, :string
     belongs_to :post, PhxBb.Posts.Post
 
@@ -18,7 +19,7 @@ defmodule PhxBb.Replies.Reply do
   @doc false
   def changeset(reply, attrs) do
     reply
-    |> cast(attrs, [:body, :author, :post_id])
+    |> cast(attrs, [:body, :author, :post_id, :edited_by])
     |> validate_required([:body, :author, :post_id])
     |> validate_length(:body, min: 3)
   end

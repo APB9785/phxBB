@@ -100,6 +100,13 @@ defmodule PhxBb.Accounts do
     |> Repo.update_all([])
   end
 
+  def deleted_post(user_id) do
+    from(u in User,
+      update: [inc: [post_count: -1]],
+      where: u.id == ^user_id)
+    |> Repo.update_all([])
+  end
+
   def last_five_posts(user_id) do
     post_query =
       from p in Post,

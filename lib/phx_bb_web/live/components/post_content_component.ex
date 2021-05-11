@@ -10,6 +10,7 @@ defmodule PhxBbWeb.PostContentComponent do
 
   alias PhxBb.Posts
   alias PhxBb.Replies
+  alias PhxBbWeb.PostContentBodyComponent
 
   def mount(socket) do
     socket = assign(socket, edit: false, delete: false)
@@ -34,11 +35,13 @@ defmodule PhxBbWeb.PostContentComponent do
   end
 
   def handle_event("save_edit", %{"post" => params}, socket) do
+    params = %{edited_by: socket.assigns.active_user.id, body: params["body"]}
     case Posts.update_post(socket.assigns.post, params) do
       {:ok, post} ->
         # Update locally
-        socket = assign(socket, post: post, edit: false)
+        socket = assign(socket, edit: false)
         # Send PubSub message to update
+        Phoenix.PubSub.broadcast(PhxBb.PubSub, "posts", {:edited_post, post})
 
         {:noreply, socket}
 
@@ -49,11 +52,13 @@ defmodule PhxBbWeb.PostContentComponent do
   end
 
   def handle_event("save_edit", %{"reply" => params}, socket) do
+    params = %{edited_by: socket.assigns.active_user.id, body: params["body"]}
     case Replies.update_reply(socket.assigns.post, params) do
       {:ok, reply} ->
         # Update locally
-        socket = assign(socket, post: reply, edit: false)
+        socket = assign(socket, edit: false)
         # Send PubSub message to update
+        Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", {:edited_reply, reply})
 
         {:noreply, socket}
 
@@ -86,29 +91,28 @@ defmodule PhxBbWeb.PostContentComponent do
   end
 
   def handle_event("cancel_edit", _params, socket) do
-    socket =
-      assign(socket,
-        edit: false,
-        changeset: Ecto.Changeset.delete_change(socket.assigns.changeset, :body))
+    changeset = case socket.assigns.type do
+      "post" -> Posts.change_post(socket.assigns.post)
+      "reply" -> Replies.change_reply(socket.assigns.post)
+    end
+    socket = assign(socket, edit: false, changeset: changeset)
 
     {:noreply, socket}
   end
 
-  def handle_event("delete_post", %{"id" => post_id}, socket) do
-    # DB update
-    Posts.delete_post_body(post_id, socket.assigns.active_user.id)
-    # Local update
-    socket = assign(socket, post: %{socket.assigns.post | body: "_Post deleted._"}, delete: false)
-    # Need to add PubSub message
+  def handle_event("delete_post", %{"id" => _post_id}, socket) do
+    params = %{body: "_Post deleted._", edited_by: socket.assigns.active_user.id}
+    {:ok, post} = Posts.update_post(socket.assigns.post, params)
+    socket = assign(socket, delete: false)
+    Phoenix.PubSub.broadcast(PhxBb.PubSub, "posts", {:edited_post, post})
+
     {:noreply, socket}
   end
 
-  def handle_event("delete_reply", %{"id" => id}, socket) do
-    # DB update
-    Replies.delete_reply(socket.assigns.post)
-    # Local update
-    send(self(), {:delete_reply, String.to_integer(id)})
-    # Need to add PubSub message
+  def handle_event("delete_reply", _params, socket) do
+    {:ok, reply} = Replies.delete_reply(socket.assigns.post)
+    send(self(), {:backend_delete_reply, reply})
+
     {:noreply, socket}
   end
 
@@ -121,7 +125,7 @@ defmodule PhxBbWeb.PostContentComponent do
 
   def edit_post_form_value(changeset) do
     case changeset.changes[:body] do
-      nil -> changeset.data.body
+      nil -> if changeset.errors == [] do changeset.data.body else "" end
       changed_body -> changed_body
     end
   end

@@ -9,13 +9,6 @@ defmodule PhxBbWeb.MainIndexComponent do
   import PhxBbWeb.StyleHelpers
 
   alias PhxBb.Accounts
-  alias PhxBb.Boards
-
-  def mount(socket) do
-    boards = Boards.list_boards()
-    socket = assign(socket, board_list: boards)
-    {:ok, socket}
-  end
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)

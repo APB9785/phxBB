@@ -68,7 +68,10 @@
           Cancel
         </button>
     <% else %>
-      <%= parse_post_body(@post.body) %>
+      <%= live_component @socket, PostContentBodyComponent,
+            post: @post,
+            active_user: @active_user,
+            user_cache: @user_cache %>
     <% end %>
   </div>
 </div>

@@ -11,6 +11,7 @@ defmodule PhxBbWeb.LiveHelpers do
   alias PhxBb.Boards
   alias PhxBb.Boards.Board
   alias PhxBb.Posts
+  alias PhxBb.Posts.Post
   alias PhxBb.Replies
 
   @month_abv_map %{1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun",
@@ -43,12 +44,27 @@ defmodule PhxBbWeb.LiveHelpers do
 
       post ->
         replies = Replies.list_replies(post.id)
-        user_ids = Enum.map(replies, fn reply -> reply.author end)
-        cache = Accounts.build_cache([post.author | user_ids], socket.assigns.user_cache)
+        user_ids = parse_user_ids(replies, post)
+        cache = Accounts.build_cache(user_ids, socket.assigns.user_cache)
 
         socket
         |> assign_post_nav(post)
         |> assign(active_post: post, user_cache: cache, reply_list: replies)
+    end
+  end
+
+  defp parse_user_ids(replies, post) do
+    user_ids =
+      Enum.reduce(replies, [], fn reply, acc ->
+        case reply.edited_by do
+          nil -> [reply.author | acc]
+          editor -> [reply.author | [editor | acc]]
+        end
+      end)
+
+    case post.edited_by do
+      nil -> [post.author | user_ids]
+      editor -> [post.author | [editor | user_ids]]
     end
   end
 
@@ -73,7 +89,12 @@ defmodule PhxBbWeb.LiveHelpers do
   end
 
   def assign_defaults(socket) do
-    assign(socket, [active_board: nil, active_post: nil])
+    boards = Boards.list_boards()
+    assign(socket,
+      active_board: nil,
+      active_post: nil,
+      board_list: boards
+    )
   end
 
   # Query the database for Board data only if the active Board has changed.
@@ -189,6 +210,16 @@ defmodule PhxBbWeb.LiveHelpers do
   def post_count_display(%Board{post_count: 1}), do: "1 post"
   def post_count_display(%Board{post_count: count}) do
     Integer.to_string(count) <> " posts"
+  end
+
+  def view_count_display(%Post{view_count: 1}), do: "1 view"
+  def view_count_display(%Post{view_count: count}) do
+    Integer.to_string(count) <> " views"
+  end
+
+  def reply_count_display(%Post{reply_count: 1}), do: "1 reply"
+  def reply_count_display(%Post{reply_count: count}) do
+    Integer.to_string(count) <> " replies"
   end
 
   # Post + Reply

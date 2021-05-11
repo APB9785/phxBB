@@ -653,13 +653,22 @@ defmodule PhxBbWeb.PageLiveTest do
     end
 
     test "Delete a reply", %{conn: conn, user: user, board: board} do
+      user_2 = user_fixture()
       conn = login_fixture(conn, user)
-      post = post_fixture(user, board)
+      post = post_fixture(user_2, board)
+      post_id_label = "#post-" <> Integer.to_string(post.id) <> "-latest-info"
       reply = reply_fixture(user, post, "Get rid of me!")
       reply_id = Integer.to_string(reply.id)
       {:ok, view, _html} = live(conn, "/")
 
+      assert has_element?(view, "#last-post-author-link", user.username)
+      assert has_element?(view, "#board-post-count", "2")
+
       view |> element("#board-name", board.name) |> render_click
+
+      assert render(view) =~ "1 reply"
+      assert has_element?(view, post_id_label, user.username)
+
       view |> element("#post-listing-link", post.title) |> render_click
 
       assert render(view) =~ "Get rid of me!"
@@ -667,7 +676,19 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#delete-reply-link-" <> reply_id) |> render_click
       view |> element("#delete-reply-final-" <> reply_id) |> render_click
 
+      # Ensure reply was deleted
       refute render(view) =~ "Get rid of me!"
+
+      view |> element("#crumb-board") |> render_click
+
+      assert render(view) =~ "0 replies"
+      assert has_element?(view, post_id_label, user_2.username)
+
+      view |> element("#crumb-index") |> render_click
+
+      # Ensure Board info was updated
+      assert has_element?(view, "#last-post-author-link", user_2.username)
+      assert has_element?(view, "#board-post-count", "1")
     end
 
     test "Validate post edits", %{conn: conn, user: user, board: board} do

@@ -10,11 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Administrator account: can edit and delete posts
 - Users can now edit and delete their own posts
+- Timestamp and user attribution is shown below edited posts
 
 ### Fixed
 
 - Login prompt now positioned properly on all screen sizes
 - A post and reply with the same database ID will no longer have HTML ID conflicts
+- Cancel link on post editor now works properly even when errors are displayed
+- Post edit validation no longer undoes changes when the form is completely empty
+- Post view and reply count now use singular grammar when the count is one
 
 ## [0.4.1] - 2021-05-04
 

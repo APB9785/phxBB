@@ -9,7 +9,7 @@
 
 <div class="<%= content_background(@active_user) %>">
 
-  <%= if @nav != :main do %>
+  <%= if !(@nav in [:main, :invalid]) do %>
     <%= live_component @socket, BreadcrumbComponent,
           active_user: @active_user,
           active_board: @active_board,
@@ -25,7 +25,8 @@
     </div>
     <%= live_component @socket, MainIndexComponent,
           active_user: @active_user,
-          user_cache: @user_cache %>
+          user_cache: @user_cache,
+          board_list: @board_list %>
 
   <% :board -> %>
     <div class="text-2xl pb-4 md:pl-8" id="board-header">

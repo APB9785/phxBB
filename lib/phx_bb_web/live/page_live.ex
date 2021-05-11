@@ -9,8 +9,10 @@ defmodule PhxBbWeb.PageLive do
   import PhxBbWeb.StyleHelpers
 
   alias PhxBb.Accounts
+  alias PhxBb.Boards
   alias PhxBb.Posts
   alias PhxBb.Replies
+  alias PhxBb.Replies.Reply
   alias PhxBbWeb.BoardComponent
   alias PhxBbWeb.BreadcrumbComponent
   alias PhxBbWeb.CreatePostComponent
@@ -188,13 +190,77 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
 
-  def handle_info({:delete_reply, reply_id}, socket) do
-    new_reply_list = Enum.reject(socket.assigns.reply_list, &(&1.id == reply_id))
-    socket = assign(socket, reply_list: new_reply_list)
+  def handle_info({:backend_delete_reply, %Reply{id: reply_id} = reply}, socket) do
+    board = socket.assigns.active_board
+    active_post = socket.assigns.active_post
+    # Reply has already been removed from the DB
+    case Enum.reverse(socket.assigns.reply_list) do
+      [%Reply{id: ^reply_id}] ->
+        # Give OP info to Post as latest
+        Posts.deleted_only_reply(active_post)
+        # Find second-to-last post/reply for Board
+        [next_post] = Posts.most_recent_post(board.id)
+        Boards.deleted_latest_reply(board.id, next_post)
+        # Remove the reply from all viewers' assigns
+        new_reply_list = []
+        message = {:deleted_reply, new_reply_list, active_post.id, next_post}
+        Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
+
+      [%Reply{id: ^reply_id} | [next | rest]] ->
+        # Give second-to-last reply to the Post
+        Posts.deleted_last_reply(reply.post_id, next.author, next.inserted_at)
+        # Find second-to-last post/reply for Board
+        [next_post] = Posts.most_recent_post(board.id)
+        Boards.deleted_latest_reply(board.id, next_post)
+        # Remove the reply from all viewers' assigns
+        new_reply_list = [next | rest]
+        message = {:deleted_reply, new_reply_list, active_post.id, next_post}
+        Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
+
+      reversed_reply_list ->
+        # Decrement Post's reply count
+        Posts.deleted_reply(reply.post_id)
+        # Decrement Board's reply count
+        Boards.deleted_reply(board.id)
+        # Remove the reply from all viewers' assigns
+        new_reply_list =
+          Enum.reject(reversed_reply_list, &(&1.id == reply_id))
+          |> Enum.reverse
+        message = {:deleted_reply, new_reply_list, active_post.id, hd(reversed_reply_list)}
+        Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
+    end
+    # Decrement author's post count
+    Accounts.deleted_post(reply.author)
+
     {:noreply, socket}
   end
 
   # PubSub messages
+
+  def handle_info({:deleted_reply, new_reply_list, post_id, next_post}, socket) do
+    new_board_list = update_board_list(socket.assigns.board_list, next_post.board_id, [
+      post_count: &(&1 - 1),
+      last_post: fn _ -> next_post.id end,
+      last_user: fn _ -> next_post.author end,
+      updated_at: fn _ -> NaiveDateTime.utc_now() end
+    ])
+    socket =
+      socket
+      |> delete_reply(new_reply_list, post_id)
+      |> assign(board_list: new_board_list)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:edited_reply, new_reply}, socket) do
+    socket = edit_reply(socket, new_reply)
+    {:noreply, socket}
+  end
+
+  def handle_info({:edited_post, new_post}, socket) do
+    socket = edit_post(socket, new_post)
+    {:noreply, socket}
+  end
 
   def handle_info({:user_avatar_change, user_id, avatar}, socket) do
     socket = update_cache(socket, user_id, :avatar, avatar)
@@ -206,26 +272,105 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
 
-  def handle_info({:new_reply, post_id, reply, author_id}, socket) do
+  def handle_info({:new_reply, reply, board_id}, socket) do
+    new_board_list = update_board_list(socket.assigns.board_list, board_id, [
+      post_count: &(&1 + 1),
+      last_post: fn _ -> reply.post_id end,
+      last_user: fn _ -> reply.author end,
+      updated_at: fn _ -> NaiveDateTime.utc_now() end
+    ])
     socket =
       socket
-      |> update_reply_list(post_id, reply)
-      |> update_cache_post_count(author_id)
+      |> add_reply(reply.post_id, reply)
+      |> assign(board_list: new_board_list)
+      |> update_cache_post_count(reply.author)
 
     {:noreply, socket}
   end
 
-  def handle_info({:new_post, author_id}, socket) do
-    socket = update_cache_post_count(socket, author_id)
-    {:noreply, socket}
-  end
-
-  defp update_reply_list(socket, post_id, reply) do
-    if post_id == socket.assigns.active_post.id do
-      assign(socket, reply_list: socket.assigns.reply_list ++ [reply])
-    else
+  def handle_info({:new_topic, author_id, post_id, board_id}, socket) do
+    new_board_list = update_board_list(socket.assigns.board_list, board_id, [
+      topic_count: &(&1 + 1),
+      post_count: &(&1 + 1),
+      last_post: fn _ -> post_id end,
+      last_user: fn _ -> author_id end,
+      updated_at: fn _ -> NaiveDateTime.utc_now() end
+    ])
+    socket =
       socket
+      |> update_cache_post_count(author_id)
+      |> assign(board_list: new_board_list)
+
+    {:noreply, socket}
+  end
+
+  def update_board_list(board_list, board_id, changes) do
+    Enum.map(board_list, fn b ->
+      if b.id == board_id do
+        Enum.reduce(changes, b, fn {key, func}, acc ->
+          Map.update!(acc, key, func)
+        end)
+      else
+        b
+      end
+    end)
+  end
+
+  defp edit_post(socket, new_post) do
+    cond do
+      is_nil(socket.assigns[:active_post]) ->
+        socket
+      socket.assigns.active_post.id == new_post.id ->
+        assign(socket, active_post: new_post)
+      true ->
+        socket
     end
+  end
+
+  defp edit_reply(socket, new_reply) do
+    cond do
+      is_nil(socket.assigns[:active_post]) ->
+        socket
+      socket.assigns.active_post.id == new_reply.post_id ->
+        new_reply_list = replace_reply_list(socket.assigns.reply_list, new_reply)
+        assign(socket, reply_list: new_reply_list)
+      true ->
+        socket
+    end
+  end
+
+  defp delete_reply(socket, new_reply_list, post_id) do
+    cond do
+      is_nil(socket.assigns[:active_post]) ->
+        socket
+      socket.assigns.active_post.id == post_id ->
+        assign(socket,
+          reply_list: new_reply_list,
+          active_board: Map.update!(socket.assigns.active_board, :post_count, &(&1 - 1)),
+          active_post: Map.update!(socket.assigns.active_post, :reply_count, &(&1 - 1)))
+      true ->
+        socket
+    end
+  end
+
+  defp add_reply(socket, post_id, reply) do
+    cond do
+      is_nil(socket.assigns[:active_post]) ->
+        socket
+      post_id == socket.assigns.active_post.id ->
+        assign(socket,
+          reply_list: socket.assigns.reply_list ++ [reply],
+          active_board: Map.update!(socket.assigns.active_board, :post_count, &(&1 + 1)),
+          active_post: Map.update!(socket.assigns.active_post, :reply_count, &(&1 + 1)))
+      true ->
+        socket
+    end
+  end
+
+  defp replace_reply_list(reply_list, new_reply) do
+    Enum.map(reply_list, fn reply ->
+      if reply.id == new_reply.id, do: new_reply, else: reply
+    end)
   end
 
   defp update_cache_post_count(socket, author_id) do

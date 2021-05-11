@@ -24,6 +24,7 @@ defmodule PhxBbWeb.PostComponent do
             active_user: @active_user,
             post: @active_post,
             type: "post",
+            user_cache: @user_cache,
             id: "post-content-component" %>
     </div>
 
@@ -41,6 +42,7 @@ defmodule PhxBbWeb.PostComponent do
                 active_user: @active_user,
                 post: reply,
                 type: "reply",
+                user_cache: @user_cache,
                 id: id_maker("reply", "content", "comp", reply.id) %>
         </div>
 

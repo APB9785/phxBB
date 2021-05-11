@@ -24,8 +24,14 @@ defmodule PhxBb.Posts do
   def list_posts(board_id) do
     Repo.all(from p in Post,
              where: p.board_id == ^board_id,
-             order_by: [desc: p.updated_at])
-    # |> Enum.sort_by(fn schema -> schema.updated_at end, {:desc, NaiveDateTime})
+             order_by: [desc: p.last_reply_at])
+  end
+
+  def most_recent_post(board_id) do
+    Repo.all(from p in Post,
+             where: p.board_id == ^board_id,
+             order_by: [desc: p.last_reply_at],
+             limit: 1)
   end
 
   @doc """
@@ -65,7 +71,8 @@ defmodule PhxBb.Posts do
 
   """
   def create_post(attrs \\ %{}) do
-    attrs = Enum.into(attrs, %{view_count: 0, reply_count: 0})
+    now = NaiveDateTime.utc_now()
+    attrs = Enum.into(attrs, %{view_count: 0, reply_count: 0, last_reply_at: now})
 
     %Post{}
     |> Post.changeset(attrs)
@@ -87,7 +94,7 @@ defmodule PhxBb.Posts do
   def update_post(%Post{} = post, attrs) do
     post
     |> Post.changeset(attrs)
-    |> Repo.update([force: true])
+    |> Repo.update()
   end
 
   def viewed(post_id) do
@@ -99,8 +106,31 @@ defmodule PhxBb.Posts do
     now = NaiveDateTime.utc_now()
     from(p in Post,
       update: [inc: [reply_count: 1],
-               set: [last_user: ^user_id, updated_at: ^now]],
+               set: [last_user: ^user_id, last_reply_at: ^now]],
       where: p.id == ^post_id)
+    |> Repo.update_all([])
+  end
+
+  def deleted_reply(post_id) do
+    from(p in Post,
+      update: [inc: [reply_count: -1]],
+      where: p.id == ^post_id)
+    |> Repo.update_all([])
+  end
+
+  def deleted_last_reply(post_id, user_id, time) do
+    from(p in Post,
+      update: [inc: [reply_count: -1],
+               set: [last_user: ^user_id, last_reply_at: ^time]],
+      where: p.id == ^post_id)
+    |> Repo.update_all([])
+  end
+
+  def deleted_only_reply(%Post{id: id, author: author, inserted_at: time}) do
+    from(p in Post,
+      update: [inc: [reply_count: -1],
+               set: [last_user: ^author, last_reply_at: ^time]],
+      where: p.id == ^id)
     |> Repo.update_all([])
   end
 

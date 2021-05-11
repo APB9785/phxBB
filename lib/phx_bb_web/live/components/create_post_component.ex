@@ -34,7 +34,7 @@ defmodule PhxBbWeb.CreatePostComponent do
         # Update the user's post count
         {1, _} = Accounts.added_post(user.id)
 
-        message = {:new_post, user.id}
+        message = {:new_topic, user.id, post.id, post.board_id}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "posts", message)
 
         socket =
