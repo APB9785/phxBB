@@ -226,7 +226,8 @@ defmodule PhxBbWeb.PageLive do
         new_reply_list =
           Enum.reject(reversed_reply_list, &(&1.id == reply_id))
           |> Enum.reverse
-        message = {:deleted_reply, new_reply_list, active_post.id, hd(reversed_reply_list)}
+        [next_post] = Posts.most_recent_post(board.id)
+        message = {:deleted_reply, new_reply_list, active_post.id, next_post}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
     end
     # Decrement author's post count
@@ -241,7 +242,7 @@ defmodule PhxBbWeb.PageLive do
     new_board_list = update_board_list(socket.assigns.board_list, next_post.board_id, [
       post_count: &(&1 - 1),
       last_post: fn _ -> next_post.id end,
-      last_user: fn _ -> next_post.author end,
+      last_user: fn _ -> next_post.last_user end,
       updated_at: fn _ -> NaiveDateTime.utc_now() end
     ])
     socket =

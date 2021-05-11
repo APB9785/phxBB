@@ -652,7 +652,7 @@ defmodule PhxBbWeb.PageLiveTest do
       refute has_element?(view, "#delete-post-final-" <> post_id)
     end
 
-    test "Delete a reply", %{conn: conn, user: user, board: board} do
+    test "Delete a lone reply", %{conn: conn, user: user, board: board} do
       user_2 = user_fixture()
       conn = login_fixture(conn, user)
       post = post_fixture(user_2, board)
@@ -689,6 +689,88 @@ defmodule PhxBbWeb.PageLiveTest do
       # Ensure Board info was updated
       assert has_element?(view, "#last-post-author-link", user_2.username)
       assert has_element?(view, "#board-post-count", "1")
+    end
+
+    test "Delete the older of two replies", %{conn: conn, user: user, board: board} do
+      user_2 = user_fixture(%{timezone: "Etc/UTC"})
+      user_3 = user_fixture()
+      conn = login_fixture(conn, user_2)
+      post = post_fixture(user, board)
+      post_id_label = "#post-" <> Integer.to_string(post.id) <> "-latest-info"
+      reply = reply_fixture(user_2, post, "Get rid of me!")
+      reply_id = Integer.to_string(reply.id)
+      _reply_2 = reply_fixture(user_3, post, "Keep this reply")
+      {:ok, view, _html} = live(conn, "/")
+
+      assert has_element?(view, "#last-post-author-link", user_3.username)
+      assert has_element?(view, "#board-post-count", "3")
+
+      view |> element("#board-name", board.name) |> render_click
+
+      assert render(view) =~ "2 replies"
+      assert has_element?(view, post_id_label, user_3.username)
+
+      view |> element("#post-listing-link", post.title) |> render_click
+
+      assert render(view) =~ "Get rid of me!"
+
+      view |> element("#delete-reply-link-" <> reply_id) |> render_click
+      view |> element("#delete-reply-final-" <> reply_id) |> render_click
+
+      # Ensure reply was deleted
+      refute render(view) =~ "Get rid of me!"
+
+      view |> element("#crumb-board") |> render_click
+
+      assert render(view) =~ "1 reply"
+      assert has_element?(view, post_id_label, user_3.username)
+
+      view |> element("#crumb-index") |> render_click
+
+      # Ensure Board info was updated
+      assert has_element?(view, "#last-post-author-link", user_3.username)
+      assert has_element?(view, "#board-post-count", "2")
+    end
+
+    test "Delete the newer of two replies", %{conn: conn, user: user, board: board} do
+      user_2 = user_fixture()
+      user_3 = user_fixture(%{timezone: "Etc/UTC"})
+      conn = login_fixture(conn, user_3)
+      post = post_fixture(user, board)
+      post_id_label = "#post-" <> Integer.to_string(post.id) <> "-latest-info"
+      _reply = reply_fixture(user_2, post, "Keep this reply")
+      reply_2 = reply_fixture(user_3, post, "Get rid of me!")
+      reply_2_id = Integer.to_string(reply_2.id)
+      {:ok, view, _html} = live(conn, "/")
+
+      assert has_element?(view, "#last-post-author-link", user_3.username)
+      assert has_element?(view, "#board-post-count", "3")
+
+      view |> element("#board-name", board.name) |> render_click
+
+      assert render(view) =~ "2 replies"
+      assert has_element?(view, post_id_label, user_3.username)
+
+      view |> element("#post-listing-link", post.title) |> render_click
+
+      assert render(view) =~ "Get rid of me!"
+
+      view |> element("#delete-reply-link-" <> reply_2_id) |> render_click
+      view |> element("#delete-reply-final-" <> reply_2_id) |> render_click
+
+      # Ensure reply was deleted
+      refute render(view) =~ "Get rid of me!"
+
+      view |> element("#crumb-board") |> render_click
+
+      assert render(view) =~ "1 reply"
+      assert has_element?(view, post_id_label, user_2.username)
+
+      view |> element("#crumb-index") |> render_click
+
+      # Ensure Board info was updated
+      assert has_element?(view, "#last-post-author-link", user_2.username)
+      assert has_element?(view, "#board-post-count", "2")
     end
 
     test "Validate post edits", %{conn: conn, user: user, board: board} do
@@ -767,7 +849,24 @@ defmodule PhxBbWeb.PageLiveTest do
 
       view |> element("#cancel-post-edit-" <> post_id) |> render_click
 
-      refute has_element?(view, "#edit-post-form")
+      refute has_element?(view, "#edit-post-form-" <> post_id)
+    end
+
+    test "Cancel a reply edit", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      post = post_fixture(user, board)
+      reply = reply_fixture(user, post, "Please edit me!")
+      reply_id = Integer.to_string(reply.id)
+      {:ok, view, _html} = live(conn, "/")
+      view |> element("#board-name", board.name) |> render_click
+      view |> element("#post-listing-link", post.title) |> render_click
+      view |> element("#edit-reply-link-" <> reply_id) |> render_click
+
+      assert has_element?(view, "#edit-reply-form-" <> reply_id)
+
+      view |> element("#cancel-reply-edit-" <> reply_id) |> render_click
+
+      refute has_element?(view, "#edit-reply-form-" <> reply_id)
     end
   end
 

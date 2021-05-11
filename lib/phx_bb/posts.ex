@@ -150,14 +150,6 @@ defmodule PhxBb.Posts do
     Repo.delete(post)
   end
 
-  def delete_post_body(post_id, user_id) do
-    now = NaiveDateTime.utc_now()
-    from(p in Post,
-      update: [set: [body: "_Post deleted._", last_user: ^user_id, updated_at: ^now]],
-      where: p.id == ^post_id)
-    |> Repo.update_all([])
-  end
-
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking post changes.
 
