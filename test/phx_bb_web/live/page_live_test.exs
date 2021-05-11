@@ -676,8 +676,7 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#delete-reply-link-" <> reply_id) |> render_click
       view |> element("#delete-reply-final-" <> reply_id) |> render_click
 
-      Process.sleep(50) # This will hopefully fix an issue where the upcoming
-      # refutation fails in CI testing
+      Process.sleep(50) # upcoming refutation fails in CI testing otherwise
 
       # Ensure reply was deleted
       refute render(view) =~ "Get rid of me!"
@@ -760,6 +759,8 @@ defmodule PhxBbWeb.PageLiveTest do
 
       view |> element("#delete-reply-link-" <> reply_2_id) |> render_click
       view |> element("#delete-reply-final-" <> reply_2_id) |> render_click
+
+      Process.sleep(50) # upcoming refutation fails in CI testing otherwise
 
       # Ensure reply was deleted
       refute render(view) =~ "Get rid of me!"
