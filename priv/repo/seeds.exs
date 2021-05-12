@@ -11,20 +11,25 @@
 # and so on) as they will fail if something goes wrong.
 
 alias PhxBb.Accounts
+alias PhxBb.Accounts.User
 alias PhxBb.Boards.Board
 alias PhxBb.Repo
 
-%{
-  email: "admin@phxbb.app",
-  password: "CHANGEME",
-  username: "admin",
-  post_count: 9000,
-  title: "Forum Administrator",
-  theme: "dark",
-  admin: true,
-  timezone: "US/Central"
-}
-|> Accounts.register_user()
+{:ok, user} =
+  %{
+    email: "admin@phxbb.app",
+    password: "CHANGEME",
+    username: "admin",
+    post_count: 9000,
+    title: "Forum Administrator",
+    theme: "dark",
+    admin: true,
+    timezone: "US/Central"
+  }
+  |> Accounts.register_user()
+
+User.confirm_changeset(user)
+|> Repo.update()
 
 gen_script =
   "This board is for discussion of a general nature. Please feel free to " <>
