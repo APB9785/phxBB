@@ -22,16 +22,20 @@ defmodule PhxBb.Posts do
 
   """
   def list_posts(board_id) do
-    Repo.all(from p in Post,
-             where: p.board_id == ^board_id,
-             order_by: [desc: p.last_reply_at])
+    Repo.all(
+      from p in Post,
+        where: p.board_id == ^board_id,
+        order_by: [desc: p.last_reply_at]
+    )
   end
 
   def most_recent_post(board_id) do
-    Repo.all(from p in Post,
-             where: p.board_id == ^board_id,
-             order_by: [desc: p.last_reply_at],
-             limit: 1)
+    Repo.all(
+      from p in Post,
+        where: p.board_id == ^board_id,
+        order_by: [desc: p.last_reply_at],
+        limit: 1
+    )
   end
 
   @doc """
@@ -53,9 +57,11 @@ defmodule PhxBb.Posts do
   def get_post!(id), do: Repo.get!(Post, id)
 
   def get_title(id) do
-    Repo.one from p in Post,
-               where: p.id == ^id,
-               select: p.title
+    Repo.one(
+      from p in Post,
+        where: p.id == ^id,
+        select: p.title
+    )
   end
 
   @doc """
@@ -104,33 +110,35 @@ defmodule PhxBb.Posts do
 
   def added_reply(post_id, user_id) do
     now = NaiveDateTime.utc_now()
+
     from(p in Post,
-      update: [inc: [reply_count: 1],
-               set: [last_user: ^user_id, last_reply_at: ^now]],
-      where: p.id == ^post_id)
+      update: [inc: [reply_count: 1], set: [last_user: ^user_id, last_reply_at: ^now]],
+      where: p.id == ^post_id
+    )
     |> Repo.update_all([])
   end
 
   def deleted_reply(post_id) do
     from(p in Post,
       update: [inc: [reply_count: -1]],
-      where: p.id == ^post_id)
+      where: p.id == ^post_id
+    )
     |> Repo.update_all([])
   end
 
   def deleted_last_reply(post_id, user_id, time) do
     from(p in Post,
-      update: [inc: [reply_count: -1],
-               set: [last_user: ^user_id, last_reply_at: ^time]],
-      where: p.id == ^post_id)
+      update: [inc: [reply_count: -1], set: [last_user: ^user_id, last_reply_at: ^time]],
+      where: p.id == ^post_id
+    )
     |> Repo.update_all([])
   end
 
   def deleted_only_reply(%Post{id: id, author: author, inserted_at: time}) do
     from(p in Post,
-      update: [inc: [reply_count: -1],
-               set: [last_user: ^author, last_reply_at: ^time]],
-      where: p.id == ^id)
+      update: [inc: [reply_count: -1], set: [last_user: ^author, last_reply_at: ^time]],
+      where: p.id == ^id
+    )
     |> Repo.update_all([])
   end
 

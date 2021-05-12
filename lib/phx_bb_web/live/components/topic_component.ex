@@ -1,4 +1,4 @@
-defmodule PhxBbWeb.PostComponent do
+defmodule PhxBbWeb.TopicComponent do
   @moduledoc """
   View a post and its replies.
   """

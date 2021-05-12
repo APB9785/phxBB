@@ -23,9 +23,10 @@ defmodule PhxBb.Accounts.UserNotifier do
     |> from({"PhxBB team", "phxbbmail@gmail.com"})
     |> subject("Please confirm your phxBB acount")
     |> text_body(body)
-    |> PhxBb.Mailer.deliver
+    |> PhxBb.Mailer.deliver()
 
-    return_token(url)  # Returns for LiveView testing
+    # Returns for LiveView testing
+    return_token(url)
   end
 
   @doc """
@@ -42,9 +43,10 @@ defmodule PhxBb.Accounts.UserNotifier do
     |> from({"PhxBB team", "phxbbmail@gmail.com"})
     |> subject("Reset password for your phxBB acount")
     |> text_body(body)
-    |> PhxBb.Mailer.deliver
+    |> PhxBb.Mailer.deliver()
 
-    body  # Returns for controller testing
+    # Returns for controller testing
+    body
   end
 
   @doc """
@@ -61,9 +63,10 @@ defmodule PhxBb.Accounts.UserNotifier do
     |> from({"PhxBB team", "phxbbmail@gmail.com"})
     |> subject("Change the email for your phxBB acount")
     |> text_body(body)
-    |> PhxBb.Mailer.deliver
+    |> PhxBb.Mailer.deliver()
 
-    return_token(url)  # Returns for LiveView testing
+    # Returns for LiveView testing
+    return_token(url)
   end
 
   defp greeting(user), do: "Hi #{user.username},\n\n"

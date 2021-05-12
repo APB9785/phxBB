@@ -4,7 +4,7 @@ defmodule PhxBb.AccountsFixtures do
   entities via the `PhxBb.Accounts` context.
   """
 
-  def unique_user, do: "user#{rem(System.unique_integer([:positive, :monotonic]), 1000000000)}"
+  def unique_user, do: "user#{rem(System.unique_integer([:positive, :monotonic]), 1_000_000_000)}"
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
 

@@ -54,7 +54,12 @@ defmodule PhxBb.RepliesTest do
       reply = reply_fixture(%{post_id: post.id, author: user.id})
 
       assert {:ok, %Reply{} = reply} =
-        Replies.update_reply(reply, %{author: user_2.id, post_id: post_2.id, body: "some updated body"})
+               Replies.update_reply(reply, %{
+                 author: user_2.id,
+                 post_id: post_2.id,
+                 body: "some updated body"
+               })
+
       assert reply.author == user_2.id
       assert reply.body == "some updated body"
       assert reply.post_id == post_2.id

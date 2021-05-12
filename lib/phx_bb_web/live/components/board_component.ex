@@ -18,6 +18,7 @@ defmodule PhxBbWeb.BoardComponent do
 
   def update(assigns, socket) do
     posts = Posts.list_posts(assigns.active_board.id)
+
     cache =
       Enum.reduce(posts, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
       |> Accounts.build_cache(assigns.user_cache)

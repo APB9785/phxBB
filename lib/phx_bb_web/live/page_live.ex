@@ -18,7 +18,7 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBbWeb.CreatePostComponent
   alias PhxBbWeb.MainIndexComponent
   alias PhxBbWeb.NewReplyComponent
-  alias PhxBbWeb.PostComponent
+  alias PhxBbWeb.TopicComponent
   alias PhxBbWeb.UserMenuComponent
   alias PhxBbWeb.UserProfileComponent
   alias PhxBbWeb.UserRegistrationComponent
@@ -54,43 +54,47 @@ defmodule PhxBbWeb.PageLive do
           |> allow_upload(:avatar,
             accept: ~w(.png .jpeg .jpg),
             max_entries: 1,
-            max_file_size: 100_000)
+            max_file_size: 100_000
+          )
 
         {:ok, socket}
     end
   end
 
   def handle_params(%{"create_post" => "1", "board" => _}, _url, socket)
-  when is_nil(socket.assigns.active_user) do
+      when is_nil(socket.assigns.active_user) do
     socket = push_redirect(socket, to: "/users/log_in")
     {:noreply, socket}
   end
 
   def handle_params(%{"create_post" => "1", "board" => board_id}, _url, socket) do
+    # No need to query database for Board info
     if active_assign_outdated?(:board, board_id, socket) do
       socket = assign_create_full_query(socket, board_id)
       {:noreply, socket}
-    else  # No need to query database for Board info
+    else
       socket = assign(socket, nav: :create_post, page_title: "Create Post")
       {:noreply, socket}
     end
   end
 
   def handle_params(%{"post" => post_id}, _url, socket) do
+    # No need to query database for Post info
     if active_assign_outdated?(:post, post_id, socket) do
       socket = assign_post_full_query(socket, post_id)
       {:noreply, socket}
-    else  # No need to query database for Post info
+    else
       socket = assign_post_nav(socket, socket.assigns.active_post)
       {:noreply, socket}
     end
   end
 
   def handle_params(%{"board" => board_id}, _url, socket) do
+    # No need to query database for Board info
     if active_assign_outdated?(:board, board_id, socket) do
       socket = assign_board_full_query(socket, board_id)
       {:noreply, socket}
-    else  # No need to query database for Board info
+    else
       socket = assign(socket, nav: :board, page_title: socket.assigns.active_board.name)
       {:noreply, socket}
     end
@@ -101,6 +105,7 @@ defmodule PhxBbWeb.PageLive do
       nil ->
         socket = assign_invalid(socket)
         {:noreply, socket}
+
       user ->
         socket = assign(socket, nav: :user_profile, page_title: user.username, view_user: user)
         {:noreply, socket}
@@ -116,6 +121,7 @@ defmodule PhxBbWeb.PageLive do
         socket
         |> put_flash(:info, "You are already registered and logged in.")
         |> push_patch(to: Routes.live_path(socket, __MODULE__))
+
       {:noreply, socket}
     end
   end
@@ -125,6 +131,7 @@ defmodule PhxBbWeb.PageLive do
       nil ->
         socket = push_redirect(socket, to: "/users/log_in")
         {:noreply, socket}
+
       _user ->
         socket = assign(socket, nav: :settings, page_title: "User Settings")
         {:noreply, socket}
@@ -140,6 +147,7 @@ defmodule PhxBbWeb.PageLive do
           socket
           |> put_flash(:info, "Account confirmed successfully.")
           |> redirect(to: "/users/log_in")
+
         {:noreply, socket}
 
       :error ->
@@ -155,6 +163,7 @@ defmodule PhxBbWeb.PageLive do
           socket
           |> put_flash(:info, "Email changed successfully.")
           |> push_redirect(to: Routes.live_path(socket, __MODULE__))
+
         {:noreply, socket}
 
       :error ->
@@ -162,6 +171,7 @@ defmodule PhxBbWeb.PageLive do
           socket
           |> put_flash(:error, "Email change link is invalid or it has expired.")
           |> push_redirect(to: Routes.live_path(socket, __MODULE__))
+
         {:noreply, socket}
     end
   end
@@ -189,6 +199,7 @@ defmodule PhxBbWeb.PageLive do
         active_user: user,
         bg_color: get_theme_background(user)
       )
+
     {:noreply, socket}
   end
 
@@ -227,11 +238,13 @@ defmodule PhxBbWeb.PageLive do
         # Remove the reply from all viewers' assigns
         new_reply_list =
           Enum.reject(reversed_reply_list, &(&1.id == reply_id))
-          |> Enum.reverse
+          |> Enum.reverse()
+
         [next_post] = Posts.most_recent_post(board.id)
         message = {:deleted_reply, new_reply_list, active_post.id, next_post}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
     end
+
     # Decrement author's post count
     Accounts.deleted_post(reply.author)
 
@@ -241,12 +254,14 @@ defmodule PhxBbWeb.PageLive do
   # Global PubSub message handlers
 
   def handle_info({:deleted_reply, new_reply_list, post_id, next_post}, socket) do
-    new_board_list = update_board_list(socket.assigns.board_list, next_post.board_id, [
-      post_count: &(&1 - 1),
-      last_post: fn _ -> next_post.id end,
-      last_user: fn _ -> next_post.last_user end,
-      updated_at: fn _ -> NaiveDateTime.utc_now() end
-    ])
+    new_board_list =
+      update_board_list(socket.assigns.board_list, next_post.board_id,
+        post_count: &(&1 - 1),
+        last_post: fn _ -> next_post.id end,
+        last_user: fn _ -> next_post.last_user end,
+        updated_at: fn _ -> NaiveDateTime.utc_now() end
+      )
+
     socket =
       socket
       |> delete_reply(new_reply_list, post_id)
@@ -276,12 +291,14 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_info({:new_reply, reply, board_id}, socket) do
-    new_board_list = update_board_list(socket.assigns.board_list, board_id, [
-      post_count: &(&1 + 1),
-      last_post: fn _ -> reply.post_id end,
-      last_user: fn _ -> reply.author end,
-      updated_at: fn _ -> NaiveDateTime.utc_now() end
-    ])
+    new_board_list =
+      update_board_list(socket.assigns.board_list, board_id,
+        post_count: &(&1 + 1),
+        last_post: fn _ -> reply.post_id end,
+        last_user: fn _ -> reply.author end,
+        updated_at: fn _ -> NaiveDateTime.utc_now() end
+      )
+
     socket =
       socket
       |> add_reply(reply.post_id, reply)
@@ -292,13 +309,15 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_info({:new_topic, author_id, post_id, board_id}, socket) do
-    new_board_list = update_board_list(socket.assigns.board_list, board_id, [
-      topic_count: &(&1 + 1),
-      post_count: &(&1 + 1),
-      last_post: fn _ -> post_id end,
-      last_user: fn _ -> author_id end,
-      updated_at: fn _ -> NaiveDateTime.utc_now() end
-    ])
+    new_board_list =
+      update_board_list(socket.assigns.board_list, board_id,
+        topic_count: &(&1 + 1),
+        post_count: &(&1 + 1),
+        last_post: fn _ -> post_id end,
+        last_user: fn _ -> author_id end,
+        updated_at: fn _ -> NaiveDateTime.utc_now() end
+      )
+
     socket =
       socket
       |> update_cache_post_count(author_id)
@@ -325,8 +344,10 @@ defmodule PhxBbWeb.PageLive do
     cond do
       is_nil(socket.assigns[:active_post]) ->
         socket
+
       socket.assigns.active_post.id == new_post.id ->
         assign(socket, active_post: new_post)
+
       true ->
         socket
     end
@@ -336,9 +357,11 @@ defmodule PhxBbWeb.PageLive do
     cond do
       is_nil(socket.assigns[:active_post]) ->
         socket
+
       socket.assigns.active_post.id == new_reply.post_id ->
         new_reply_list = replace_reply_list(socket.assigns.reply_list, new_reply)
         assign(socket, reply_list: new_reply_list)
+
       true ->
         socket
     end
@@ -348,11 +371,14 @@ defmodule PhxBbWeb.PageLive do
     cond do
       is_nil(socket.assigns[:active_post]) ->
         socket
+
       socket.assigns.active_post.id == post_id ->
         assign(socket,
           reply_list: new_reply_list,
           active_board: Map.update!(socket.assigns.active_board, :post_count, &(&1 - 1)),
-          active_post: Map.update!(socket.assigns.active_post, :reply_count, &(&1 - 1)))
+          active_post: Map.update!(socket.assigns.active_post, :reply_count, &(&1 - 1))
+        )
+
       true ->
         socket
     end
@@ -362,11 +388,14 @@ defmodule PhxBbWeb.PageLive do
     cond do
       is_nil(socket.assigns[:active_post]) ->
         socket
+
       post_id == socket.assigns.active_post.id ->
         assign(socket,
           reply_list: socket.assigns.reply_list ++ [reply],
           active_board: Map.update!(socket.assigns.active_board, :post_count, &(&1 + 1)),
-          active_post: Map.update!(socket.assigns.active_post, :reply_count, &(&1 + 1)))
+          active_post: Map.update!(socket.assigns.active_post, :reply_count, &(&1 + 1))
+        )
+
       true ->
         socket
     end

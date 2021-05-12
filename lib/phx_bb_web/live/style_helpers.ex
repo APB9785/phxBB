@@ -19,7 +19,13 @@ defmodule PhxBbWeb.StyleHelpers do
   # Post timestamp headers
 
   def timestamp_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
     %{
       "default" => "text-gray-500",
       "dark" => "text-gray-800"
@@ -50,7 +56,13 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp user_form_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
     %{
       "default" => "border-purple-300 focus:ring-purple-300 focus:border-purple-300",
       "dark" => "border-gray-600 focus:ring-gray-500 focus:border-gray-900"
@@ -70,7 +82,13 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp form_label_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
     %{
       "default" => "text-gray-600",
       "dark" => "text-gray-800"
@@ -91,8 +109,10 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp new_topic_form_base do
-    ["py-2 w-11/12 rounded-md transition shadow-md duration-150 text-sm",
-      "focus:outline-none focus:ring md:w-7/12"]
+    [
+      "py-2 w-11/12 rounded-md transition shadow-md duration-150 text-sm",
+      "focus:outline-none focus:ring md:w-7/12"
+    ]
     |> Enum.join(" ")
   end
 
@@ -102,19 +122,30 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp reply_form_base do
-    ["appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 justify-self-center",
-      "rounded-md shadow-md transition duration-150 text-sm focus:outline-none focus:ring"]
+    [
+      "appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 justify-self-center",
+      "rounded-md shadow-md transition duration-150 text-sm focus:outline-none focus:ring"
+    ]
     |> Enum.join(" ")
   end
 
   defp post_form_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
-    all_size =
-      %{"default" => "bg-white focus:border-purple-700 focus:ring-purple-400",
-        "dark" => "bg-gray-200 focus:border-gray-900 focus:ring-gray-600"}
-    desktop_size =
-      %{"default" => "md:focus:ring-purple-300 md:border-purple-400",
-        "dark" => "md:focus:ring-gray-600 md:border-gray-700"}
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
+    all_size = %{
+      "default" => "bg-white focus:border-purple-700 focus:ring-purple-400",
+      "dark" => "bg-gray-200 focus:border-gray-900 focus:ring-gray-600"
+    }
+
+    desktop_size = %{
+      "default" => "md:focus:ring-purple-300 md:border-purple-400",
+      "dark" => "md:focus:ring-gray-600 md:border-gray-700"
+    }
 
     [all_size, desktop_size]
     |> Enum.map(&Map.fetch!(&1, theme))
@@ -133,7 +164,13 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp user_menu_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
     %{
       "default" => "bg-gray-100",
       "dark" => "bg-gray-400"
@@ -149,13 +186,21 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp content_bg_base do
-    ["mx-auto w-11/12 bg-transparent rounded-xl space-y-2 m-4 pb-4",
-      "antialiased relative font-sans max-w-full md:shadow-md"]
+    [
+      "mx-auto w-11/12 bg-transparent rounded-xl space-y-2 m-4 pb-4",
+      "antialiased relative font-sans max-w-full md:shadow-md"
+    ]
     |> Enum.join(" ")
   end
 
   defp content_bg_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
     %{
       "default" => "md:bg-gray-100",
       "dark" => "md:bg-gray-400"
@@ -171,6 +216,7 @@ defmodule PhxBbWeb.StyleHelpers do
 
   def post_dividers(nil), do: "md:border-t-2 md:border-b-2 md:divide-y-2"
   def post_dividers(%User{theme: "default"}), do: "md:border-t-2 md:border-b-2 md:divide-y-2"
+
   def post_dividers(%User{theme: "dark"}) do
     "md:border-t-2 md:border-b-2 md:divide-y-2 md:border-gray-500 md:divide-gray-500"
   end
@@ -205,7 +251,13 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp button_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
     %{
       "default" => "bg-purple-700 text-white",
       "dark" => "bg-gray-900 text-gray-100"
@@ -227,7 +279,13 @@ defmodule PhxBbWeb.StyleHelpers do
   # Text
 
   def text_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
     %{
       "default" => "text-purple-700",
       "dark" => "text-gray-900"
@@ -274,7 +332,13 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp content_bubble_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
     %{
       "default" => "bg-white",
       "dark" => "bg-gray-300"
@@ -288,7 +352,13 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp confirmation_reminder_theme(user) do
-    theme = if is_nil(user) do "default" else user.theme end
+    theme =
+      if is_nil(user) do
+        "default"
+      else
+        user.theme
+      end
+
     %{
       "default" => "bg-purple-200",
       "dark" => "bg-purple-900 text-gray-300"

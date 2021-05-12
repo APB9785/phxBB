@@ -167,10 +167,11 @@ defmodule PhxBbWeb.PageLiveTest do
           username: "testie",
           password: "test1234",
           timezone: "Etc/UTC"
-      }})
+        }
+      })
       |> render_submit
 
-      flash = assert_redirected view, "/users/log_in"
+      flash = assert_redirected(view, "/users/log_in")
       assert flash["info"] =~ "User created successfully. Please check your email"
     end
 
@@ -184,7 +185,8 @@ defmodule PhxBbWeb.PageLiveTest do
           username: "tester2000",
           password: "short",
           timezone: "Etc/UTC"
-      }})
+        }
+      })
       |> render_submit
 
       assert has_element?(view, "#register-new-user-form", "should be at least 8 character(s)")
@@ -221,9 +223,16 @@ defmodule PhxBbWeb.PageLiveTest do
     end
 
     test "Board updated when navigating between posts", %{conn: conn, user: user, board: board} do
-      new_board = Repo.insert!(%Board{
-        name: "Sample Topic", description: "Test Board #2",
-        post_count: 0, topic_count: 0, last_post: nil, last_user: nil})
+      new_board =
+        Repo.insert!(%Board{
+          name: "Sample Topic",
+          description: "Test Board #2",
+          post_count: 0,
+          topic_count: 0,
+          last_post: nil,
+          last_user: nil
+        })
+
       post = post_fixture(user, new_board)
       {:ok, view, _html} = live(conn, "/")
 
@@ -401,7 +410,8 @@ defmodule PhxBbWeb.PageLiveTest do
             content: File.read!("test/support/fixtures/elixir.png"),
             size: 2_118,
             type: "image/png"
-          }])
+          }
+        ])
 
       assert render_upload(avatar, "elixir.png") =~ "100%"
 
@@ -432,7 +442,8 @@ defmodule PhxBbWeb.PageLiveTest do
             content: File.read!("test/support/fixtures/elixir.png"),
             size: 2_118,
             type: "image/png"
-          }])
+          }
+        ])
 
       render_upload(avatar, "elixir.png")
 
@@ -455,7 +466,8 @@ defmodule PhxBbWeb.PageLiveTest do
             content: File.read!("test/support/fixtures/elixir.png"),
             size: 158_894,
             type: "image/png"
-          }])
+          }
+        ])
 
       assert view
              |> element("#change-user-avatar-form")
@@ -537,15 +549,12 @@ defmodule PhxBbWeb.PageLiveTest do
 
       view
       |> form("#change-user-password-form", %{
-        user:
-          %{password: "another pass",
-            password_confirmation: "another pass"},
-        current_password:
-          "hello world!"
+        user: %{password: "another pass", password_confirmation: "another pass"},
+        current_password: "hello world!"
       })
       |> render_submit
 
-      flash = assert_redirected view, "/users/log_in"
+      flash = assert_redirected(view, "/users/log_in")
       assert flash["info"] == "Password updated successfully.  Please log in again."
     end
 
@@ -555,11 +564,8 @@ defmodule PhxBbWeb.PageLiveTest do
 
       view
       |> form("#change-user-password-form", %{
-        user:
-          %{password: "short",
-            password_confirmation: "short"},
-        current_password:
-          "hello world!"
+        user: %{password: "short", password_confirmation: "short"},
+        current_password: "hello world!"
       })
       |> render_submit
 
@@ -623,9 +629,14 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Confirm an email change", %{conn: conn, user: user} do
       {:ok, applied_user} =
         Accounts.apply_user_email(user, "hello world!", %{email: "newemail@example.com"})
+
       token =
-        Accounts.deliver_update_email_instructions(applied_user, user.email,
-          &add_confirm_email_param/1)
+        Accounts.deliver_update_email_instructions(
+          applied_user,
+          user.email,
+          &add_confirm_email_param/1
+        )
+
       url = "/?confirm_email=" <> token
 
       conn = login_fixture(conn, user)
@@ -642,7 +653,10 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
       view |> element("#edit-post-link-" <> post_id) |> render_click
-      view |> form("#edit-post-form-" <> post_id, %{post: %{body: "Edited text"}}) |> render_submit
+
+      view
+      |> form("#edit-post-form-" <> post_id, %{post: %{body: "Edited text"}})
+      |> render_submit
 
       assert render(view) =~ "Edited text"
       refute has_element?(view, "#edit-post-form")
@@ -689,7 +703,8 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#delete-reply-link-" <> reply_id) |> render_click
       view |> element("#delete-reply-final-" <> reply_id) |> render_click
 
-      Process.sleep(50) # upcoming refutation fails in CI testing otherwise
+      # upcoming refutation fails in CI testing otherwise
+      Process.sleep(50)
 
       # Ensure reply was deleted
       refute render(view) =~ "Get rid of me!"
@@ -773,7 +788,8 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#delete-reply-link-" <> reply_2_id) |> render_click
       view |> element("#delete-reply-final-" <> reply_2_id) |> render_click
 
-      Process.sleep(50) # upcoming refutation fails in CI testing otherwise
+      # upcoming refutation fails in CI testing otherwise
+      Process.sleep(50)
 
       # Ensure reply was deleted
       refute render(view) =~ "Get rid of me!"
@@ -801,11 +817,19 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#edit-post-link-" <> post_id) |> render_click
       view |> element("#edit-post-form-" <> post_id) |> render_change(%{post: %{body: "X"}})
 
-      assert has_element?(view, "#edit-post-form-" <> post_id, "should be at least 3 character(s)")
+      assert has_element?(
+               view,
+               "#edit-post-form-" <> post_id,
+               "should be at least 3 character(s)"
+             )
 
       view |> form("#edit-post-form-" <> post_id, %{post: %{body: "X"}}) |> render_submit
 
-      assert has_element?(view, "#edit-post-form-" <> post_id, "should be at least 3 character(s)")
+      assert has_element?(
+               view,
+               "#edit-post-form-" <> post_id,
+               "should be at least 3 character(s)"
+             )
     end
 
     test "Validate reply edits", %{conn: conn, user: user, board: board} do
@@ -820,15 +844,19 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#edit-reply-link-" <> reply_id) |> render_click
       view |> element("#edit-reply-form-" <> reply_id) |> render_change(%{reply: %{body: "X"}})
 
-      assert has_element?(view,
-        "#edit-reply-form-" <> reply_id,
-        "should be at least 3 character(s)")
+      assert has_element?(
+               view,
+               "#edit-reply-form-" <> reply_id,
+               "should be at least 3 character(s)"
+             )
 
       view |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "X"}}) |> render_submit
 
-      assert has_element?(view,
-        "#edit-reply-form-" <> reply_id,
-        "should be at least 3 character(s)")
+      assert has_element?(
+               view,
+               "#edit-reply-form-" <> reply_id,
+               "should be at least 3 character(s)"
+             )
     end
 
     test "Edit a reply", %{conn: conn, user: user, board: board} do
@@ -888,9 +916,16 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Post/reply changes as seen from Main Index", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
+
       Repo.insert!(%Board{
-        name: "Sample Topic", description: "Test Board #2",
-        post_count: 0, topic_count: 0, last_post: nil, last_user: nil})
+        name: "Sample Topic",
+        description: "Test Board #2",
+        post_count: 0,
+        topic_count: 0,
+        last_post: nil,
+        last_user: nil
+      })
+
       post = post_fixture(user, board)
       post_id = Integer.to_string(post.id)
 
@@ -905,7 +940,11 @@ defmodule PhxBbWeb.PageLiveTest do
 
       # Test reply edit
       view_2 |> element("#edit-reply-link-" <> reply_id) |> render_click
-      view_2 |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}}) |> render_submit
+
+      view_2
+      |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}})
+      |> render_submit
+
       # Test OP edit
       view_2 |> element("#edit-post-link-" <> post_id) |> render_click
       view_2 |> form("#edit-post-form-" <> post_id, %{post: %{body: "POSTEDIT"}}) |> render_submit
@@ -923,9 +962,16 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Post/reply changes as seen from another post", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
+
       Repo.insert!(%Board{
-        name: "Sample Topic", description: "Test Board #2",
-        post_count: 0, topic_count: 0, last_post: nil, last_user: nil})
+        name: "Sample Topic",
+        description: "Test Board #2",
+        post_count: 0,
+        topic_count: 0,
+        last_post: nil,
+        last_user: nil
+      })
+
       post = post_fixture(user, board)
       post_id = Integer.to_string(post.id)
       post_2 = post_fixture(user, board, "Second Post")
@@ -943,7 +989,11 @@ defmodule PhxBbWeb.PageLiveTest do
 
       # Test reply edit
       view_2 |> element("#edit-reply-link-" <> reply_id) |> render_click
-      view_2 |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}}) |> render_submit
+
+      view_2
+      |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}})
+      |> render_submit
+
       # Test OP edit
       view_2 |> element("#edit-post-link-" <> post_id) |> render_click
       view_2 |> form("#edit-post-form-" <> post_id, %{post: %{body: "POSTEDIT"}}) |> render_submit
@@ -965,7 +1015,11 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
       view |> element("#edit-reply-link-" <> reply_id) |> render_click
-      view |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}}) |> render_submit
+
+      view
+      |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}})
+      |> render_submit
+
       view |> element("#edit-post-link-" <> post_id) |> render_click
       view |> form("#edit-post-form-" <> post_id, %{post: %{body: "POSTEDIT"}}) |> render_submit
 

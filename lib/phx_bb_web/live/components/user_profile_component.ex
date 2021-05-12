@@ -12,6 +12,7 @@ defmodule PhxBbWeb.UserProfileComponent do
 
   def update(assigns, socket) do
     posts = Accounts.last_five_posts(assigns.view_user.id)
+
     socket =
       socket
       |> assign(assigns)

@@ -14,12 +14,25 @@ defmodule PhxBbWeb.LiveHelpers do
   alias PhxBb.Posts.Post
   alias PhxBb.Replies
 
-  @month_abv_map %{1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun",
-    7 => "Jul", 8 => "Aug", 9 => "Sep", 10 => "Oct", 11 => "Nov", 12 => "Dec"}
+  @month_abv_map %{
+    1 => "Jan",
+    2 => "Feb",
+    3 => "Mar",
+    4 => "Apr",
+    5 => "May",
+    6 => "Jun",
+    7 => "Jul",
+    8 => "Aug",
+    9 => "Sep",
+    10 => "Oct",
+    11 => "Nov",
+    12 => "Dec"
+  }
 
   def lookup_token(token) when is_nil(token) do
     nil
   end
+
   def lookup_token(token) do
     PhxBb.Accounts.get_user_by_session_token(token)
   end
@@ -27,13 +40,15 @@ defmodule PhxBbWeb.LiveHelpers do
   # Assigns helpers
 
   def assign_invalid(socket) do
-    assign(socket, [nav: :invalid, page_title: "404 Page Not Found"])
+    assign(socket, nav: :invalid, page_title: "404 Page Not Found")
   end
 
   def assign_post_nav(socket, post) do
-    {1, _} = Posts.viewed(post.id)  # Increments post view count
+    # Increments post view count
+    {1, _} = Posts.viewed(post.id)
+
     socket
-    |> assign([nav: :post, page_title: post.title])
+    |> assign(nav: :post, page_title: post.title)
     |> check_board_change(post.board_id)
   end
 
@@ -74,7 +89,7 @@ defmodule PhxBbWeb.LiveHelpers do
         assign_invalid(socket)
 
       board ->
-        assign(socket, [nav: :board, page_title: board.name, active_board: board])
+        assign(socket, nav: :board, page_title: board.name, active_board: board)
     end
   end
 
@@ -84,12 +99,13 @@ defmodule PhxBbWeb.LiveHelpers do
         assign_invalid(socket)
 
       board ->
-        assign(socket, [nav: :create_post, page_title: "Create Post", active_board: board])
+        assign(socket, nav: :create_post, page_title: "Create Post", active_board: board)
     end
   end
 
   def assign_defaults(socket) do
     boards = Boards.list_boards()
+
     assign(socket,
       active_board: nil,
       active_post: nil,
@@ -102,8 +118,10 @@ defmodule PhxBbWeb.LiveHelpers do
     case socket.assigns[:active_board] do
       nil ->
         assign(socket, active_board: Boards.get_board!(new_board_id))
+
       %Board{id: current_id} when current_id != new_board_id ->
         assign(socket, active_board: Boards.get_board!(new_board_id))
+
       %Board{} ->
         socket
     end
@@ -146,6 +164,7 @@ defmodule PhxBbWeb.LiveHelpers do
   def format_date(naive_datetime, user) when is_nil(user) do
     format_date(naive_datetime)
   end
+
   def format_date(naive_datetime, user) do
     datetime = DateTime.from_naive!(naive_datetime, "Etc/UTC")
 
@@ -154,13 +173,16 @@ defmodule PhxBbWeb.LiveHelpers do
   end
 
   def format_date(datetime) do
-    month_abv(datetime.month) <> " " <> Integer.to_string(datetime.day) <>
+    month_abv(datetime.month) <>
+      " " <>
+      Integer.to_string(datetime.day) <>
       ", " <> Integer.to_string(datetime.year)
   end
 
   def format_time(naive_datetime, user) when is_nil(user) do
     format_time(naive_datetime)
   end
+
   def format_time(naive_datetime, user) do
     datetime = DateTime.from_naive!(naive_datetime, "Etc/UTC")
 
@@ -170,16 +192,27 @@ defmodule PhxBbWeb.LiveHelpers do
 
   def format_time(datetime) do
     month = month_abv(datetime.month)
-    ampm = if datetime.hour > 11 do "pm" else "am" end
+
+    ampm =
+      if datetime.hour > 11 do
+        "pm"
+      else
+        "am"
+      end
+
     hour =
       case datetime.hour do
         0 -> "12"
         x when x > 12 -> Integer.to_string(x - 12)
         x -> Integer.to_string(x)
       end
+
     minute = Integer.to_string(datetime.minute) |> String.pad_leading(2, "0")
 
-    month <> " " <> Integer.to_string(datetime.day) <> ", " <>
+    month <>
+      " " <>
+      Integer.to_string(datetime.day) <>
+      ", " <>
       Integer.to_string(datetime.year) <> "  " <> hour <> ":" <> minute <> " " <> ampm
   end
 
@@ -194,7 +227,7 @@ defmodule PhxBbWeb.LiveHelpers do
 
   def display_title(post) do
     post
-    |> PhxBb.Posts.get_title
+    |> PhxBb.Posts.get_title()
     |> shortener
   end
 
@@ -203,21 +236,25 @@ defmodule PhxBbWeb.LiveHelpers do
   end
 
   def topic_count_display(%Board{topic_count: 1}), do: "1 topic"
+
   def topic_count_display(%Board{topic_count: count}) do
     Integer.to_string(count) <> " topics"
   end
 
   def post_count_display(%Board{post_count: 1}), do: "1 post"
+
   def post_count_display(%Board{post_count: count}) do
     Integer.to_string(count) <> " posts"
   end
 
   def view_count_display(%Post{view_count: 1}), do: "1 view"
+
   def view_count_display(%Post{view_count: count}) do
     Integer.to_string(count) <> " views"
   end
 
   def reply_count_display(%Post{reply_count: 1}), do: "1 reply"
+
   def reply_count_display(%Post{reply_count: count}) do
     Integer.to_string(count) <> " replies"
   end
@@ -226,12 +263,12 @@ defmodule PhxBbWeb.LiveHelpers do
 
   def postmaker(body, title, board_id, user_id) do
     %{body: body, title: title, board_id: board_id, author: user_id, last_user: user_id}
-    |> PhxBb.Posts.create_post
+    |> PhxBb.Posts.create_post()
   end
 
   def replymaker(body, post_id, user_id) do
     %{body: body, post_id: post_id, author: user_id}
-    |> PhxBb.Replies.create_reply
+    |> PhxBb.Replies.create_reply()
   end
 
   # URL makers

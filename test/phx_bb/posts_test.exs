@@ -13,7 +13,14 @@ defmodule PhxBb.PostsTest do
   describe "posts" do
     alias PhxBb.Posts.Post
 
-    @invalid_attrs %{author: nil, board_id: nil, body: nil, title: nil, reply_count: nil, view_count: nil}
+    @invalid_attrs %{
+      author: nil,
+      board_id: nil,
+      body: nil,
+      title: nil,
+      reply_count: nil,
+      view_count: nil
+    }
 
     test "list_posts/1 returns all posts in a board" do
       board = board_fixture()
@@ -53,13 +60,13 @@ defmodule PhxBb.PostsTest do
       user = user_fixture()
       user_2 = user_fixture()
       post = post_fixture(%{author: user.id, board_id: board.id})
-      changes =
-        %{
-          author: user_2.id,
-          board_id: board_2.id,
-          body: "some updated body",
-          title: "some updated title"
-        }
+
+      changes = %{
+        author: user_2.id,
+        board_id: board_2.id,
+        body: "some updated body",
+        title: "some updated title"
+      }
 
       assert {:ok, %Post{} = post} = Posts.update_post(post, changes)
       assert post.body == "some updated body"

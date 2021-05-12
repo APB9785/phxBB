@@ -21,15 +21,15 @@ alias PhxBb.Repo
   post_count: 9000,
   title: "Forum Administrator",
   theme: "dark",
-  admin: :true,
+  admin: true,
   timezone: "US/Central"
 }
 |> Accounts.register_user()
 
 gen_script =
   "This board is for discussion of a general nature. Please feel free to " <>
-  "talk about your favorite interests. Anyone can post here as long as " <>
-  "they are a registered user."
+    "talk about your favorite interests. Anyone can post here as long as " <>
+    "they are a registered user."
 
 %Board{
   name: "General Discussion",
@@ -53,7 +53,7 @@ gen_script =
 
 custard =
   "All discussion of custard goes here. No custard posts will be allowed " <>
-  "in other boards."
+    "in other boards."
 
 %Board{
   name: "Custard Discussion",

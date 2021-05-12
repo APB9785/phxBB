@@ -88,6 +88,7 @@ defmodule PhxBb.AccountsTest do
     test "registers users with a hashed password" do
       email = unique_user_email()
       name = unique_user()
+
       {:ok, user} =
         %{email: email, password: valid_user_password(), username: name, lowercase: name}
         |> Accounts.register_user()
@@ -209,27 +210,27 @@ defmodule PhxBb.AccountsTest do
   #     %{user: user, token: token, email: email}
   #   end
 
-    # test "updates the email with a valid token", %{user: user, token: token, email: email} do
-    #   assert Accounts.update_user_email(user, token) == :ok
-    #   changed_user = Repo.get!(User, user.id)
-    #   assert changed_user.email != user.email
-    #   assert changed_user.email == email
-    #   assert changed_user.confirmed_at
-    #   assert changed_user.confirmed_at != user.confirmed_at
-    #   refute Repo.get_by(UserToken, user_id: user.id)
-    # end
+  # test "updates the email with a valid token", %{user: user, token: token, email: email} do
+  #   assert Accounts.update_user_email(user, token) == :ok
+  #   changed_user = Repo.get!(User, user.id)
+  #   assert changed_user.email != user.email
+  #   assert changed_user.email == email
+  #   assert changed_user.confirmed_at
+  #   assert changed_user.confirmed_at != user.confirmed_at
+  #   refute Repo.get_by(UserToken, user_id: user.id)
+  # end
 
-    # test "does not update email with invalid token", %{user: user} do
-    #   assert Accounts.update_user_email(user, "oops") == :error
-    #   assert Repo.get!(User, user.id).email == user.email
-    #   assert Repo.get_by(UserToken, user_id: user.id)
-    # end
+  # test "does not update email with invalid token", %{user: user} do
+  #   assert Accounts.update_user_email(user, "oops") == :error
+  #   assert Repo.get!(User, user.id).email == user.email
+  #   assert Repo.get_by(UserToken, user_id: user.id)
+  # end
 
-    # test "does not update email if user email changed", %{user: user, token: token} do
-    #   assert Accounts.update_user_email(%{user | email: "current@example.com"}, token) == :error
-    #   assert Repo.get!(User, user.id).email == user.email
-    #   assert Repo.get_by(UserToken, user_id: user.id)
-    # end
+  # test "does not update email if user email changed", %{user: user, token: token} do
+  #   assert Accounts.update_user_email(%{user | email: "current@example.com"}, token) == :error
+  #   assert Repo.get!(User, user.id).email == user.email
+  #   assert Repo.get_by(UserToken, user_id: user.id)
+  # end
 
   #   test "does not update email if token expired", %{user: user, token: token} do
   #     {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
@@ -396,19 +397,19 @@ defmodule PhxBb.AccountsTest do
   #     %{user: user, token: token}
   #   end
 
-    # test "confirms the email with a valid token", %{user: user, token: token} do
-    #   assert {:ok, confirmed_user} = Accounts.confirm_user(token)
-    #   assert confirmed_user.confirmed_at
-    #   assert confirmed_user.confirmed_at != user.confirmed_at
-    #   assert Repo.get!(User, user.id).confirmed_at
-    #   refute Repo.get_by(UserToken, user_id: user.id)
-    # end
+  # test "confirms the email with a valid token", %{user: user, token: token} do
+  #   assert {:ok, confirmed_user} = Accounts.confirm_user(token)
+  #   assert confirmed_user.confirmed_at
+  #   assert confirmed_user.confirmed_at != user.confirmed_at
+  #   assert Repo.get!(User, user.id).confirmed_at
+  #   refute Repo.get_by(UserToken, user_id: user.id)
+  # end
 
-    # test "does not confirm with invalid token", %{user: user} do
-    #   assert Accounts.confirm_user("oops") == :error
-    #   refute Repo.get!(User, user.id).confirmed_at
-    #   assert Repo.get_by(UserToken, user_id: user.id)
-    # end
+  # test "does not confirm with invalid token", %{user: user} do
+  #   assert Accounts.confirm_user("oops") == :error
+  #   refute Repo.get!(User, user.id).confirmed_at
+  #   assert Repo.get_by(UserToken, user_id: user.id)
+  # end
 
   #   test "does not confirm email if token expired", %{user: user, token: token} do
   #     {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
@@ -449,21 +450,21 @@ defmodule PhxBb.AccountsTest do
   #     %{user: user, token: token}
   #   end
 
-    # test "returns the user with valid token", %{user: %{id: id}, token: token} do
-    #   assert %User{id: ^id} = Accounts.get_user_by_reset_password_token(token)
-    #   assert Repo.get_by(UserToken, user_id: id)
-    # end
+  # test "returns the user with valid token", %{user: %{id: id}, token: token} do
+  #   assert %User{id: ^id} = Accounts.get_user_by_reset_password_token(token)
+  #   assert Repo.get_by(UserToken, user_id: id)
+  # end
 
-    # test "does not return the user with invalid token", %{user: user} do
-    #   refute Accounts.get_user_by_reset_password_token("oops")
-    #   assert Repo.get_by(UserToken, user_id: user.id)
-    # end
+  # test "does not return the user with invalid token", %{user: user} do
+  #   refute Accounts.get_user_by_reset_password_token("oops")
+  #   assert Repo.get_by(UserToken, user_id: user.id)
+  # end
 
-    # test "does not return the user if token expired", %{user: user, token: token} do
-    #   {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-    #   refute Accounts.get_user_by_reset_password_token(token)
-    #   assert Repo.get_by(UserToken, user_id: user.id)
-    # end
+  # test "does not return the user if token expired", %{user: user, token: token} do
+  #   {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
+  #   refute Accounts.get_user_by_reset_password_token(token)
+  #   assert Repo.get_by(UserToken, user_id: user.id)
+  # end
   # end
 
   describe "reset_user_password/2" do

@@ -20,10 +20,12 @@ defmodule PhxBbWeb.PostContentComponent do
   def update(assigns, socket) do
     socket = assign(socket, assigns)
     post = socket.assigns.post
-    socket = case socket.assigns.type do
-      "reply" -> assign(socket, changeset: Replies.change_reply(post))
-      "post" -> assign(socket, changeset: Posts.change_post(post))
-    end
+
+    socket =
+      case socket.assigns.type do
+        "reply" -> assign(socket, changeset: Replies.change_reply(post))
+        "post" -> assign(socket, changeset: Posts.change_post(post))
+      end
 
     {:ok, socket}
   end
@@ -36,6 +38,7 @@ defmodule PhxBbWeb.PostContentComponent do
 
   def handle_event("save_edit", %{"post" => params}, socket) do
     params = %{edited_by: socket.assigns.active_user.id, body: params["body"]}
+
     case Posts.update_post(socket.assigns.post, params) do
       {:ok, post} ->
         # Update locally
@@ -53,6 +56,7 @@ defmodule PhxBbWeb.PostContentComponent do
 
   def handle_event("save_edit", %{"reply" => params}, socket) do
     params = %{edited_by: socket.assigns.active_user.id, body: params["body"]}
+
     case Replies.update_reply(socket.assigns.post, params) do
       {:ok, reply} ->
         # Update locally
@@ -91,10 +95,12 @@ defmodule PhxBbWeb.PostContentComponent do
   end
 
   def handle_event("cancel_edit", _params, socket) do
-    changeset = case socket.assigns.type do
-      "post" -> Posts.change_post(socket.assigns.post)
-      "reply" -> Replies.change_reply(socket.assigns.post)
-    end
+    changeset =
+      case socket.assigns.type do
+        "post" -> Posts.change_post(socket.assigns.post)
+        "reply" -> Replies.change_reply(socket.assigns.post)
+      end
+
     socket = assign(socket, edit: false, changeset: changeset)
 
     {:noreply, socket}
@@ -125,8 +131,15 @@ defmodule PhxBbWeb.PostContentComponent do
 
   def edit_post_form_value(changeset) do
     case changeset.changes[:body] do
-      nil -> if changeset.errors == [] do changeset.data.body else "" end
-      changed_body -> changed_body
+      nil ->
+        if changeset.errors == [] do
+          changeset.data.body
+        else
+          ""
+        end
+
+      changed_body ->
+        changed_body
     end
   end
 end

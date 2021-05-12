@@ -20,11 +20,14 @@ defmodule PhxBb.Boards.Board do
 
   @doc false
   def changeset(board, attrs) do
-    fields =
-      [
-        :name, :description, :topic_count, :post_count,
-        :last_post, :last_user
-      ]
+    fields = [
+      :name,
+      :description,
+      :topic_count,
+      :post_count,
+      :last_post,
+      :last_user
+    ]
 
     board
     |> cast(attrs, fields)

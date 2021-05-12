@@ -41,7 +41,7 @@
     <div class="text-2xl pb-4 md:pl-8" id="post-header">
       <%= @active_post.title %>
     </div>
-    <%= live_component @socket, PostComponent,
+    <%= live_component @socket, TopicComponent,
           active_user: @active_user,
           active_post: @active_post,
           reply_list: @reply_list,

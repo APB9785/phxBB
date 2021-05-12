@@ -32,7 +32,6 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
     create index(:users_tokens, [:user_id])
     create unique_index(:users_tokens, [:context, :token])
 
-
     create table(:boards) do
       add :name, :string
       add :description, :string
@@ -73,6 +72,5 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
     end
 
     create index(:replies, [:post_id])
-
   end
 end

@@ -20,13 +20,15 @@ defmodule PhxBbWeb.UserSettingsComponent do
         confirmation_resent: false,
         email_updated: false,
         avatar_updated: false,
-        avatar_removed: false)
+        avatar_removed: false
+      )
 
     {:ok, socket}
   end
 
   def update(assigns, socket) do
     user = assigns.active_user
+
     socket =
       socket
       |> assign(assigns)
@@ -36,7 +38,8 @@ defmodule PhxBbWeb.UserSettingsComponent do
         tz_changeset: Accounts.change_user_timezone(user),
         title_changeset: Accounts.change_user_title(user),
         avatar_changeset: Accounts.change_user_avatar(user),
-        theme_changeset: Accounts.change_user_theme(user))
+        theme_changeset: Accounts.change_user_theme(user)
+      )
 
     {:ok, socket}
   end
@@ -84,7 +87,7 @@ defmodule PhxBbWeb.UserSettingsComponent do
   def handle_event("validate_avatar", _params, socket) do
     changeset =
       %User{}
-      |> Accounts.change_user_avatar
+      |> Accounts.change_user_avatar()
       |> Map.put(:action, :insert)
 
     socket = assign(socket, avatar_changeset: changeset)
@@ -111,7 +114,7 @@ defmodule PhxBbWeb.UserSettingsComponent do
     user = socket.assigns.active_user
 
     # If the user is replacing an existing avatar, delete the old file
-    if user.avatar, do: Application.app_dir(:phx_bb, "priv/static") <> user.avatar |> File.rm!
+    if user.avatar, do: (Application.app_dir(:phx_bb, "priv/static") <> user.avatar) |> File.rm!()
 
     # Update DB with new avatar link
     {:ok, user} = Accounts.update_user_avatar(user, %{avatar: avatar_link})
@@ -126,7 +129,8 @@ defmodule PhxBbWeb.UserSettingsComponent do
     assign(socket,
       avatar_changeset: Accounts.change_user_avatar(%User{}),
       avatar_updated: true,
-      avatar_removed: false)
+      avatar_removed: false
+    )
   end
 
   defp copy_avatar_links(socket) do
@@ -181,8 +185,12 @@ defmodule PhxBbWeb.UserSettingsComponent do
 
     case Accounts.apply_user_email(user, password, user_params) do
       {:ok, applied_user} ->
-        Accounts.deliver_update_email_instructions(applied_user, user.email,
-          &add_confirm_email_param/1)
+        Accounts.deliver_update_email_instructions(
+          applied_user,
+          user.email,
+          &add_confirm_email_param/1
+        )
+
         changeset = Accounts.change_user_email(user)
         assign(socket, email_updated: true, email_changeset: changeset)
 
@@ -208,7 +216,7 @@ defmodule PhxBbWeb.UserSettingsComponent do
 
   defp assign_remove_avatar(socket) do
     user = socket.assigns.active_user
-    Application.app_dir(:phx_bb, "priv/static") <> user.avatar |> File.rm!
+    (Application.app_dir(:phx_bb, "priv/static") <> user.avatar) |> File.rm!()
     {:ok, user} = Accounts.update_user_avatar(user, %{avatar: nil})
 
     # Update active_user assign
@@ -221,6 +229,7 @@ defmodule PhxBbWeb.UserSettingsComponent do
     assign(socket,
       avatar_changeset: Accounts.change_user_avatar(%User{}),
       avatar_removed: true,
-      avatar_updated: false)
+      avatar_updated: false
+    )
   end
 end

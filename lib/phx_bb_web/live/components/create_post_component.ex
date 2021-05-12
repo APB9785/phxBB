@@ -39,7 +39,8 @@ defmodule PhxBbWeb.CreatePostComponent do
 
         socket =
           push_patch(socket,
-            to: Routes.live_path(socket, PhxBbWeb.PageLive, board: board.id))
+            to: Routes.live_path(socket, PhxBbWeb.PageLive, board: board.id)
+          )
 
         {:noreply, socket}
 

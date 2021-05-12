@@ -22,9 +22,12 @@ defmodule PhxBb.Replies do
 
   """
   def list_replies(post_id) do
-    Repo.all(from r in Reply,
-             where: r.post_id == ^post_id,
-             order_by: [asc: r.inserted_at])
+    Repo.all(
+      from r in Reply,
+        where: r.post_id == ^post_id,
+        order_by: [asc: r.inserted_at]
+    )
+
     # |> Enum.sort_by(fn schema -> schema.updated_at end, {:asc, NaiveDateTime})
   end
 

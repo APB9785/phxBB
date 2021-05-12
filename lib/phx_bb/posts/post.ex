@@ -25,8 +25,20 @@ defmodule PhxBb.Posts.Post do
   @doc false
   def changeset(post, attrs) do
     post
-    |> cast(attrs,
-      [:title, :body, :board_id, :author, :last_user, :view_count, :reply_count, :last_reply_at, :edited_by])
+    |> cast(
+      attrs,
+      [
+        :title,
+        :body,
+        :board_id,
+        :author,
+        :last_user,
+        :view_count,
+        :reply_count,
+        :last_reply_at,
+        :edited_by
+      ]
+    )
     |> validate_required([:title, :body, :board_id, :author, :view_count, :reply_count])
     |> validate_length(:title, min: 3)
     |> validate_length(:body, min: 3)

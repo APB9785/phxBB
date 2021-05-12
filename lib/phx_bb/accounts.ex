@@ -72,38 +72,39 @@ defmodule PhxBb.Accounts do
 
   # Leverages Map.put_new_lazy/3 to check every ID and only run the query
   # for previously unseen IDs
-  def build_cache(user_ids, cache) do
+  def build_cache(user_ids, cache) when is_list(user_ids) do
     Enum.reduce(user_ids, cache, fn id, acc ->
       fun = fn ->
-        Repo.one from u in User,
-                 where: u.id == ^id,
-                 select: %{name: u.username,
-                           joined: u.inserted_at,
-                           title: u.title,
-                           avatar: u.avatar,
-                           post_count: u.post_count}
+        Repo.one(
+          from u in User,
+            where: u.id == ^id,
+            select: %{
+              name: u.username,
+              joined: u.inserted_at,
+              title: u.title,
+              avatar: u.avatar,
+              post_count: u.post_count
+            }
+        )
       end
 
       Map.put_new_lazy(acc, id, fun)
     end)
   end
 
-  # Replaced by user cache.
-  # def post_count(user_id) do
-  #   Repo.one from u in User, select: u.post_count, where: u.id == ^user_id
-  # end
-
   def added_post(user_id) do
     from(u in User,
       update: [inc: [post_count: 1]],
-      where: u.id == ^user_id)
+      where: u.id == ^user_id
+    )
     |> Repo.update_all([])
   end
 
   def deleted_post(user_id) do
     from(u in User,
       update: [inc: [post_count: -1]],
-      where: u.id == ^user_id)
+      where: u.id == ^user_id
+    )
     |> Repo.update_all([])
   end
 
@@ -123,7 +124,8 @@ defmodule PhxBb.Accounts do
           author: r.author,
           inserted_at: r.inserted_at,
           title: p.title,
-          id: p.id},
+          id: p.id
+        },
         where: r.author == ^user_id,
         order_by: [desc: r.inserted_at],
         limit: 5
@@ -131,7 +133,7 @@ defmodule PhxBb.Accounts do
     posts = Repo.all(post_query)
     replies = Repo.all(reply_query)
 
-    Enum.sort_by(posts ++ replies, &(&1.inserted_at), {:desc, NaiveDateTime})
+    Enum.sort_by(posts ++ replies, & &1.inserted_at, {:desc, NaiveDateTime})
     |> Enum.take(5)
   end
 
@@ -218,7 +220,8 @@ defmodule PhxBb.Accounts do
       |> User.email_changeset(attrs)
       |> User.validate_current_password(password)
 
-    if Map.has_key?(changeset.changes, :email) and Repo.get_by(User, email: changeset.changes.email) do
+    if Map.has_key?(changeset.changes, :email) and
+         Repo.get_by(User, email: changeset.changes.email) do
       {:error, Ecto.Changeset.add_error(changeset, :email, "has already been taken")}
     else
       changeset
@@ -233,6 +236,7 @@ defmodule PhxBb.Accounts do
   The confirmed_at date is also updated to the current time.
   """
   def update_user_email(nil, _token), do: :error
+
   def update_user_email(user, token) do
     context = "change:#{user.email}"
 
@@ -314,25 +318,25 @@ defmodule PhxBb.Accounts do
   def update_user_timezone(%User{} = user, attrs) do
     user
     |> User.timezone_changeset(attrs)
-    |> Repo.update
+    |> Repo.update()
   end
 
   def update_user_title(%User{} = user, attrs) do
     user
     |> User.title_changeset(attrs)
-    |> Repo.update
+    |> Repo.update()
   end
 
   def update_user_avatar(%User{} = user, attrs) do
     user
     |> User.avatar_changeset(attrs)
-    |> Repo.update
+    |> Repo.update()
   end
 
   def update_user_theme(%User{} = user, attrs) do
     user
     |> User.theme_changeset(attrs)
-    |> Repo.update
+    |> Repo.update()
   end
 
   ## Session

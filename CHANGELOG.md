@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Administrator account: can edit and delete posts
 - Users can now edit and delete their own posts
 - Timestamp and user attribution is shown below edited posts
+- Live updates site-wide after post/reply deletion
 
 ### Fixed
 

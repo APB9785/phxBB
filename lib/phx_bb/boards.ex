@@ -78,34 +78,46 @@ defmodule PhxBb.Boards do
 
   def added_post(board_id, post_id, user_id) do
     now = NaiveDateTime.utc_now()
+
     from(b in Board,
-      update: [inc: [post_count: 1, topic_count: 1],
-               set: [last_post: ^post_id, last_user: ^user_id, updated_at: ^now]],
-      where: b.id == ^board_id)
+      update: [
+        inc: [post_count: 1, topic_count: 1],
+        set: [last_post: ^post_id, last_user: ^user_id, updated_at: ^now]
+      ],
+      where: b.id == ^board_id
+    )
     |> Repo.update_all([])
   end
 
   def added_reply(board_id, post_id, user_id) do
     now = NaiveDateTime.utc_now()
+
     from(b in Board,
-      update: [inc: [post_count: 1],
-               set: [last_post: ^post_id, last_user: ^user_id, updated_at: ^now]],
-      where: b.id == ^board_id)
+      update: [
+        inc: [post_count: 1],
+        set: [last_post: ^post_id, last_user: ^user_id, updated_at: ^now]
+      ],
+      where: b.id == ^board_id
+    )
     |> Repo.update_all([])
   end
 
   def deleted_reply(board_id) do
     from(b in Board,
       update: [inc: [post_count: -1]],
-      where: b.id == ^board_id)
+      where: b.id == ^board_id
+    )
     |> Repo.update_all([])
   end
 
   def deleted_latest_reply(board_id, %Post{id: post_id, last_user: last_user, last_reply_at: time}) do
     from(b in Board,
-      update: [inc: [post_count: -1],
-               set: [last_post: ^post_id, last_user: ^last_user, updated_at: ^time]],
-      where: b.id == ^board_id)
+      update: [
+        inc: [post_count: -1],
+        set: [last_post: ^post_id, last_user: ^last_user, updated_at: ^time]
+      ],
+      where: b.id == ^board_id
+    )
     |> Repo.update_all([])
   end
 

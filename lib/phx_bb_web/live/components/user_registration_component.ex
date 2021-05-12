@@ -37,6 +37,7 @@ defmodule PhxBbWeb.UserRegistrationComponent do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
         Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
+
         alert_message =
           "User created successfully. Please check your email for confirmation instructions."
 

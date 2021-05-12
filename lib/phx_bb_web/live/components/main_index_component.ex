@@ -12,6 +12,7 @@ defmodule PhxBbWeb.MainIndexComponent do
 
   def update(assigns, socket) do
     socket = assign(socket, assigns)
+
     users =
       Enum.reduce(socket.assigns.board_list, [], fn board, acc ->
         case board.last_user do
@@ -19,6 +20,7 @@ defmodule PhxBbWeb.MainIndexComponent do
           last_user -> [last_user | acc]
         end
       end)
+
     cache = Accounts.build_cache(users, socket.assigns.user_cache)
     socket = assign(socket, user_cache: cache)
     {:ok, socket}
