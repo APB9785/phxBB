@@ -28,6 +28,10 @@
           user_cache: @user_cache,
           board_list: @board_list %>
 
+    <%= live_component @socket, UsersOnlineComponent,
+          active_user: @active_user,
+          users_online: @users_online %>
+
   <% :board -> %>
     <div class="text-2xl pb-4 md:pl-8" id="board-header">
       <%= @active_board.name %>

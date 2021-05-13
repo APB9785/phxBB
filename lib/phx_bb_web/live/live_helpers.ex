@@ -109,7 +109,8 @@ defmodule PhxBbWeb.LiveHelpers do
     assign(socket,
       active_board: nil,
       active_post: nil,
-      board_list: boards
+      board_list: boards,
+      users_online: %{}
     )
   end
 
@@ -219,7 +220,7 @@ defmodule PhxBbWeb.LiveHelpers do
   # Display
 
   def shortener(text) do
-    case String.slice(text, 0..50) do
+    case String.slice(text, 0..45) do
       ^text -> text
       short -> short <> "..."
     end

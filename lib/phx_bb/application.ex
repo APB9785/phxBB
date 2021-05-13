@@ -13,6 +13,8 @@ defmodule PhxBb.Application do
       PhxBbWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: PhxBb.PubSub},
+      # Start the Presence
+      PhxBbWeb.Presence,
       # Start the Endpoint (http/https)
       PhxBbWeb.Endpoint
       # Start a worker by calling: PhxBb.Worker.start_link(arg)

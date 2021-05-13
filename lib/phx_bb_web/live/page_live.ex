@@ -18,11 +18,15 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBbWeb.CreatePostComponent
   alias PhxBbWeb.MainIndexComponent
   alias PhxBbWeb.NewReplyComponent
+  alias PhxBbWeb.Presence
   alias PhxBbWeb.TopicComponent
   alias PhxBbWeb.UserMenuComponent
   alias PhxBbWeb.UserProfileComponent
   alias PhxBbWeb.UserRegistrationComponent
   alias PhxBbWeb.UserSettingsComponent
+  alias PhxBbWeb.UsersOnlineComponent
+
+  @presence "phx_bb:presence"
 
   def mount(_params, session, socket) do
     if connected?(socket) do
@@ -34,23 +38,35 @@ defmodule PhxBbWeb.PageLive do
     case lookup_token(session["user_token"]) do
       nil ->
         # User is logged out
+        if connected?(socket) do
+          Presence.track(self(), @presence, nil, %{name: "guest"})
+          Phoenix.PubSub.subscribe(PhxBb.PubSub, @presence)
+        end
+
         socket =
           socket
           |> assign(active_user: nil)
           |> assign(user_cache: %{})
           |> assign(bg_color: get_default_background())
           |> assign_defaults
+          |> handle_joins(Presence.list(@presence))
 
         {:ok, socket}
 
       user ->
         # User is logged in
+        if connected?(socket) do
+          Presence.track(self(), @presence, user.id, %{name: user.username})
+          Phoenix.PubSub.subscribe(PhxBb.PubSub, @presence)
+        end
+
         socket =
           socket
           |> assign(bg_color: get_theme_background(user))
           |> assign(active_user: user)
           |> assign(user_cache: %{user.id => cache_self(user)})
           |> assign_defaults
+          |> handle_joins(Presence.list(@presence))
           |> allow_upload(:avatar,
             accept: ~w(.png .jpeg .jpg),
             max_entries: 1,
@@ -326,7 +342,28 @@ defmodule PhxBbWeb.PageLive do
     {:noreply, socket}
   end
 
+  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
+    {
+      :noreply,
+      socket
+      |> handle_leaves(diff.leaves)
+      |> handle_joins(diff.joins)
+    }
+  end
+
   # Helpers for the above handlers
+
+  defp handle_joins(socket, joins) do
+    Enum.reduce(joins, socket, fn {user, %{metas: [meta | _]}}, socket ->
+      assign(socket, :users_online, Map.put(socket.assigns.users_online, user, meta))
+    end)
+  end
+
+  defp handle_leaves(socket, leaves) do
+    Enum.reduce(leaves, socket, fn {user, _}, socket ->
+      assign(socket, :users_online, Map.delete(socket.assigns.users_online, user))
+    end)
+  end
 
   def update_board_list(board_list, board_id, changes) do
     Enum.map(board_list, fn b ->

@@ -88,7 +88,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Long topic title shortened in Main view", %{conn: conn, user: user, board: board} do
       long_title = String.duplicate("AbcXyz", 20)
-      shortened_title = "AbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbc..."
+      shortened_title = "AbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcXyzAbcX..."
       _post = post_fixture(user, board, long_title)
       {:ok, view, _html} = live(conn, "/")
 

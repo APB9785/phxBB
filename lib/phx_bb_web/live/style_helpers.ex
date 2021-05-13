@@ -19,12 +19,7 @@ defmodule PhxBbWeb.StyleHelpers do
   # Post timestamp headers
 
   def timestamp_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     %{
       "default" => "text-gray-500",
@@ -56,12 +51,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp user_form_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     %{
       "default" => "border-purple-300 focus:ring-purple-300 focus:border-purple-300",
@@ -82,12 +72,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp form_label_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     %{
       "default" => "text-gray-600",
@@ -130,12 +115,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp post_form_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     all_size = %{
       "default" => "bg-white focus:border-purple-700 focus:ring-purple-400",
@@ -164,12 +144,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp user_menu_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     %{
       "default" => "bg-gray-100",
@@ -194,12 +169,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp content_bg_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     %{
       "default" => "md:bg-gray-100",
@@ -251,12 +221,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp button_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     %{
       "default" => "bg-purple-700 text-white",
@@ -279,12 +244,7 @@ defmodule PhxBbWeb.StyleHelpers do
   # Text
 
   def text_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     %{
       "default" => "text-purple-700",
@@ -319,7 +279,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp user_history_bubble_base do
-    "p-2 pb-4 pr-4 w-min rounded-xl shadow-md md:ml-8"
+    "p-2 pb-4 pr-4 rounded-xl w-max max-w-full md:max-w-prose shadow-md md:mx-8"
   end
 
   def settings_block(user) do
@@ -332,12 +292,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp content_bubble_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     %{
       "default" => "bg-white",
@@ -352,16 +307,51 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp confirmation_reminder_theme(user) do
-    theme =
-      if is_nil(user) do
-        "default"
-      else
-        user.theme
-      end
+    theme = if is_nil(user), do: "default", else: user.theme
 
     %{
       "default" => "bg-purple-200",
       "dark" => "bg-purple-900 text-gray-300"
+    }
+    |> Map.fetch!(theme)
+  end
+
+  # UsersOnlineComponent helpers
+
+  def users_online_style(user) do
+    [users_online_base(), users_online_theme(user)]
+    |> Enum.join(" ")
+  end
+
+  defp users_online_base do
+    "shadow-inner px-4 md:px-8 flex flex-wrap mx-1 md:mx-4 rounded-lg py-4"
+  end
+
+  defp users_online_theme(user) do
+    theme = if is_nil(user), do: "default", else: user.theme
+
+    %{
+      "default" => "bg-purple-700",
+      "dark" => "bg-gray-800"
+    }
+    |> Map.fetch!(theme)
+  end
+
+  def online_user_bubble_style(user) do
+    [online_user_bubble_base(), online_user_bubble_theme(user)]
+    |> Enum.join(" ")
+  end
+
+  defp online_user_bubble_base do
+    "px-1 mx-1 rounded-lg text-sm flex items-center shadow-inner"
+  end
+
+  defp online_user_bubble_theme(user) do
+    theme = if is_nil(user), do: "default", else: user.theme
+
+    %{
+      "default" => "bg-gray-200",
+      "dark" => "bg-gray-300"
     }
     |> Map.fetch!(theme)
   end

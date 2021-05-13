@@ -12,14 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Users can now edit and delete their own posts
 - Timestamp and user attribution is shown below edited posts
 - Live updates site-wide after post/reply deletion
+- Main Index now shows other users who are currently online
 
 ### Fixed
 
 - Login prompt now positioned properly on all screen sizes
-- A post and reply with the same database ID will no longer have HTML ID conflicts
+- A post and reply with the same database ID will no longer have ID conflicts
 - Cancel link on post editor now works properly even when errors are displayed
 - Post edit validation no longer undoes changes when the form is completely empty
-- Post view and reply count now use singular grammar when the count is one
+- Post view/reply counts now use singular grammar when the count is one
+- Various styling fixes for user profiles
 
 ## [0.4.1] - 2021-05-04
 
