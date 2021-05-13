@@ -952,6 +952,9 @@ defmodule PhxBbWeb.PageLiveTest do
       view_2 |> element("#delete-reply-link-" <> reply_id) |> render_click
       view_2 |> element("#delete-reply-final-" <> reply_id) |> render_click
 
+      # upcoming assertion fails in CI testing otherwise
+      Process.sleep(50)
+
       # Original LV is still alive and was updated
       assert has_element?(view, "#main-header")
       assert render(view) =~ "1 post"
