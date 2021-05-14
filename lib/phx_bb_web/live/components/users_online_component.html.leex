@@ -1,12 +1,16 @@
 <div class="<%= users_online_style(@active_user) %>">
-  <h2 class="pr-2 text-lg text-gray-200">Users online:</h2>
+  <h2 class="pr-2 text-lg text-gray-200">
+    Users online:
+  </h2>
   <%= for {user_id, user} <- @users_online do %>
     <%= if user_id == "" do %>
-      <div class="italic <%= online_user_bubble_style(@active_user) %>">
+      <div id="online-username"
+           class="italic <%= online_user_bubble_style(@active_user) %>">
         <%= user.name %>
       </div>
     <% else %>
-      <div class="<%= online_user_bubble_style(@active_user) %>">
+      <div id="online-username"
+           class="<%= online_user_bubble_style(@active_user) %>">
         <%= live_patch user.name,
               to: Routes.live_path(@socket, PhxBbWeb.PageLive, user: user_id),
               class: link_style(@active_user),

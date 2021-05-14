@@ -1029,6 +1029,24 @@ defmodule PhxBbWeb.PageLiveTest do
       {:ok, view, _html} = live(conn, "/?post=" <> post_id)
       assert render(view) =~ "Edited by " <> user.username
     end
+
+    test "Online users list updates live", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/")
+
+      assert has_element?(view, "#online-username", user.username)
+      refute has_element?(view, "#online-username", "guest")
+
+      diff = %{joins: %{"" => %{metas: [%{name: "guest"}]}}, leaves: %{}}
+      send(view.pid, %Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff})
+
+      assert has_element?(view, "#online-username", "guest")
+
+      diff = %{joins: %{}, leaves: %{"" => %{metas: [%{name: "guest"}]}}}
+      send(view.pid, %Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff})
+
+      refute has_element?(view, "#online-username", "guest")
+    end
   end
 
   def login_fixture(conn, user) do
