@@ -1004,6 +1004,9 @@ defmodule PhxBbWeb.PageLiveTest do
       view_2 |> element("#delete-reply-link-" <> reply_id) |> render_click
       view_2 |> element("#delete-reply-final-" <> reply_id) |> render_click
 
+      # Give time for the PubSub message to be received
+      Process.sleep(50)
+
       # Original LV is still alive with no other changes
       assert has_element?(view, "#post-header", post_2.title)
     end
