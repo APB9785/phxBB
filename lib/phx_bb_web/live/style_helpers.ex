@@ -140,7 +140,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp user_menu_base do
-    "py-2 max-w-sm mx-auto rounded-xl shadow-md antialiased relative opacity-100 font-sans"
+    "py-2 max-w-sm mx-auto rounded-lg md:rounded-md shadow-md antialiased relative opacity-100 font-sans"
   end
 
   defp user_menu_theme(user) do
@@ -162,7 +162,7 @@ defmodule PhxBbWeb.StyleHelpers do
 
   defp content_bg_base do
     [
-      "mx-auto w-11/12 bg-transparent rounded-xl space-y-2 m-4 pb-4",
+      "mx-auto w-11/12 bg-transparent rounded-md space-y-2 m-4 pb-4",
       "antialiased relative font-sans max-w-full md:shadow-md"
     ]
     |> Enum.join(" ")
@@ -324,7 +324,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp users_online_base do
-    "shadow-inner px-4 md:px-8 flex flex-wrap mx-1 md:mx-4 rounded-lg py-4"
+    "shadow-inner px-4 md:px-8 flex flex-wrap mx-1 md:mx-4 rounded-lg md:rounded-md py-4"
   end
 
   defp users_online_theme(user) do

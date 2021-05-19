@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Live updates site-wide after post/reply deletion
 - Main Index now shows other users who are currently online
 
+### Changed
+
+- New topics are now shown live to all board viewers
+
 ### Fixed
 
 - Login prompt now positioned properly on all screen sizes
