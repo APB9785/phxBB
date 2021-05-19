@@ -36,6 +36,7 @@ defmodule PhxBb.Posts do
         order_by: [desc: p.last_reply_at],
         limit: 1
     )
+    |> hd
   end
 
   @doc """

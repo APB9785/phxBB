@@ -109,16 +109,14 @@ defmodule PhxBbWeb.PostContentComponent do
   def handle_event("delete_post", %{"id" => _post_id}, socket) do
     params = %{body: "_Post deleted._", edited_by: socket.assigns.active_user.id}
     {:ok, post} = Posts.update_post(socket.assigns.post, params)
-    socket = assign(socket, delete: false)
     Phoenix.PubSub.broadcast(PhxBb.PubSub, "posts", {:edited_post, post})
+    socket = assign(socket, delete: false)
 
     {:noreply, socket}
   end
 
   def handle_event("delete_reply", _params, socket) do
-    {:ok, reply} = Replies.delete_reply(socket.assigns.post)
-    send(self(), {:backend_delete_reply, reply})
-
+    send(self(), {:backend_delete_reply, socket.assigns.post})
     {:noreply, socket}
   end
 

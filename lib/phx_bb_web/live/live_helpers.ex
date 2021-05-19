@@ -29,21 +29,13 @@ defmodule PhxBbWeb.LiveHelpers do
     12 => "Dec"
   }
 
-  def lookup_token(token) when is_nil(token) do
-    nil
-  end
-
-  def lookup_token(token) do
-    PhxBb.Accounts.get_user_by_session_token(token)
-  end
-
   # Assigns helpers
 
   def assign_invalid(socket) do
     assign(socket, nav: :invalid, page_title: "404 Page Not Found")
   end
 
-  def assign_post_nav(socket, post) do
+  def assign_post_nav(socket, %Post{} = post) do
     # Increments post view count
     {1, _} = Posts.viewed(post.id)
 
@@ -52,12 +44,12 @@ defmodule PhxBbWeb.LiveHelpers do
     |> check_board_change(post.board_id)
   end
 
-  def assign_post_full_query(socket, post_id) do
+  def assign_post_full_query(socket, post_id) when is_integer(post_id) do
     case Posts.get_post(post_id) do
       nil ->
         assign_invalid(socket)
 
-      post ->
+      %Post{} = post ->
         replies = Replies.list_replies(post.id)
         user_ids = parse_user_ids(replies, post)
         cache = Accounts.build_cache(user_ids, socket.assigns.user_cache)
@@ -68,7 +60,7 @@ defmodule PhxBbWeb.LiveHelpers do
     end
   end
 
-  defp parse_user_ids(replies, post) do
+  defp parse_user_ids(replies, %Post{} = post) do
     user_ids =
       Enum.reduce(replies, [], fn reply, acc ->
         case reply.edited_by do
@@ -83,22 +75,34 @@ defmodule PhxBbWeb.LiveHelpers do
     end
   end
 
-  def assign_board_full_query(socket, board_id) do
+  def assign_board_full_query(socket, board_id) when is_integer(board_id) do
     case Boards.get_board(board_id) do
       nil ->
         assign_invalid(socket)
 
-      board ->
-        assign(socket, nav: :board, page_title: board.name, active_board: board)
+      %Board{} = board ->
+        post_list = Posts.list_posts(board_id)
+
+        cache =
+          Enum.reduce(post_list, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
+          |> Accounts.build_cache(socket.assigns.user_cache)
+
+        assign(socket,
+          nav: :board,
+          page_title: board.name,
+          active_board: board,
+          post_list: post_list,
+          user_cache: cache
+        )
     end
   end
 
-  def assign_create_full_query(socket, board_id) do
+  def assign_create_full_query(socket, board_id) when is_integer(board_id) do
     case Boards.get_board(board_id) do
       nil ->
         assign_invalid(socket)
 
-      board ->
+      %Board{} = board ->
         assign(socket, nav: :create_post, page_title: "Create Post", active_board: board)
     end
   end
@@ -110,12 +114,13 @@ defmodule PhxBbWeb.LiveHelpers do
       active_board: nil,
       active_post: nil,
       board_list: boards,
-      users_online: %{}
+      users_online: %{},
+      post_list: []
     )
   end
 
   # Query the database for Board data only if the active Board has changed.
-  def check_board_change(socket, new_board_id) do
+  def check_board_change(socket, new_board_id) when is_integer(new_board_id) do
     case socket.assigns[:active_board] do
       nil ->
         assign(socket, active_board: Boards.get_board!(new_board_id))
@@ -128,14 +133,14 @@ defmodule PhxBbWeb.LiveHelpers do
     end
   end
 
-  def active_assign_outdated?(assign, target_id, socket) do
+  def active_assign_outdated?(assign, target_id, socket) when is_integer(target_id) do
     active =
       case assign do
         :post -> socket.assigns.active_post
         :board -> socket.assigns.active_board
       end
 
-    is_nil(active) or String.to_integer(target_id) != active.id
+    is_nil(active) or target_id != active.id
   end
 
   # Redirect helpers
@@ -304,10 +309,10 @@ defmodule PhxBbWeb.LiveHelpers do
   end
 
   def admin?(nil), do: false
-  def admin?(user), do: user.admin
+  def admin?(%User{} = user), do: user.admin
 
   def author?(nil, _), do: false
-  def author?(user, post), do: user.id == post.author
+  def author?(%User{} = user, post), do: user.id == post.author
 
   def parse_post_body(content) do
     content

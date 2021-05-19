@@ -35,7 +35,7 @@ defmodule PhxBbWeb.PageLive do
       Posts.subscribe()
     end
 
-    case lookup_token(session["user_token"]) do
+    case Accounts.get_user_by_session_token(session["user_token"]) do
       nil ->
         # User is logged out
         if connected?(socket) do
@@ -84,33 +84,39 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_params(%{"create_post" => "1", "board" => board_id}, _url, socket) do
-    # No need to query database for Board info
+    board_id = String.to_integer(board_id)
+
     if active_assign_outdated?(:board, board_id, socket) do
       socket = assign_create_full_query(socket, board_id)
       {:noreply, socket}
     else
+      # No need to query database for Board info
       socket = assign(socket, nav: :create_post, page_title: "Create Post")
       {:noreply, socket}
     end
   end
 
   def handle_params(%{"post" => post_id}, _url, socket) do
-    # No need to query database for Post info
+    post_id = String.to_integer(post_id)
+
     if active_assign_outdated?(:post, post_id, socket) do
       socket = assign_post_full_query(socket, post_id)
       {:noreply, socket}
     else
+      # No need to query database for Post info
       socket = assign_post_nav(socket, socket.assigns.active_post)
       {:noreply, socket}
     end
   end
 
   def handle_params(%{"board" => board_id}, _url, socket) do
-    # No need to query database for Board info
+    board_id = String.to_integer(board_id)
+
     if active_assign_outdated?(:board, board_id, socket) do
       socket = assign_board_full_query(socket, board_id)
       {:noreply, socket}
     else
+      # No need to query database for Board info
       socket = assign(socket, nav: :board, page_title: socket.assigns.active_board.name)
       {:noreply, socket}
     end
@@ -222,42 +228,34 @@ defmodule PhxBbWeb.PageLive do
   def handle_info({:backend_delete_reply, %Reply{id: reply_id} = reply}, socket) do
     board = socket.assigns.active_board
     active_post = socket.assigns.active_post
-    # Reply has already been removed from the DB
+    {:ok, _} = Replies.delete_reply(reply)
+
     case Enum.reverse(socket.assigns.reply_list) do
       [%Reply{id: ^reply_id}] ->
-        # Give OP info to Post as latest
+        # There was only one reply
         Posts.deleted_only_reply(active_post)
-        # Find second-to-last post/reply for Board
-        [next_post] = Posts.most_recent_post(board.id)
-        Boards.deleted_latest_reply(board.id, next_post)
-        # Remove the reply from all viewers' assigns
+        top_post = Posts.most_recent_post(board.id)
+        Boards.deleted_latest_reply(board.id, top_post)
         new_reply_list = []
-        message = {:deleted_reply, new_reply_list, active_post.id, next_post}
+        message = {:deleted_reply, new_reply_list, active_post.id, top_post}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
 
       [%Reply{id: ^reply_id} | [next | rest]] ->
-        # Give second-to-last reply to the Post
+        # The deleted reply was the most recent among other(s)
         Posts.deleted_last_reply(reply.post_id, next.author, next.inserted_at)
-        # Find second-to-last post/reply for Board
-        [next_post] = Posts.most_recent_post(board.id)
-        Boards.deleted_latest_reply(board.id, next_post)
-        # Remove the reply from all viewers' assigns
-        new_reply_list = [next | rest]
-        message = {:deleted_reply, new_reply_list, active_post.id, next_post}
+        top_post = Posts.most_recent_post(board.id)
+        Boards.deleted_latest_reply(board.id, top_post)
+        new_reply_list = Enum.reverse([next | rest])
+        message = {:deleted_reply, new_reply_list, active_post.id, top_post}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
 
       reversed_reply_list ->
-        # Decrement Post's reply count
+        # There have been other replies made to the topic since this one
         Posts.deleted_reply(reply.post_id)
-        # Decrement Board's reply count
+        top_post = Posts.most_recent_post(board.id)
         Boards.deleted_reply(board.id)
-        # Remove the reply from all viewers' assigns
-        new_reply_list =
-          Enum.reject(reversed_reply_list, &(&1.id == reply_id))
-          |> Enum.reverse()
-
-        [next_post] = Posts.most_recent_post(board.id)
-        message = {:deleted_reply, new_reply_list, active_post.id, next_post}
+        new_reply_list = Enum.reject(reversed_reply_list, &(&1.id == reply_id)) |> Enum.reverse()
+        message = {:deleted_reply, new_reply_list, active_post.id, top_post}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
     end
 
@@ -269,18 +267,19 @@ defmodule PhxBbWeb.PageLive do
 
   # Global PubSub message handlers
 
-  def handle_info({:deleted_reply, new_reply_list, post_id, next_post}, socket) do
+  def handle_info({:deleted_reply, new_reply_list, post_id, top_post}, socket) do
     new_board_list =
-      update_board_list(socket.assigns.board_list, next_post.board_id,
+      update_board_list(socket.assigns.board_list, top_post.board_id,
         post_count: &(&1 - 1),
-        last_post: fn _ -> next_post.id end,
-        last_user: fn _ -> next_post.last_user end,
+        last_post: fn _ -> top_post.id end,
+        last_user: fn _ -> top_post.last_user end,
         updated_at: fn _ -> NaiveDateTime.utc_now() end
       )
 
     socket =
       socket
-      |> delete_reply(new_reply_list, post_id)
+      |> delete_reply_from_post(new_reply_list, post_id)
+      |> refresh_post_list(top_post.board_id)
       |> assign(board_list: new_board_list)
 
     {:noreply, socket}
@@ -318,6 +317,7 @@ defmodule PhxBbWeb.PageLive do
     socket =
       socket
       |> add_reply(reply.post_id, reply)
+      |> refresh_post_list(board_id)
       |> assign(board_list: new_board_list)
       |> update_cache_post_count(reply.author)
 
@@ -337,6 +337,7 @@ defmodule PhxBbWeb.PageLive do
     socket =
       socket
       |> update_cache_post_count(author_id)
+      |> refresh_post_list(board_id)
       |> assign(board_list: new_board_list)
 
     {:noreply, socket}
@@ -404,7 +405,7 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
-  defp delete_reply(socket, new_reply_list, post_id) do
+  defp delete_reply_from_post(socket, new_reply_list, post_id) do
     cond do
       is_nil(socket.assigns[:active_post]) ->
         socket
@@ -418,6 +419,16 @@ defmodule PhxBbWeb.PageLive do
 
       true ->
         socket
+    end
+  end
+
+  defp refresh_post_list(socket, board_id) do
+    active_board = socket.assigns.active_board
+
+    if !is_nil(active_board) and active_board.id == board_id do
+      assign(socket, post_list: Posts.list_posts(board_id))
+    else
+      socket
     end
   end
 
