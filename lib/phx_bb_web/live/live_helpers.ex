@@ -222,7 +222,7 @@ defmodule PhxBbWeb.LiveHelpers do
         x -> Integer.to_string(x)
       end
 
-    "#{month} #{day}, #{year} #{hour}:#{minute} #{ampm}"
+    "#{month} #{day}, #{year}  #{hour}:#{minute} #{ampm}"
   end
 
   # Display
