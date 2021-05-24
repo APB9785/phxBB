@@ -3,6 +3,8 @@ defmodule PhxBbWeb.LiveHelpersTest do
 
   import PhxBbWeb.LiveHelpers
 
+  alias PhxBb.Accounts.User
+
   test "format_time/1" do
     datetime = %NaiveDateTime{
       month: 2,
@@ -15,5 +17,15 @@ defmodule PhxBbWeb.LiveHelpersTest do
 
     assert format_time(datetime) == "Feb 3, 1980  10:11 am"
     assert format_time(%{datetime | hour: 13}) == "Feb 3, 1980  1:11 pm"
+  end
+
+  test "postmaker/4" do
+    now = NaiveDateTime.utc_now()
+    assert postmaker("test body", "test title", 1, %User{disabled_at: now}) == {:disabled}
+  end
+
+  test "replymaker/3" do
+    now = NaiveDateTime.utc_now()
+    assert replymaker("test body", 1, %User{disabled_at: now}) == {:disabled}
   end
 end

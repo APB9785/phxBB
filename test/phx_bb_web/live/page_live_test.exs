@@ -21,6 +21,15 @@ defmodule PhxBbWeb.PageLiveTest do
     last_user: nil
   }
 
+  @board_2 %Board{
+    name: "Sample Topic",
+    description: "Test Board #2",
+    post_count: 0,
+    topic_count: 0,
+    last_post: nil,
+    last_user: nil
+  }
+
   setup do
     %{
       user: user_fixture(),
@@ -42,7 +51,6 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Main view after one post is made", %{conn: conn, user: user, board: board} do
       post = post_fixture(user, board)
-
       {:ok, view, _html} = live(conn, "/")
 
       assert has_element?(view, "#board-name", board.name)
@@ -64,7 +72,7 @@ defmodule PhxBbWeb.PageLiveTest do
     end
 
     test "Irrelevant PubSub message", %{conn: conn, user: user, board: board} do
-      alt_user = user_fixture(%{timezone: "Etc/UTC"})
+      alt_user = user_fixture()
       post = post_fixture(user, board, "First Title")
       alt_post = post_fixture(user, board, "Second Title")
       {:ok, view, _html} = live(conn, "/")
@@ -80,9 +88,7 @@ defmodule PhxBbWeb.PageLiveTest do
     end
 
     test "Visit a board directly from URL", %{conn: conn, board: board} do
-      board_link = "/?board=" <> Integer.to_string(board.id)
-      {:ok, view, _html} = live(conn, board_link)
-
+      {:ok, view, _html} = live(conn, "/?board=#{board.id}")
       assert has_element?(view, "#board-header", board.name)
     end
 
@@ -97,15 +103,11 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Post author info box", %{conn: conn, user: user, board: board} do
       post = post_fixture(user, board)
+      user_join_date_fragment = "#{user.inserted_at.day}, #{user.inserted_at.year}"
       {:ok, view, _html} = live(conn, "/")
 
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
-
-      user_join_date_fragment =
-        [user.inserted_at.day, user.inserted_at.year]
-        |> Enum.map(&Integer.to_string/1)
-        |> Enum.join(", ")
 
       assert has_element?(view, "#post-author-info", user.username)
       assert has_element?(view, "#post-author-info", user.title)
@@ -195,44 +197,29 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Return to Main Index from 404", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/?invalid=9999")
 
-      view
-      |> element("#return-from-invalid")
-      |> render_click
+      view |> element("#return-from-invalid") |> render_click
 
       assert has_element?(view, "#main-header")
     end
 
     test "Visit a user profile from Main Index", %{conn: conn, user: user, board: board} do
       _post = post_fixture(user, board)
-
       {:ok, view, _html} = live(conn, "/")
 
-      view
-      |> element("#last-post-author-link")
-      |> render_click
+      view |> element("#last-post-author-link") |> render_click
 
       assert has_element?(view, "#user-profile-header")
     end
 
     test "Confirm a user account", %{conn: conn, user: user} do
       token = Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
-      url = "/?confirm=" <> token
-      {:ok, conn} = live(conn, url) |> follow_redirect(conn)
+      {:ok, conn} = live(conn, "/?confirm=#{token}") |> follow_redirect(conn)
 
       assert html_response(conn, 200) =~ "Account confirmed successfully."
     end
 
     test "Board updated when navigating between posts", %{conn: conn, user: user, board: board} do
-      new_board =
-        Repo.insert!(%Board{
-          name: "Sample Topic",
-          description: "Test Board #2",
-          post_count: 0,
-          topic_count: 0,
-          last_post: nil,
-          last_user: nil
-        })
-
+      new_board = Repo.insert!(@board_2)
       post = post_fixture(user, new_board)
       {:ok, view, _html} = live(conn, "/")
 
@@ -260,7 +247,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "New unseen post by an unknown user", %{conn: conn, user: user, board: board} do
       post = post_fixture(user, board)
-      user_2 = user_fixture(%{timezone: "Etc/UTC"})
+      user_2 = user_fixture()
       {:ok, view, _html} = live(conn, "/")
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
@@ -274,13 +261,11 @@ defmodule PhxBbWeb.PageLiveTest do
   describe "Logged-in User:" do
     test "Create a new topic and reply", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
-
       {:ok, view, _html} = live(conn, "/")
 
       assert has_element?(view, "#logged-in-menu", user.username)
 
       view |> element("#board-name", board.name) |> render_click
-
       view |> element("#new-post-button-top") |> render_click
 
       assert has_element?(view, "#create-topic-header")
@@ -292,9 +277,7 @@ defmodule PhxBbWeb.PageLiveTest do
       assert has_element?(view, "#board-header", board.name)
       assert has_element?(view, "#post-listing", "Hello World")
 
-      view
-      |> element("#post-listing-link", "Hello World")
-      |> render_click
+      view |> element("#post-listing-link", "Hello World") |> render_click
 
       assert has_element?(view, "#breadcrumb", board.name)
       assert has_element?(view, "#post-header", "Hello World")
@@ -312,9 +295,7 @@ defmodule PhxBbWeb.PageLiveTest do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
 
-      view
-      |> element("#resend-verification-button")
-      |> render_click
+      view |> element("#resend-verification-button") |> render_click
 
       assert has_element?(view, "#confirmation-resent-ok")
     end
@@ -350,6 +331,7 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Update user title", %{conn: conn, user: user} do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/")
+
       view |> element("#user-menu-settings") |> render_click
 
       view
@@ -396,7 +378,6 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Upload, view, and remove user avatar", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      post_id = Integer.to_string(post.id)
       {:ok, view, _html} = live(conn, "/?settings=1")
 
       refute render(view) =~ "100%"
@@ -418,15 +399,12 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#change-user-avatar-form") |> render_submit
 
       # Avatar should be uploaded OK, now see if it displays
+      {:ok, view, _html} = live(conn, "/?post=#{post.id}")
+      assert has_element?(view, "#post-author-avatar-#{post.id}")
 
-      {:ok, view, _html} = live(conn, "/?post=" <> post_id)
-
-      assert has_element?(view, "#post-author-avatar-" <> post_id)
-
+      # Remove the avatar
       {:ok, view, _html} = live(conn, "/?settings=1")
-
       view |> element("#remove-avatar-link") |> render_click
-
       assert render(view) =~ "User avatar removed successfully."
     end
 
@@ -484,8 +462,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
       assert has_element?(view, "#theme-changed-ok")
 
-      url = "/?create=1&board=" <> Integer.to_string(board.id)
-      {:ok, view, _html} = live(conn, url)
+      {:ok, view, _html} = live(conn, "/?create=1&board=#{board.id}")
       assert render(view) =~ "bg-gray-900"
     end
 
@@ -504,9 +481,7 @@ defmodule PhxBbWeb.PageLiveTest do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
 
-      view
-      |> form("#change-user-avatar-form", %{})
-      |> render_submit
+      view |> form("#change-user-avatar-form", %{}) |> render_submit
 
       assert has_element?(view, "#avatar-submit-error", "no file was selected")
     end
@@ -514,12 +489,9 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Reply form live validations", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      url = "/?post=" <> Integer.to_string(post.id)
-      {:ok, view, _html} = live(conn, url)
+      {:ok, view, _html} = live(conn, "/?post=#{post.id}")
 
-      view
-      |> element("#new-reply-form")
-      |> render_change(%{reply: %{body: "X"}})
+      view |> element("#new-reply-form") |> render_change(%{reply: %{body: "X"}})
 
       assert has_element?(view, "#new-reply-form", "should be at least 3 character(s)")
     end
@@ -528,9 +500,7 @@ defmodule PhxBbWeb.PageLiveTest do
       conn = login_fixture(conn, user)
       {:ok, view, _html} = live(conn, "/?settings=1")
 
-      view
-      |> element("#crumb-index")
-      |> render_click
+      view |> element("#crumb-index") |> render_click
 
       assert has_element?(view, "#main-header")
     end
@@ -581,16 +551,14 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "New topic form via URL", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
-      url = "/?board=" <> Integer.to_string(board.id) <> "&create_post=1"
-      {:ok, view, _html} = live(conn, url)
+      {:ok, view, _html} = live(conn, "/?board=#{board.id}&create_post=1")
 
       assert has_element?(view, "#new-topic-form")
     end
 
     test "Fail to create new topic", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
-      url = "/?board=" <> Integer.to_string(board.id) <> "&create_post=1"
-      {:ok, view, _html} = live(conn, url)
+      {:ok, view, _html} = live(conn, "/?board=#{board.id}&create_post=1")
 
       view
       |> form("#new-topic-form", %{post: %{body: "Test body", title: "X"}})
@@ -602,26 +570,22 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Fail to create new reply", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      url = "/?post=" <> Integer.to_string(post.id)
-      {:ok, view, _html} = live(conn, url)
+      {:ok, view, _html} = live(conn, "/?post=#{post.id}")
 
-      view
-      |> form("#new-reply-form", %{reply: %{body: "OK"}})
-      |> render_submit
+      view |> form("#new-reply-form", %{reply: %{body: "OK"}}) |> render_submit
 
       assert has_element?(view, "#new-reply-form", "should be at least 3 character(s)")
     end
 
     test "Confirm a user account", %{conn: conn, user: user} do
       token = Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
-      url = "/?confirm=" <> token
-      {:ok, new_conn} = live(conn, url) |> follow_redirect(conn)
+      {:ok, new_conn} = live(conn, "/?confirm=#{token}") |> follow_redirect(conn)
 
       assert html_response(new_conn, 200) =~ "Account confirmed successfully."
 
       # Log in and try the same confirmation link again
       conn = login_fixture(conn, user)
-      {:ok, final_conn} = live(conn, url) |> follow_redirect(conn)
+      {:ok, final_conn} = live(conn, "/?confirm=#{token}") |> follow_redirect(conn)
 
       assert html_response(final_conn, 200) =~ "Welcome to the Forum!"
     end
@@ -637,10 +601,8 @@ defmodule PhxBbWeb.PageLiveTest do
           &add_confirm_email_param/1
         )
 
-      url = "/?confirm_email=" <> token
-
       conn = login_fixture(conn, user)
-      {:ok, view, _html} = live(conn, url) |> follow_redirect(conn)
+      {:ok, view, _html} = live(conn, "/?confirm_email=#{token}") |> follow_redirect(conn)
 
       assert render(view) =~ "Email changed successfully."
     end
@@ -648,14 +610,13 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Edit a post", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      post_id = Integer.to_string(post.id)
       {:ok, view, _html} = live(conn, "/")
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
-      view |> element("#edit-post-link-" <> post_id) |> render_click
+      view |> element("#edit-post-link-#{post.id}") |> render_click
 
       view
-      |> form("#edit-post-form-" <> post_id, %{post: %{body: "Edited text"}})
+      |> form("#edit-post-form-#{post.id}", %{post: %{body: "Edited text"}})
       |> render_submit
 
       assert render(view) =~ "Edited text"
@@ -665,27 +626,24 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Delete a post", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      post_id = Integer.to_string(post.id)
       {:ok, view, _html} = live(conn, "/")
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
 
-      refute has_element?(view, "#delete-post-final-" <> post_id)
+      refute has_element?(view, "#delete-post-final-#{post.id}")
 
-      view |> element("#delete-post-link-" <> post_id) |> render_click
-      view |> element("#delete-post-final-" <> post_id) |> render_click
+      view |> element("#delete-post-link-#{post.id}") |> render_click
+      view |> element("#delete-post-final-#{post.id}") |> render_click
 
       assert render(view) =~ "Post deleted."
-      refute has_element?(view, "#delete-post-final-" <> post_id)
+      refute has_element?(view, "#delete-post-final-#{post.id}")
     end
 
     test "Delete a lone reply", %{conn: conn, user: user, board: board} do
       user_2 = user_fixture()
       conn = login_fixture(conn, user)
       post = post_fixture(user_2, board)
-      post_id_label = "#post-" <> Integer.to_string(post.id) <> "-latest-info"
       reply = reply_fixture(user, post, "Get rid of me!")
-      reply_id = Integer.to_string(reply.id)
       {:ok, view, _html} = live(conn, "/")
 
       assert has_element?(view, "#last-post-author-link", user.username)
@@ -694,14 +652,14 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#board-name", board.name) |> render_click
 
       assert render(view) =~ "1 reply"
-      assert has_element?(view, post_id_label, user.username)
+      assert has_element?(view, "#post-#{post.id}-latest-info", user.username)
 
       view |> element("#post-listing-link", post.title) |> render_click
 
       assert render(view) =~ "Get rid of me!"
 
-      view |> element("#delete-reply-link-" <> reply_id) |> render_click
-      view |> element("#delete-reply-final-" <> reply_id) |> render_click
+      view |> element("#delete-reply-link-#{reply.id}") |> render_click
+      view |> element("#delete-reply-final-#{reply.id}") |> render_click
 
       # upcoming refutation fails in CI testing otherwise
       Process.sleep(50)
@@ -712,7 +670,7 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#crumb-board") |> render_click
 
       assert render(view) =~ "0 replies"
-      assert has_element?(view, post_id_label, user_2.username)
+      assert has_element?(view, "#post-#{post.id}-latest-info", user_2.username)
 
       view |> element("#crumb-index") |> render_click
 
@@ -726,9 +684,7 @@ defmodule PhxBbWeb.PageLiveTest do
       user_3 = user_fixture()
       conn = login_fixture(conn, user_2)
       post = post_fixture(user, board)
-      post_id_label = "#post-" <> Integer.to_string(post.id) <> "-latest-info"
       reply = reply_fixture(user_2, post, "Get rid of me!")
-      reply_id = Integer.to_string(reply.id)
       _reply_2 = reply_fixture(user_3, post, "Keep this reply")
       {:ok, view, _html} = live(conn, "/")
 
@@ -738,14 +694,14 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#board-name", board.name) |> render_click
 
       assert render(view) =~ "2 replies"
-      assert has_element?(view, post_id_label, user_3.username)
+      assert has_element?(view, "#post-#{post.id}-latest-info", user_3.username)
 
       view |> element("#post-listing-link", post.title) |> render_click
 
       assert render(view) =~ "Get rid of me!"
 
-      view |> element("#delete-reply-link-" <> reply_id) |> render_click
-      view |> element("#delete-reply-final-" <> reply_id) |> render_click
+      view |> element("#delete-reply-link-#{reply.id}") |> render_click
+      view |> element("#delete-reply-final-#{reply.id}") |> render_click
 
       # Ensure reply was deleted
       refute render(view) =~ "Get rid of me!"
@@ -753,7 +709,7 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#crumb-board") |> render_click
 
       assert render(view) =~ "1 reply"
-      assert has_element?(view, post_id_label, user_3.username)
+      assert has_element?(view, "#post-#{post.id}-latest-info", user_3.username)
 
       view |> element("#crumb-index") |> render_click
 
@@ -764,13 +720,11 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Delete the newer of two replies", %{conn: conn, user: user, board: board} do
       user_2 = user_fixture()
-      user_3 = user_fixture(%{timezone: "Etc/UTC"})
+      user_3 = user_fixture()
       conn = login_fixture(conn, user_3)
       post = post_fixture(user, board)
-      post_id_label = "#post-" <> Integer.to_string(post.id) <> "-latest-info"
       _reply = reply_fixture(user_2, post, "Keep this reply")
       reply_2 = reply_fixture(user_3, post, "Get rid of me!")
-      reply_2_id = Integer.to_string(reply_2.id)
       {:ok, view, _html} = live(conn, "/")
 
       assert has_element?(view, "#last-post-author-link", user_3.username)
@@ -779,14 +733,14 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#board-name", board.name) |> render_click
 
       assert render(view) =~ "2 replies"
-      assert has_element?(view, post_id_label, user_3.username)
+      assert has_element?(view, "#post-#{post.id}-latest-info", user_3.username)
 
       view |> element("#post-listing-link", post.title) |> render_click
 
       assert render(view) =~ "Get rid of me!"
 
-      view |> element("#delete-reply-link-" <> reply_2_id) |> render_click
-      view |> element("#delete-reply-final-" <> reply_2_id) |> render_click
+      view |> element("#delete-reply-link-#{reply_2.id}") |> render_click
+      view |> element("#delete-reply-final-#{reply_2.id}") |> render_click
 
       # upcoming refutation fails in CI testing otherwise
       Process.sleep(50)
@@ -797,7 +751,7 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#crumb-board") |> render_click
 
       assert render(view) =~ "1 reply"
-      assert has_element?(view, post_id_label, user_2.username)
+      assert has_element?(view, "#post-#{post.id}-latest-info", user_2.username)
 
       view |> element("#crumb-index") |> render_click
 
@@ -809,61 +763,43 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Validate post edits", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      post_id = Integer.to_string(post.id)
 
       {:ok, view, _html} = live(conn, "/")
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
-      view |> element("#edit-post-link-" <> post_id) |> render_click
-      view |> element("#edit-post-form-" <> post_id) |> render_change(%{post: %{body: "X"}})
+      view |> element("#edit-post-link-#{post.id}") |> render_click
+      view |> element("#edit-post-form-#{post.id}") |> render_change(%{post: %{body: "X"}})
 
-      assert has_element?(
-               view,
-               "#edit-post-form-" <> post_id,
-               "should be at least 3 character(s)"
-             )
+      assert has_element?(view, "#edit-post-form-#{post.id}", "should be at least 3 character(s)")
 
-      view |> form("#edit-post-form-" <> post_id, %{post: %{body: "X"}}) |> render_submit
+      view |> form("#edit-post-form-#{post.id}", %{post: %{body: "X"}}) |> render_submit
 
-      assert has_element?(
-               view,
-               "#edit-post-form-" <> post_id,
-               "should be at least 3 character(s)"
-             )
+      assert has_element?(view, "#edit-post-form-#{post.id}", "should be at least 3 character(s)")
     end
 
     test "Validate reply edits", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
       reply = reply_fixture(user, post)
-      reply_id = Integer.to_string(reply.id)
+      message = "should be at least 3 character(s)"
 
       {:ok, view, _html} = live(conn, "/")
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
-      view |> element("#edit-reply-link-" <> reply_id) |> render_click
-      view |> element("#edit-reply-form-" <> reply_id) |> render_change(%{reply: %{body: "X"}})
+      view |> element("#edit-reply-link-#{reply.id}") |> render_click
+      view |> element("#edit-reply-form-#{reply.id}") |> render_change(%{reply: %{body: "X"}})
 
-      assert has_element?(
-               view,
-               "#edit-reply-form-" <> reply_id,
-               "should be at least 3 character(s)"
-             )
+      assert has_element?(view, "#edit-reply-form-#{reply.id}", message)
 
-      view |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "X"}}) |> render_submit
+      view |> form("#edit-reply-form-#{reply.id}", %{reply: %{body: "X"}}) |> render_submit
 
-      assert has_element?(
-               view,
-               "#edit-reply-form-" <> reply_id,
-               "should be at least 3 character(s)"
-             )
+      assert has_element?(view, "#edit-reply-form-#{reply.id}", message)
     end
 
     test "Edit a reply", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
       reply = reply_fixture(user, post, "Please edit me!")
-      reply_id = Integer.to_string(reply.id)
 
       {:ok, view, _html} = live(conn, "/")
       view |> element("#board-name", board.name) |> render_click
@@ -871,10 +807,10 @@ defmodule PhxBbWeb.PageLiveTest do
 
       assert render(view) =~ "Please edit me!"
 
-      view |> element("#edit-reply-link-" <> reply_id) |> render_click
+      view |> element("#edit-reply-link-#{reply.id}") |> render_click
 
       view
-      |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "Finished editing."}})
+      |> form("#edit-reply-form-#{reply.id}", %{reply: %{body: "Finished editing."}})
       |> render_submit
 
       refute has_element?(view, "#edit-reply-form")
@@ -884,73 +820,60 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Cancel a post edit", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      post_id = Integer.to_string(post.id)
       {:ok, view, _html} = live(conn, "/")
+
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
-      view |> element("#edit-post-link-" <> post_id) |> render_click
+      view |> element("#edit-post-link-#{post.id}") |> render_click
 
-      assert has_element?(view, "#edit-post-form-" <> post_id)
+      assert has_element?(view, "#edit-post-form-#{post.id}")
 
-      view |> element("#cancel-post-edit-" <> post_id) |> render_click
+      view |> element("#cancel-post-edit-#{post.id}") |> render_click
 
-      refute has_element?(view, "#edit-post-form-" <> post_id)
+      refute has_element?(view, "#edit-post-form-#{post.id}")
     end
 
     test "Cancel a reply edit", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
       reply = reply_fixture(user, post, "Please edit me!")
-      reply_id = Integer.to_string(reply.id)
       {:ok, view, _html} = live(conn, "/")
+
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
-      view |> element("#edit-reply-link-" <> reply_id) |> render_click
+      view |> element("#edit-reply-link-#{reply.id}") |> render_click
 
-      assert has_element?(view, "#edit-reply-form-" <> reply_id)
+      assert has_element?(view, "#edit-reply-form-#{reply.id}")
 
-      view |> element("#cancel-reply-edit-" <> reply_id) |> render_click
+      view |> element("#cancel-reply-edit-#{reply.id}") |> render_click
 
-      refute has_element?(view, "#edit-reply-form-" <> reply_id)
+      refute has_element?(view, "#edit-reply-form-#{reply.id}")
     end
 
     test "Post/reply changes as seen from Main Index", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
-
-      Repo.insert!(%Board{
-        name: "Sample Topic",
-        description: "Test Board #2",
-        post_count: 0,
-        topic_count: 0,
-        last_post: nil,
-        last_user: nil
-      })
-
+      _board_2 = Repo.insert!(@board_2)
       post = post_fixture(user, board)
-      post_id = Integer.to_string(post.id)
-
-      # Test new reply added
-      {:ok, view, _html} = live(conn, "/")
       reply = reply_fixture(user, post, "Test Reply")
-      reply_id = Integer.to_string(reply.id)
 
+      {:ok, view, _html} = live(conn, "/")
       {:ok, view_2, _html} = live(conn, "/")
       view_2 |> element("#board-name", board.name) |> render_click
       view_2 |> element("#post-listing-link", post.title) |> render_click
 
       # Test reply edit
-      view_2 |> element("#edit-reply-link-" <> reply_id) |> render_click
+      view_2 |> element("#edit-reply-link-#{reply.id}") |> render_click
 
       view_2
-      |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}})
+      |> form("#edit-reply-form-#{reply.id}", %{reply: %{body: "TESTEDIT"}})
       |> render_submit
 
       # Test OP edit
-      view_2 |> element("#edit-post-link-" <> post_id) |> render_click
-      view_2 |> form("#edit-post-form-" <> post_id, %{post: %{body: "POSTEDIT"}}) |> render_submit
+      view_2 |> element("#edit-post-link-#{post.id}") |> render_click
+      view_2 |> form("#edit-post-form-#{post.id}", %{post: %{body: "POSTEDIT"}}) |> render_submit
       # Test reply delete
-      view_2 |> element("#delete-reply-link-" <> reply_id) |> render_click
-      view_2 |> element("#delete-reply-final-" <> reply_id) |> render_click
+      view_2 |> element("#delete-reply-link-#{reply.id}") |> render_click
+      view_2 |> element("#delete-reply-final-#{reply.id}") |> render_click
 
       # upcoming assertion fails in CI testing otherwise
       Process.sleep(50)
@@ -965,44 +888,33 @@ defmodule PhxBbWeb.PageLiveTest do
 
     test "Post/reply changes as seen from another post", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
-
-      Repo.insert!(%Board{
-        name: "Sample Topic",
-        description: "Test Board #2",
-        post_count: 0,
-        topic_count: 0,
-        last_post: nil,
-        last_user: nil
-      })
-
+      _board_2 = Repo.insert!(@board_2)
       post = post_fixture(user, board)
-      post_id = Integer.to_string(post.id)
       post_2 = post_fixture(user, board, "Second Post")
+
       {:ok, view, _html} = live(conn, "/")
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post_2.title) |> render_click
-
-      # Test new reply added
-      reply = reply_fixture(user, post)
-      reply_id = Integer.to_string(reply.id)
 
       {:ok, view_2, _html} = live(conn, "/")
       view_2 |> element("#board-name", board.name) |> render_click
       view_2 |> element("#post-listing-link", post.title) |> render_click
 
+      reply = reply_fixture(user, post)
+
       # Test reply edit
-      view_2 |> element("#edit-reply-link-" <> reply_id) |> render_click
+      view_2 |> element("#edit-reply-link-#{reply.id}") |> render_click
 
       view_2
-      |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}})
+      |> form("#edit-reply-form-#{reply.id}", %{reply: %{body: "TESTEDIT"}})
       |> render_submit
 
       # Test OP edit
-      view_2 |> element("#edit-post-link-" <> post_id) |> render_click
-      view_2 |> form("#edit-post-form-" <> post_id, %{post: %{body: "POSTEDIT"}}) |> render_submit
+      view_2 |> element("#edit-post-link-#{post.id}") |> render_click
+      view_2 |> form("#edit-post-form-#{post.id}", %{post: %{body: "POSTEDIT"}}) |> render_submit
       # Test reply delete
-      view_2 |> element("#delete-reply-link-" <> reply_id) |> render_click
-      view_2 |> element("#delete-reply-final-" <> reply_id) |> render_click
+      view_2 |> element("#delete-reply-link-#{reply.id}") |> render_click
+      view_2 |> element("#delete-reply-final-#{reply.id}") |> render_click
 
       # Give time for the PubSub message to be received
       Process.sleep(50)
@@ -1014,23 +926,22 @@ defmodule PhxBbWeb.PageLiveTest do
     test "User cache parses IDs from Edit footers", %{conn: conn, user: user, board: board} do
       conn = login_fixture(conn, user)
       post = post_fixture(user, board)
-      post_id = Integer.to_string(post.id)
       reply = reply_fixture(user, post)
-      reply_id = Integer.to_string(reply.id)
       {:ok, view, _html} = live(conn, "/")
+
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
-      view |> element("#edit-reply-link-" <> reply_id) |> render_click
+      view |> element("#edit-reply-link-#{reply.id}") |> render_click
 
       view
-      |> form("#edit-reply-form-" <> reply_id, %{reply: %{body: "TESTEDIT"}})
+      |> form("#edit-reply-form-#{reply.id}", %{reply: %{body: "TESTEDIT"}})
       |> render_submit
 
-      view |> element("#edit-post-link-" <> post_id) |> render_click
-      view |> form("#edit-post-form-" <> post_id, %{post: %{body: "POSTEDIT"}}) |> render_submit
+      view |> element("#edit-post-link-#{post.id}") |> render_click
+      view |> form("#edit-post-form-#{post.id}", %{post: %{body: "POSTEDIT"}}) |> render_submit
 
-      {:ok, view, _html} = live(conn, "/?post=" <> post_id)
-      assert render(view) =~ "Edited by " <> user.username
+      {:ok, view, _html} = live(conn, "/?post=#{post.id}")
+      assert render(view) =~ "Edited by #{user.username}"
     end
 
     test "Online users list updates live", %{conn: conn, user: user} do
@@ -1051,13 +962,13 @@ defmodule PhxBbWeb.PageLiveTest do
       refute has_element?(view, "#online-username", "guest")
     end
 
-    test "Disable a user account", %{conn: conn, user: user, board: board} do
+    test "Disable and re-enable a user account", %{conn: conn, user: user, board: board} do
       admin_user = user_fixture(%{admin: true})
       admin_conn = login_fixture(conn, admin_user)
       user_conn = login_fixture(conn, user)
 
-      {:ok, view, _html} = live(user_conn, "/?board=#{board.id}")
-      assert has_element?(view, "#new-post-button-top")
+      {:ok, user_view, _html} = live(user_conn, "/?board=#{board.id}")
+      assert has_element?(user_view, "#new-post-button-top")
 
       {:ok, admin_view, _html} = live(admin_conn, "/?admin=1")
       assert render(admin_view) =~ "Admin Panel"
@@ -1068,8 +979,35 @@ defmodule PhxBbWeb.PageLiveTest do
 
       # Give time for the PubSub message to be received
       Process.sleep(50)
+      refute has_element?(user_view, "#new-post-button-top")
 
-      refute has_element?(view, "#new-post-button-top")
+      admin_view
+      |> form("#admin-enable-user-form", %{enable_user: %{user: user.id}})
+      |> render_submit
+
+      Process.sleep(50)
+      assert has_element?(user_view, "#new-post-button-top")
+    end
+
+    test "Return to board via create_post link", %{conn: conn, user: user, board: board} do
+      user_2 = user_fixture()
+      post = post_fixture(user_2, board)
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?board=#{board.id}&create_post=1")
+
+      view |> element("#crumb-board") |> render_click
+
+      assert has_element?(view, "#post-listing-link", post.title)
+      assert has_element?(view, "#post-author-link", user_2.username)
+    end
+
+    test "New topic live validations", %{conn: conn, user: user, board: board} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?board=#{board.id}&create_post=1")
+
+      view |> element("#new-topic-form") |> render_change(%{post: %{title: "Test", body: "X"}})
+
+      assert has_element?(view, "#new-topic-form", "should be at least 3 character(s)")
     end
   end
 
