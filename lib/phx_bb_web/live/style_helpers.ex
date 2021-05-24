@@ -43,6 +43,11 @@ defmodule PhxBbWeb.StyleHelpers do
     |> Enum.join(" ")
   end
 
+  def post_content_style(user) do
+    ["block rounded-xl mb-4 md:flex md:rounded-none md:bg-transparent", content_bg_theme(user)]
+    |> Enum.join(" ")
+  end
+
   # User form fields
 
   def user_form(user) do
@@ -135,7 +140,7 @@ defmodule PhxBbWeb.StyleHelpers do
   # User menu
 
   def user_menu(user) do
-    [user_menu_base(), user_menu_theme(user)]
+    [user_menu_base(), content_bg_theme(user)]
     |> Enum.join(" ")
   end
 
@@ -143,20 +148,10 @@ defmodule PhxBbWeb.StyleHelpers do
     "py-2 max-w-sm mx-auto rounded-lg md:rounded-md shadow-md antialiased relative opacity-100 font-sans"
   end
 
-  defp user_menu_theme(user) do
-    theme = if is_nil(user), do: "default", else: user.theme
-
-    %{
-      "default" => "bg-gray-100",
-      "dark" => "bg-gray-400"
-    }
-    |> Map.fetch!(theme)
-  end
-
   # Content background
 
   def content_background(user) do
-    [content_bg_base(), content_bg_theme(user)]
+    [content_bg_base(), content_bg_theme_md_only(user)]
     |> Enum.join(" ")
   end
 
@@ -168,21 +163,11 @@ defmodule PhxBbWeb.StyleHelpers do
     |> Enum.join(" ")
   end
 
-  defp content_bg_theme(user) do
-    theme = if is_nil(user), do: "default", else: user.theme
-
-    %{
-      "default" => "md:bg-gray-100",
-      "dark" => "md:bg-gray-400"
-    }
-    |> Map.fetch!(theme)
-  end
-
   # Dividers
 
   def board_dividers(nil), do: "divide-y-2"
-  def board_dividers(%User{theme: "default"}), do: "divide-y-2"
-  def board_dividers(%User{theme: "dark"}), do: "divide-y-2 divide-gray-500"
+  def board_dividers(%User{theme: "default"}), do: "md:divide-y-2"
+  def board_dividers(%User{theme: "dark"}), do: "md:divide-y-2 md:divide-gray-500"
 
   def post_dividers(nil), do: "md:border-t-2 md:border-b-2 md:divide-y-2"
   def post_dividers(%User{theme: "default"}), do: "md:border-t-2 md:border-b-2 md:divide-y-2"
@@ -190,6 +175,10 @@ defmodule PhxBbWeb.StyleHelpers do
   def post_dividers(%User{theme: "dark"}) do
     "md:border-t-2 md:border-b-2 md:divide-y-2 md:border-gray-500 md:divide-gray-500"
   end
+
+  def author_dividers(nil), do: "border-b"
+  def author_dividers(%User{theme: "default"}), do: "border-b"
+  def author_dividers(%User{theme: "dark"}), do: "border-b border-gray-500"
 
   # Buttons
 
@@ -199,7 +188,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp button_base do
-    "text-sm md:text-base px-4 md:px-8 py-2 mt-4 mb-4 w-6/12 md:w-3/12 rounded-md"
+    "text-sm md:text-base px-4 md:px-8 py-2 mt-4 mb-4 rounded-md"
   end
 
   def new_post_button_style(user) do
@@ -217,7 +206,7 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp reply_button_base do
-    "px-8 py-2 m-2 rounded-md justify-self-center md:w-1/6"
+    "px-8 py-2 m-2 rounded-md justify-self-center"
   end
 
   defp button_theme(user) do
@@ -272,6 +261,24 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   # Content Bubbles
+
+  def post_author_style(user) do
+    [
+      "flex justify-end items-center flex-row-reverse pl-4 pb-2 pt-2",
+      "md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block",
+      author_dividers(user)
+    ]
+    |> Enum.join(" ")
+  end
+
+  def topic_bubble_style(user) do
+    [
+      "p-4 block items-center rounded-lg m-1",
+      "md:flex md:m-0 md:bg-transparent md:rounded-none",
+      content_bg_theme(user)
+    ]
+    |> Enum.join(" ")
+  end
 
   def user_history_bubble_style(user) do
     [user_history_bubble_base(), content_bubble_theme(user)]
@@ -352,6 +359,74 @@ defmodule PhxBbWeb.StyleHelpers do
     %{
       "default" => "bg-gray-200",
       "dark" => "bg-gray-300"
+    }
+    |> Map.fetch!(theme)
+  end
+
+  def index_board_bubble_style(user) do
+    [index_board_bubble_base(), index_board_bubble_theme(user)]
+    |> Enum.join(" ")
+  end
+
+  defp index_board_bubble_base do
+    "rounded-lg m-1 md:bg-transparent md:rounded-t-none md:flex md:m-0"
+  end
+
+  defp index_board_bubble_theme(user) do
+    theme = if is_nil(user), do: "default", else: user.theme
+
+    %{
+      "default" => "bg-gray-200",
+      "dark" => "bg-gray-400"
+    }
+    |> Map.fetch!(theme)
+  end
+
+  def board_stats_style(user) do
+    [board_stats_base(), board_stats_theme(user)]
+    |> Enum.join(" ")
+  end
+
+  defp board_stats_base do
+    "pl-4 pt-2 text-sm border-t flex md:p-4 md:text-base md:grid md:border-0 md:w-1/12 md:content-evenly"
+  end
+
+  defp board_stats_theme(user) do
+    theme = if is_nil(user), do: "default", else: user.theme
+
+    %{
+      "default" => "border-gray-300",
+      "dark" => "border-gray-500"
+    }
+    |> Map.fetch!(theme)
+  end
+
+  def avatar_style do
+    [
+      "max-h-40 object-fill mr-4 h-10 w-10 border border-gray-700 rounded-xl",
+      "md:h-auto md:w-32 md:mx-auto md:pt-2 md:border-none md:rounded-none"
+    ]
+    |> Enum.join(" ")
+  end
+
+  # Theme-specific content
+
+  defp content_bg_theme(user) do
+    theme = if is_nil(user), do: "default", else: user.theme
+
+    %{
+      "default" => "bg-gray-100",
+      "dark" => "bg-gray-400"
+    }
+    |> Map.fetch!(theme)
+  end
+
+  defp content_bg_theme_md_only(user) do
+    theme = if is_nil(user), do: "default", else: user.theme
+
+    %{
+      "default" => "md:bg-gray-100",
+      "dark" => "md:bg-gray-400"
     }
     |> Map.fetch!(theme)
   end

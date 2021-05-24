@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Administrator account: can edit and delete posts
+- Admin Panel: allows administrator to disable unwanted user accounts
 - Users can now edit and delete their own posts
 - Timestamp and user attribution is shown below edited posts
 - Live updates site-wide after post/reply deletion
@@ -25,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Cancel link on post editor now works properly even when errors are displayed
 - Post edit validation no longer undoes changes when the form is completely empty
 - Post view/reply counts now use singular grammar when the count is one
-- Various styling fixes for user profiles
+- Various styling fixes site-wide
 
 ## [0.4.1] - 2021-05-04
 

@@ -6,15 +6,23 @@
             class: "flex-grow mx-4 grid justify-items-auto w-full flex-grow",
             id: "new-reply-form" %>
 
-      <%= textarea f, :body,
-                     placeholder: "You may use Markdown to format your reply",
-                     phx_debounce: "blur",
-                     autocomplete: "off",
-                     class: reply_form_style(@active_user) %>
-      <div class="text-center mt-4"><%= error_tag f, :body %></div>
+    <%= textarea f, :body,
+          placeholder: "You may use Markdown to format your reply",
+          phx_debounce: "blur",
+          autocomplete: "off",
+          class: reply_form_style(@active_user) %>
 
-      <%= submit "Post Reply",
-                   phx_disable_with: "Posting...",
-                   class: reply_button_style(@active_user) %>
+    <div class="text-center mt-4"><%= error_tag f, :body %></div>
+
+    <%= if @active_user.disabled_at do %>
+      <p class="text-center text-sm">
+        Your posting privileges have been revoked by the forum administrator.
+      </p>
+    <% else %>
+      <%= submit "Create Reply",
+            phx_disable_with: "Posting...",
+            class: reply_button_style(@active_user)%>
+    <% end %>
+
   </form>
 </div>

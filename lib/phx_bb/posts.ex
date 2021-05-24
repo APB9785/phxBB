@@ -79,7 +79,7 @@ defmodule PhxBb.Posts do
   """
   def create_post(attrs \\ %{}) do
     now = NaiveDateTime.utc_now()
-    attrs = Enum.into(attrs, %{view_count: 0, reply_count: 0, last_reply_at: now})
+    attrs = Map.merge(attrs, %{view_count: 0, reply_count: 0, last_reply_at: now})
 
     %Post{}
     |> Post.changeset(attrs)

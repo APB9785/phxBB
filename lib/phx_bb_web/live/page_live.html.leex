@@ -88,6 +88,11 @@
           uploads: @uploads,
           id: "user-settings-component" %>
 
+  <% :admin -> %>
+    <%= live_component @socket, AdminPanelComponent,
+          active_user: @active_user,
+          id: "admin-panel-component" %>
+
   <% :invalid -> %>
     <div class="text-2xl p-8 text-center" id="page-not-found-live">
       404 Page Not Found

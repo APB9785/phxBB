@@ -9,10 +9,12 @@ defmodule PhxBbWeb.PageLive do
   import PhxBbWeb.StyleHelpers
 
   alias PhxBb.Accounts
+  alias PhxBb.Accounts.User
   alias PhxBb.Boards
   alias PhxBb.Posts
   alias PhxBb.Replies
   alias PhxBb.Replies.Reply
+  alias PhxBbWeb.AdminPanelComponent
   alias PhxBbWeb.BoardComponent
   alias PhxBbWeb.BreadcrumbComponent
   alias PhxBbWeb.CreatePostComponent
@@ -160,17 +162,29 @@ defmodule PhxBbWeb.PageLive do
     end
   end
 
+  def handle_params(%{"admin" => "1"}, _url, socket) do
+    user = socket.assigns.active_user
+
+    if !is_nil(user) and user.admin do
+      socket = assign(socket, nav: :admin, page_title: "Admin Panel")
+      {:noreply, socket}
+    else
+      socket = assign_invalid(socket)
+      {:noreply, socket}
+    end
+  end
+
   def handle_params(%{"confirm" => token}, _url, socket) do
     # Do not log in the user after confirmation to avoid a
     # leaked token giving the user access to the account.
     case Accounts.confirm_user(token) do
       {:ok, _} ->
-        socket =
+        {
+          :noreply,
           socket
           |> put_flash(:info, "Account confirmed successfully.")
           |> redirect(to: "/users/log_in")
-
-        {:noreply, socket}
+        }
 
       :error ->
         socket = user_confirm_error_redirect(socket)
@@ -181,25 +195,27 @@ defmodule PhxBbWeb.PageLive do
   def handle_params(%{"confirm_email" => token}, _url, socket) do
     case Accounts.update_user_email(socket.assigns.active_user, token) do
       :ok ->
-        socket =
+        {
+          :noreply,
           socket
           |> put_flash(:info, "Email changed successfully.")
           |> push_redirect(to: Routes.live_path(socket, __MODULE__))
-
-        {:noreply, socket}
+        }
 
       :error ->
-        socket =
+        {
+          :noreply,
           socket
           |> put_flash(:error, "Email change link is invalid or it has expired.")
           |> push_redirect(to: Routes.live_path(socket, __MODULE__))
-
-        {:noreply, socket}
+        }
     end
   end
 
   def handle_params(params, _url, socket) when params == %{} do
-    socket = assign(socket, nav: :main, page_title: "Board Index")
+    socket =
+      assign(socket, nav: :main, page_title: "Board Index", active_board: nil, active_post: nil)
+
     {:noreply, socket}
   end
 
@@ -237,7 +253,7 @@ defmodule PhxBbWeb.PageLive do
         top_post = Posts.most_recent_post(board.id)
         Boards.deleted_latest_reply(board.id, top_post)
         new_reply_list = []
-        message = {:deleted_reply, new_reply_list, active_post.id, top_post}
+        message = {:deleted_reply, reply.author, new_reply_list, active_post.id, top_post}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
 
       [%Reply{id: ^reply_id} | [next | rest]] ->
@@ -246,7 +262,7 @@ defmodule PhxBbWeb.PageLive do
         top_post = Posts.most_recent_post(board.id)
         Boards.deleted_latest_reply(board.id, top_post)
         new_reply_list = Enum.reverse([next | rest])
-        message = {:deleted_reply, new_reply_list, active_post.id, top_post}
+        message = {:deleted_reply, reply.author, new_reply_list, active_post.id, top_post}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
 
       reversed_reply_list ->
@@ -255,7 +271,7 @@ defmodule PhxBbWeb.PageLive do
         top_post = Posts.most_recent_post(board.id)
         Boards.deleted_reply(board.id)
         new_reply_list = Enum.reject(reversed_reply_list, &(&1.id == reply_id)) |> Enum.reverse()
-        message = {:deleted_reply, new_reply_list, active_post.id, top_post}
+        message = {:deleted_reply, reply.author, new_reply_list, active_post.id, top_post}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
     end
 
@@ -267,22 +283,23 @@ defmodule PhxBbWeb.PageLive do
 
   # Global PubSub message handlers
 
-  def handle_info({:deleted_reply, new_reply_list, post_id, top_post}, socket) do
+  def handle_info({:deleted_reply, author_id, new_reply_list, post_id, top_post}, socket) do
     new_board_list =
       update_board_list(socket.assigns.board_list, top_post.board_id,
         post_count: &(&1 - 1),
         last_post: fn _ -> top_post.id end,
         last_user: fn _ -> top_post.last_user end,
-        updated_at: fn _ -> NaiveDateTime.utc_now() end
+        updated_at: fn _ -> top_post.last_reply_at end
       )
 
-    socket =
+    {
+      :noreply,
       socket
       |> delete_reply_from_post(new_reply_list, post_id)
       |> refresh_post_list(top_post.board_id)
+      |> update_cache_post_count(author_id, &(&1 - 1))
       |> assign(board_list: new_board_list)
-
-    {:noreply, socket}
+    }
   end
 
   def handle_info({:edited_reply, new_reply}, socket) do
@@ -319,7 +336,7 @@ defmodule PhxBbWeb.PageLive do
       |> add_reply(reply.post_id, reply)
       |> refresh_post_list(board_id)
       |> assign(board_list: new_board_list)
-      |> update_cache_post_count(reply.author)
+      |> update_cache_post_count(reply.author, &(&1 + 1))
 
     {:noreply, socket}
   end
@@ -336,7 +353,7 @@ defmodule PhxBbWeb.PageLive do
 
     socket =
       socket
-      |> update_cache_post_count(author_id)
+      |> update_cache_post_count(author_id, &(&1 + 1))
       |> refresh_post_list(board_id)
       |> assign(board_list: new_board_list)
 
@@ -350,6 +367,29 @@ defmodule PhxBbWeb.PageLive do
       |> handle_leaves(diff.leaves)
       |> handle_joins(diff.joins)
     }
+  end
+
+  def handle_info({:user_disabled, user_id}, socket) do
+    case socket.assigns.active_user do
+      %User{id: ^user_id} = user ->
+        now = NaiveDateTime.utc_now()
+        socket = assign(socket, active_user: Map.put(user, :disabled_at, now))
+        {:noreply, socket}
+
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_info({:user_enabled, user_id}, socket) do
+    case socket.assigns.active_user do
+      %User{id: ^user_id} = user ->
+        socket = assign(socket, active_user: Map.put(user, :disabled_at, nil))
+        {:noreply, socket}
+
+      _ ->
+        {:noreply, socket}
+    end
   end
 
   # Helpers for the above handlers
@@ -455,10 +495,10 @@ defmodule PhxBbWeb.PageLive do
     end)
   end
 
-  defp update_cache_post_count(socket, author_id) do
+  defp update_cache_post_count(socket, author_id, func) do
     case socket.assigns.user_cache do
       %{^author_id => user_info} = cache ->
-        new_user_info = Map.update!(user_info, :post_count, &(&1 + 1))
+        new_user_info = Map.update!(user_info, :post_count, func)
         assign(socket, user_cache: Map.put(cache, author_id, new_user_info))
 
       _ ->

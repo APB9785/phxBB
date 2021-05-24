@@ -5,8 +5,7 @@ defmodule PhxBb.ForumFixtures do
 
   def reply_fixture(attrs \\ %{}) do
     {:ok, reply} =
-      attrs
-      |> Enum.into(%{body: "some body"})
+      Map.merge(%{body: "some body"}, attrs)
       |> PhxBb.Replies.create_reply()
 
     reply
@@ -14,14 +13,16 @@ defmodule PhxBb.ForumFixtures do
 
   def post_fixture(attrs \\ %{}) do
     {:ok, post} =
-      attrs
-      |> Enum.into(%{
-        board_id: 1,
-        body: "some body",
-        title: "some title",
-        reply_count: 0,
-        view_count: 0
-      })
+      Map.merge(
+        %{
+          board_id: 1,
+          body: "some body",
+          title: "some title",
+          reply_count: 0,
+          view_count: 0
+        },
+        attrs
+      )
       |> PhxBb.Posts.create_post()
 
     post
@@ -29,8 +30,7 @@ defmodule PhxBb.ForumFixtures do
 
   def board_fixture(attrs \\ %{}) do
     {:ok, board} =
-      attrs
-      |> Enum.into(%{name: "some name", description: "some description"})
+      Map.merge(%{name: "some name", description: "some description"}, attrs)
       |> PhxBb.Boards.create_board()
 
     board

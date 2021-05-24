@@ -10,8 +10,7 @@ defmodule PhxBbWeb.PostAuthorComponent do
 
   def render(assigns) do
     ~L"""
-    <div class="flex justify-end flex-row-reverse pl-4 border-b-2 pb-2 pt-2
-               md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block"
+    <div class="<%= post_author_style(@active_user) %>"
          id="post-author-info">
       <div>
         <%= live_patch @user_cache[@post.author].name,
@@ -24,7 +23,7 @@ defmodule PhxBbWeb.PostAuthorComponent do
 
       <%= if @user_cache[@post.author].avatar do %>
         <%= img_tag @user_cache[@post.author].avatar,
-                    class: "max-h-40 object-fill mr-4 h-10 w-10 md:h-auto md:w-32 md:mx-auto md:pt-2",
+                    class: avatar_style(),
                     id: id_maker(@type, "author", "avatar", @post.id) %>
       <% end %>
 

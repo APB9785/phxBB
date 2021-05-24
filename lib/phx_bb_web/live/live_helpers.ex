@@ -103,7 +103,19 @@ defmodule PhxBbWeb.LiveHelpers do
         assign_invalid(socket)
 
       %Board{} = board ->
-        assign(socket, nav: :create_post, page_title: "Create Post", active_board: board)
+        post_list = Posts.list_posts(board_id)
+
+        cache =
+          Enum.reduce(post_list, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
+          |> Accounts.build_cache(socket.assigns.user_cache)
+
+        assign(socket,
+          nav: :create_post,
+          page_title: "Create Post",
+          active_board: board,
+          post_list: post_list,
+          user_cache: cache
+        )
     end
   end
 
@@ -121,15 +133,15 @@ defmodule PhxBbWeb.LiveHelpers do
 
   # Query the database for Board data only if the active Board has changed.
   def check_board_change(socket, new_board_id) when is_integer(new_board_id) do
-    case socket.assigns[:active_board] do
-      nil ->
-        assign(socket, active_board: Boards.get_board!(new_board_id))
+    active_board = socket.assigns[:active_board]
 
-      %Board{id: current_id} when current_id != new_board_id ->
-        assign(socket, active_board: Boards.get_board!(new_board_id))
-
-      %Board{} ->
-        socket
+    if is_nil(active_board) or active_board.id != new_board_id do
+      assign(socket,
+        active_board: Boards.get_board!(new_board_id),
+        post_list: Posts.list_posts(new_board_id)
+      )
+    else
+      socket
     end
   end
 
@@ -172,17 +184,17 @@ defmodule PhxBbWeb.LiveHelpers do
   end
 
   def format_date(naive_datetime, user) do
-    datetime = DateTime.from_naive!(naive_datetime, "Etc/UTC")
-
-    DateTime.shift_zone!(datetime, user.timezone)
+    naive_datetime
+    |> DateTime.from_naive!("Etc/UTC")
+    |> DateTime.shift_zone!(user.timezone)
     |> format_date
   end
 
   def format_date(datetime) do
-    month_abv(datetime.month) <>
-      " " <>
-      Integer.to_string(datetime.day) <>
-      ", " <> Integer.to_string(datetime.year)
+    day = Integer.to_string(datetime.day)
+    month = month_abv(datetime.month)
+    year = Integer.to_string(datetime.year)
+    "#{month} #{day}, #{year}"
   end
 
   def format_time(naive_datetime, user) when is_nil(user) do
@@ -190,21 +202,18 @@ defmodule PhxBbWeb.LiveHelpers do
   end
 
   def format_time(naive_datetime, user) do
-    datetime = DateTime.from_naive!(naive_datetime, "Etc/UTC")
-
-    DateTime.shift_zone!(datetime, user.timezone)
+    naive_datetime
+    |> DateTime.from_naive!("Etc/UTC")
+    |> DateTime.shift_zone!(user.timezone)
     |> format_time
   end
 
   def format_time(datetime) do
     month = month_abv(datetime.month)
-
-    ampm =
-      if datetime.hour > 11 do
-        "pm"
-      else
-        "am"
-      end
+    minute = Integer.to_string(datetime.minute) |> String.pad_leading(2, "0")
+    ampm = if datetime.hour > 11, do: "pm", else: "am"
+    day = Integer.to_string(datetime.day)
+    year = Integer.to_string(datetime.year)
 
     hour =
       case datetime.hour do
@@ -213,13 +222,7 @@ defmodule PhxBbWeb.LiveHelpers do
         x -> Integer.to_string(x)
       end
 
-    minute = Integer.to_string(datetime.minute) |> String.pad_leading(2, "0")
-
-    month <>
-      " " <>
-      Integer.to_string(datetime.day) <>
-      ", " <>
-      Integer.to_string(datetime.year) <> "  " <> hour <> ":" <> minute <> " " <> ampm
+    "#{month} #{day}, #{year} #{hour}:#{minute} #{ampm}"
   end
 
   # Display
@@ -231,8 +234,8 @@ defmodule PhxBbWeb.LiveHelpers do
     end
   end
 
-  def display_title(post) do
-    post
+  def display_title(post_id) do
+    post_id
     |> PhxBb.Posts.get_title()
     |> shortener
   end
@@ -267,15 +270,19 @@ defmodule PhxBbWeb.LiveHelpers do
 
   # Post + Reply
 
-  def postmaker(body, title, board_id, user_id) do
+  def postmaker(body, title, board_id, %User{disabled_at: nil, id: user_id}) do
     %{body: body, title: title, board_id: board_id, author: user_id, last_user: user_id}
     |> PhxBb.Posts.create_post()
   end
 
-  def replymaker(body, post_id, user_id) do
+  def postmaker(_, _, _, _), do: {:disabled}
+
+  def replymaker(body, post_id, %User{disabled_at: nil, id: user_id}) do
     %{body: body, post_id: post_id, author: user_id}
     |> PhxBb.Replies.create_reply()
   end
+
+  def replymaker(_, _, _), do: {:disabled}
 
   # URL makers
 
@@ -310,6 +317,9 @@ defmodule PhxBbWeb.LiveHelpers do
 
   def admin?(nil), do: false
   def admin?(%User{} = user), do: user.admin
+
+  def disabled?(nil), do: false
+  def disabled?(%User{disabled_at: time}), do: !is_nil(time)
 
   def author?(nil, _), do: false
   def author?(%User{} = user, post), do: user.id == post.author

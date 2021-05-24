@@ -8,6 +8,7 @@ defmodule PhxBb.Repo.Migrations.CreateAll do
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :naive_datetime
+      add :disabled_at, :naive_datetime
       add :username, :citext, null: false
       add :post_count, :integer
       add :timezone, :string

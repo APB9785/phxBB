@@ -1,0 +1,93 @@
+<div>
+  <div class="text-2xl font-bold md:pl-8">Admin Panel</div>
+
+  <!-- Disable user account -->
+  <div class="text-2xl py-4 md:pl-8">Disable user account</div>
+  <div class="<%= settings_block(@active_user) %>">
+    <%= case @select_disable do %>
+
+    <% nil -> %>
+      <p class="font-bold">There are no other users to disable!</p>
+
+    <% _ -> %>
+      <%= f = form_for :disable_user, "#",
+                phx_submit: "disable_user",
+                phx_change: "validate",
+                phx_target: @myself,
+                id: "admin-disable-user-form" %>
+
+        <%= if @user_disabled_success do %>
+          <div class="alert alert-info" id="user-disabled-ok">
+            <p>User account successfully disabled.</p>
+          </div>
+        <% end %>
+
+        <%= label f, :user, class: user_form_label(@active_user) %>
+        <%= select f, :user, @user_list,
+              selected: @select_disable,
+              class: user_form(@active_user) %>
+
+        <%= if @confirm_disable do %>
+          <div class="flex justify-end md:justify-center">
+            <%= submit "Confirm disable?",
+                  phx_disable_with: "Disabling...",
+                  class: "font-bold text-red-500 hover:underline" %>
+          </div>
+        <% else %>
+          <button phx-click="disable_user_prompt"
+                  phx-target="<%= @myself %>"
+                  class="<%= button_style(@active_user) %>"
+                  type="button"
+                  id="disable-user-button">
+            Disable User
+          </button>
+        <% end %>
+      </form>
+    <% end %>
+  </div>
+
+  <!-- Enable user account -->
+  <div class="text-2xl py-4 md:pl-8">Re-enable user account</div>
+  <div class="<%= settings_block(@active_user) %>">
+    <%= case @select_enable do %>
+
+    <% nil -> %>
+      <p class="font-bold">There are no disabled users!</p>
+
+    <% _ -> %>
+      <%= f = form_for :enable_user, "#",
+                phx_submit: "enable_user",
+                phx_change: "validate",
+                phx_target: @myself,
+                id: "admin-enable-user-form" %>
+
+        <%= if @user_enabled_success do %>
+          <div class="alert alert-info" id="user-enabled-ok">
+            <p>User account successfully re-enabled.</p>
+          </div>
+        <% end %>
+
+        <%= label f, :user, class: user_form_label(@active_user) %>
+        <%= select f, :user, @disabled_user_list,
+              selected: @select_enable,
+              class: user_form(@active_user) %>
+
+        <%= if @confirm_enable do %>
+          <div class="flex justify-end md:justify-center">
+            <%= submit "Confirm re-enable?",
+                  phx_disable_with: "Re-enabling...",
+                  class: "font-bold text-red-500 hover:underline" %>
+          </div>
+        <% else %>
+          <button phx-click="enable_user_prompt"
+                  phx-target="<%= @myself %>"
+                  class="<%= button_style(@active_user) %>"
+                  type="button"
+                  id="enable-user-button">
+            Re-enable User
+          </button>
+        <% end %>
+      </form>
+    <% end %>
+  </div>
+</div>

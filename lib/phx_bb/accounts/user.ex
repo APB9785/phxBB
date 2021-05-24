@@ -14,6 +14,7 @@ defmodule PhxBb.Accounts.User do
     field :password, :string, virtual: true
     field :hashed_password, :string
     field :confirmed_at, :naive_datetime
+    field :disabled_at, :naive_datetime
     field :username, :string
     field :post_count, :integer
     field :timezone, :string
@@ -153,6 +154,11 @@ defmodule PhxBb.Accounts.User do
       %{changes: %{theme: _}} = changeset -> changeset
       %{} = changeset -> add_error(changeset, :theme, "did not change")
     end
+  end
+
+  def disable_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:disabled_at])
   end
 
   @doc """

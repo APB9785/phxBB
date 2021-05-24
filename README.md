@@ -26,6 +26,8 @@ To start a local phxBB server:
   * Install app dependencies with `mix deps.get`
   * Create and migrate your database with `mix ecto.setup`
   * Install Node.js dependencies with `npm install` inside the `assets` directory
+  * Create a [Mailjet](http://www.mailjet.com/) account for sending account confirmation emails
+  * Set [environment variables](https://en.wikipedia.org/wiki/Environment_variable) `MAILJET_API_KEY` and `MAILJET_SECRET_KEY`
   * Start Phoenix endpoint with `mix phx.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.

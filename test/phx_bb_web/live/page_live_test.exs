@@ -23,7 +23,7 @@ defmodule PhxBbWeb.PageLiveTest do
 
   setup do
     %{
-      user: user_fixture(%{timezone: "Etc/UTC"}),
+      user: user_fixture(),
       board: Repo.insert!(@test_board)
     }
   end
@@ -72,7 +72,7 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#board-name", board.name) |> render_click
       view |> element("#post-listing-link", post.title) |> render_click
 
-      {:ok, reply} = replymaker("Test reply", alt_post.id, alt_user.id)
+      {:ok, reply} = replymaker("Test reply", alt_post.id, alt_user)
       message = {:new_reply, alt_post.id, reply, alt_user.id}
       Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
 
@@ -1050,6 +1050,27 @@ defmodule PhxBbWeb.PageLiveTest do
 
       refute has_element?(view, "#online-username", "guest")
     end
+
+    test "Disable a user account", %{conn: conn, user: user, board: board} do
+      admin_user = user_fixture(%{admin: true})
+      admin_conn = login_fixture(conn, admin_user)
+      user_conn = login_fixture(conn, user)
+
+      {:ok, view, _html} = live(user_conn, "/?board=#{board.id}")
+      assert has_element?(view, "#new-post-button-top")
+
+      {:ok, admin_view, _html} = live(admin_conn, "/?admin=1")
+      assert render(admin_view) =~ "Admin Panel"
+
+      admin_view
+      |> form("#admin-disable-user-form", %{disable_user: %{user: user.id}})
+      |> render_submit
+
+      # Give time for the PubSub message to be received
+      Process.sleep(50)
+
+      refute has_element?(view, "#new-post-button-top")
+    end
   end
 
   def login_fixture(conn, user) do
@@ -1061,7 +1082,7 @@ defmodule PhxBbWeb.PageLiveTest do
   end
 
   def post_fixture(user, board, title \\ "Test title", body \\ "Test body") do
-    {:ok, post} = postmaker(body, title, board.id, user.id)
+    {:ok, post} = postmaker(body, title, board.id, user)
 
     # Update the last post info for the active board
     {1, _} = Boards.added_post(board.id, post.id, user.id)
@@ -1075,7 +1096,7 @@ defmodule PhxBbWeb.PageLiveTest do
   end
 
   def reply_fixture(user, post, body \\ "Test reply") do
-    {:ok, reply} = replymaker(body, post.id, user.id)
+    {:ok, reply} = replymaker(body, post.id, user)
 
     # Update the last reply info for the active post
     {1, _} = Posts.added_reply(post.id, user.id)

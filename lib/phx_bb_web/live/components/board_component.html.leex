@@ -1,18 +1,19 @@
 <div>
 
-  <div class="pb-4 pl-2 md:pl-8 pt-4">
-    <%= live_patch ~L"<button>New Post</button>",
-          to: Routes.live_path(@socket, PhxBbWeb.PageLive,
-                               [board: @active_board.id, create_post: 1]),
-          class: new_post_button_style(@active_user),
-          id: "new-post-button-top" %>
-  </div>
+  <%= if !is_nil(@active_user) and is_nil(@active_user.disabled_at) do %>
+    <div class="pb-4 pl-2 md:pl-8 pt-4">
+      <%= live_patch ~L"<button>New Post</button>",
+            to: Routes.live_path(@socket, PhxBbWeb.PageLive,
+                                 [board: @active_board.id, create_post: 1]),
+            class: new_post_button_style(@active_user),
+            id: "new-post-button-top" %>
+    </div>
+  <% end %>
 
   <!-- Post listing -->
   <div class="<%= post_dividers(@active_user) %>" id="post-listing">
     <%= for post <- @post_list do %>
-      <div class="p-4 block items-center bg-gray-100 rounded-lg m-1
-                 md:flex md:m-0 md:bg-transparent md:rounded-none">
+      <div class="<%= topic_bubble_style(@active_user) %>">
 
         <div class="px-4 md:w-7/12">
           <%= live_patch post.title,
@@ -46,12 +47,14 @@
     <% end %>
   </div>
 
-  <div class="pb-6 pl-2 md:pl-8 pt-4">
-    <%= live_patch ~L"<button>New Post</button>",
-          to: Routes.live_path(@socket, PhxBbWeb.PageLive,
-                               [board: @active_board.id, create_post: 1]),
-          class: new_post_button_style(@active_user),
-          id: "new-post-button-bottom" %>
-  </div>
+  <%= if !is_nil(@active_user) and is_nil(@active_user.disabled_at) do %>
+    <div class="pb-6 pl-2 md:pl-8 pt-4">
+      <%= live_patch ~L"<button>New Post</button>",
+            to: Routes.live_path(@socket, PhxBbWeb.PageLive,
+                                 [board: @active_board.id, create_post: 1]),
+            class: new_post_button_style(@active_user),
+            id: "new-post-button-bottom" %>
+    </div>
+  <% end %>
 
 </div>

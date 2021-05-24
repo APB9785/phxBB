@@ -5,7 +5,7 @@
       <%= format_time(@post.inserted_at, @active_user) %>
     </div>
 
-    <%= if admin?(@active_user) or author?(@active_user, @post) do %>
+    <%= if may_edit?(@active_user, @post) do %>
       <div class="<%= post_timestamp_style(@active_user) %>">&nbsp-&nbsp</div>
       <button phx-click="edit_post"
               phx-target="<%= @myself %>"

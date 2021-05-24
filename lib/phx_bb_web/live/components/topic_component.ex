@@ -13,7 +13,7 @@ defmodule PhxBbWeb.TopicComponent do
 
   def render(assigns) do
     ~L"""
-    <div class="block rounded-xl bg-gray-100 mb-4 md:flex md:rounded-none md:bg-transparent">
+    <div class="<%= post_content_style(@active_user) %>">
       <%= live_component @socket, PostAuthorComponent,
             active_user: @active_user,
             post: @active_post,
@@ -31,7 +31,7 @@ defmodule PhxBbWeb.TopicComponent do
     <div class="<%= post_dividers(@active_user) %>">
       <%= for reply <- @reply_list do %>
 
-        <div class="block rounded-xl bg-gray-100 mb-4 md:flex md:rounded-none md:bg-transparent">
+        <div class="<%= post_content_style(@active_user) %>">
           <%= live_component @socket, PostAuthorComponent,
                 active_user: @active_user,
                 post: reply,

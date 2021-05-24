@@ -27,7 +27,7 @@ defmodule PhxBbWeb.CreatePostComponent do
     user = socket.assigns.active_user
     board = socket.assigns.active_board
 
-    case postmaker(params["body"], params["title"], board.id, user.id) do
+    case postmaker(params["body"], params["title"], board.id, user) do
       {:ok, post} ->
         # Update the last post info for the active board
         {1, _} = Boards.added_post(board.id, post.id, user.id)
@@ -47,6 +47,20 @@ defmodule PhxBbWeb.CreatePostComponent do
       {:error, %Ecto.Changeset{} = changeset} ->
         socket = assign(socket, changeset: changeset)
         {:noreply, socket}
+
+      {:disabled} ->
+        {:noreply, socket}
     end
+  end
+
+  def handle_event("validate", %{"post" => params}, socket) do
+    changeset =
+      %Post{}
+      |> Posts.change_post(params)
+      |> Map.put(:action, :insert)
+
+    socket = assign(socket, changeset: changeset)
+
+    {:noreply, socket}
   end
 end

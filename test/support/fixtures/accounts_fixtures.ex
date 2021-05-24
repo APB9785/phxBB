@@ -12,16 +12,19 @@ defmodule PhxBb.AccountsFixtures do
     unique_username = unique_user()
 
     {:ok, user} =
-      attrs
-      |> Enum.into(%{
-        email: unique_user_email(),
-        password: valid_user_password(),
-        username: unique_username,
-        post_count: 0,
-        title: "Registered User",
-        theme: "default",
-        admin: false
-      })
+      Map.merge(
+        %{
+          email: unique_user_email(),
+          password: valid_user_password(),
+          username: unique_username,
+          post_count: 0,
+          title: "Registered User",
+          theme: "default",
+          admin: false,
+          timezone: "Etc/UTC"
+        },
+        attrs
+      )
       |> PhxBb.Accounts.register_user()
 
     user

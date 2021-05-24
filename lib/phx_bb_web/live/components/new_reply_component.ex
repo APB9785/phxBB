@@ -28,7 +28,7 @@ defmodule PhxBbWeb.NewReplyComponent do
     user = socket.assigns.active_user
     post = socket.assigns.active_post
 
-    case replymaker(params["body"], post.id, user.id) do
+    case replymaker(params["body"], post.id, user) do
       {:ok, reply} ->
         # Update the last reply info for the active post
         {1, _} = Posts.added_reply(post.id, user.id)
@@ -46,6 +46,9 @@ defmodule PhxBbWeb.NewReplyComponent do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         socket = assign(socket, changeset: changeset)
+        {:noreply, socket}
+
+      {:disabled} ->
         {:noreply, socket}
     end
   end

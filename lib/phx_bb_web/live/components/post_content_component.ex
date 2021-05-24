@@ -31,7 +31,6 @@ defmodule PhxBbWeb.PostContentComponent do
   end
 
   def handle_event("edit_post", _params, socket) do
-    # Should send PubSub to warn readers!
     socket = assign(socket, edit: true)
     {:noreply, socket}
   end
@@ -41,11 +40,8 @@ defmodule PhxBbWeb.PostContentComponent do
 
     case Posts.update_post(socket.assigns.post, params) do
       {:ok, post} ->
-        # Update locally
-        socket = assign(socket, edit: false)
-        # Send PubSub message to update
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "posts", {:edited_post, post})
-
+        socket = assign(socket, edit: false)
         {:noreply, socket}
 
       {:error, changeset} ->
@@ -59,11 +55,8 @@ defmodule PhxBbWeb.PostContentComponent do
 
     case Replies.update_reply(socket.assigns.post, params) do
       {:ok, reply} ->
-        # Update locally
-        socket = assign(socket, edit: false)
-        # Send PubSub message to update
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", {:edited_reply, reply})
-
+        socket = assign(socket, edit: false)
         {:noreply, socket}
 
       {:error, changeset} ->
@@ -109,9 +102,10 @@ defmodule PhxBbWeb.PostContentComponent do
   def handle_event("delete_post", %{"id" => _post_id}, socket) do
     params = %{body: "_Post deleted._", edited_by: socket.assigns.active_user.id}
     {:ok, post} = Posts.update_post(socket.assigns.post, params)
-    Phoenix.PubSub.broadcast(PhxBb.PubSub, "posts", {:edited_post, post})
-    socket = assign(socket, delete: false)
 
+    Phoenix.PubSub.broadcast(PhxBb.PubSub, "posts", {:edited_post, post})
+
+    socket = assign(socket, delete: false)
     {:noreply, socket}
   end
 
@@ -129,15 +123,16 @@ defmodule PhxBbWeb.PostContentComponent do
 
   def edit_post_form_value(changeset) do
     case changeset.changes[:body] do
-      nil ->
-        if changeset.errors == [] do
-          changeset.data.body
-        else
-          ""
-        end
+      nil -> if changeset.errors == [], do: changeset.data.body, else: ""
+      changed_body -> changed_body
+    end
+  end
 
-      changed_body ->
-        changed_body
+  def may_edit?(user, post) do
+    cond do
+      admin?(user) -> true
+      author?(user, post) and !disabled?(user) -> true
+      true -> false
     end
   end
 end

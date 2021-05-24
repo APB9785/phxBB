@@ -70,6 +70,24 @@ defmodule PhxBb.Accounts do
 
   def get_user(id), do: Repo.get(User, id)
 
+  def list_other_users(user_id) do
+    from(u in User,
+      where: u.id != ^user_id and is_nil(u.disabled_at),
+      select: %{name: u.username, id: u.id},
+      order_by: [desc: u.username]
+    )
+    |> Repo.all()
+  end
+
+  def list_disabled_users(user_id) do
+    from(u in User,
+      where: u.id != ^user_id and not is_nil(u.disabled_at),
+      select: %{name: u.username, id: u.id},
+      order_by: [desc: u.username]
+    )
+    |> Repo.all()
+  end
+
   # Leverages Map.put_new_lazy/3 to check every ID and only run the query
   # for previously unseen IDs
   def build_cache(user_ids, cache) when is_list(user_ids) do
@@ -336,6 +354,18 @@ defmodule PhxBb.Accounts do
   def update_user_theme(%User{} = user, attrs) do
     user
     |> User.theme_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def disable_user(%User{} = user) do
+    user
+    |> User.disable_changeset(%{disabled_at: NaiveDateTime.utc_now()})
+    |> Repo.update()
+  end
+
+  def enable_user(%User{} = user) do
+    user
+    |> User.disable_changeset(%{disabled_at: nil})
     |> Repo.update()
   end
 
