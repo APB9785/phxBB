@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.5] - 2021-05-24
 
 ### Added
 
@@ -27,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Post edit validation no longer undoes changes when the form is completely empty
 - Post view/reply counts now use singular grammar when the count is one
 - Various styling fixes site-wide
+- Post listing now loads properly when returning to board from "create post" form
 
 ## [0.4.1] - 2021-05-04
 
@@ -128,7 +129,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - User cache for reduced DB queries
 - Page title updates to reflect current view
 
-[Unreleased]: https://github.com/APB9785/phxBB/compare/0.4.1...HEAD
+[0.5]: https://github.com/APB9785/phxBB/compare/0.4.1...0.5
 [0.4.1]: https://github.com/APB9785/phxBB/compare/0.4...0.4.1
 [0.4]: https://github.com/APB9785/phxBB/compare/0.3.1...0.4
 [0.3.1]: https://github.com/APB9785/phxBB/compare/0.3...0.3.1

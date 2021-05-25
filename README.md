@@ -7,15 +7,27 @@
 **phxBB** is a re-imagining of classic message board software such as phpBB and   
 vBulletin.  It uses Phoenix LiveView to establish a persistent WebSocket   
 connection with each user, providing real-time updates, navigation, and   
-interaction without any full page reloads after the user is logged in.   
+interaction without any full page reloads after the user is logged in.  
 
-## What's New - v0.4
+## Features
 
-- Email verification with Swoosh
-- User profiles
-- "Dark" theme
-- Markdown enabled in posts and replies
-- Live content updates with PubSub
+- Server-side caching of user and post data within LiveView assigns
+- Real-time content updates via `Phoenix.PubSub`
+- Upload your own image for a user avatar
+- User authentication with `phx.gen.auth`
+- Email address confirmation via `Swoosh` + `Mailjet`
+- Live form validations
+- All site navigation (minus login) done via LiveView patching - no page reloads!
+- Markdown parsing in posts with `Earmark` + `PhoenixHtmlSanitizer`
+- See who's online with `Phoenix.Presence`
+- Full test suite
+
+## What's New - v0.5
+
+- Administrator account: can edit and delete posts
+- Admin Panel: allows administrator to disable unwanted user accounts
+- Users can now edit and delete their own posts
+- Main Index now shows other users who are currently online
 
 See [CHANGELOG.md](https://github.com/APB9785/phxBB/blob/master/CHANGELOG.md) for the full list of changes
 
