@@ -15,7 +15,18 @@ alias PhxBb.Accounts.User
 alias PhxBb.Boards.Board
 alias PhxBb.Repo
 
-{:ok, user} =
+board_base = %Board{
+  name: nil,
+  description: nil,
+  post_count: 0,
+  topic_count: 0,
+  last_post: nil,
+  last_user: nil
+}
+
+# Create Administrator Account
+
+{:ok, admin_user} =
   %{
     email: "admin@phxbb.app",
     password: "CHANGEME",
@@ -28,44 +39,29 @@ alias PhxBb.Repo
   }
   |> Accounts.register_user()
 
-User.confirm_changeset(user)
-|> Repo.update()
+User.confirm_changeset(admin_user)
+|> Repo.update!()
 
-gen_script =
-  "This board is for discussion of a general nature. Please feel free to " <>
-    "talk about your favorite interests. Anyone can post here as long as " <>
-    "they are a registered user."
+# Board names/descriptions
 
-%Board{
-  name: "General Discussion",
-  description: gen_script,
-  post_count: 0,
-  topic_count: 0,
-  last_post: nil,
-  last_user: nil
+%{
+  board_base
+  | name: "General Discussion",
+    description:
+      "This board is for discussion of a general nature. Please feel free to talk about your favorite interests."
 }
 |> Repo.insert!()
 
-%Board{
-  name: "Ontopic Discussion",
-  description: "Test Board #2",
-  post_count: 0,
-  topic_count: 0,
-  last_post: nil,
-  last_user: nil
+%{
+  board_base
+  | name: "phxBB Discussion",
+    description: "All questions and comments related to phxBB should be made here."
 }
 |> Repo.insert!()
 
-custard =
-  "All discussion of custard goes here. No custard posts will be allowed " <>
-    "in other boards."
-
-%Board{
-  name: "Custard Discussion",
-  description: custard,
-  post_count: 0,
-  topic_count: 0,
-  last_post: nil,
-  last_user: nil
+%{
+  board_base
+  | name: "Elixir/Phoenix Discussion",
+    description: "Anything related to Elixir or Phoenix should be posted here."
 }
 |> Repo.insert!()
