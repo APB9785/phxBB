@@ -2,6 +2,7 @@ import Config
 
 config :phx_bb, PhxBbWeb.Endpoint,
   server: true,
+  force_ssl: [rewrite_on: [:x_forwarded_proto]],
   url: [host: System.get_env("APP_NAME") <> ".gigalixirapp.com", port: 443]
 
 config :phx_bb, PhxBb.Mailer,
