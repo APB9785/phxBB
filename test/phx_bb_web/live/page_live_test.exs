@@ -153,6 +153,10 @@ defmodule PhxBbWeb.PageLiveTest do
 
       {:ok, view, _html} = live(conn, "/?user=9999")
       assert has_element?(view, "#page-not-found-live")
+
+      # This is valid but hidden
+      {:ok, view, _html} = live(conn, "/?admin=1")
+      assert has_element?(view, "#page-not-found-live")
     end
 
     test "Register new user", %{conn: conn} do
@@ -1009,6 +1013,13 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#new-topic-form") |> render_change(%{post: %{title: "Test", body: "X"}})
 
       assert has_element?(view, "#new-topic-form", "should be at least 3 character(s)")
+    end
+
+    test "Regular users cannot access Admin Panel", %{conn: conn, user: user} do
+      conn = login_fixture(conn, user)
+      {:ok, view, _html} = live(conn, "/?admin=1")
+
+      assert has_element?(view, "#page-not-found-live")
     end
   end
 
