@@ -95,6 +95,14 @@ defmodule PhxBbWeb.AdminPanelComponent do
     }
   end
 
+  def handle_event("clear-enabled-flash", _params, socket) do
+    {:noreply, assign(socket, user_enabled_success: false)}
+  end
+
+  def handle_event("clear-disabled-flash", _params, socket) do
+    {:noreply, assign(socket, user_disabled_success: false)}
+  end
+
   def assign_disable_user(socket, users) do
     assign(socket,
       user_list: users,

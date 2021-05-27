@@ -23,6 +23,7 @@ defmodule PhxBbWeb.MainIndexComponent do
 
     cache = Accounts.build_cache(users, socket.assigns.user_cache)
     socket = assign(socket, user_cache: cache)
+
     {:ok, socket}
   end
 end

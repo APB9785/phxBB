@@ -17,9 +17,12 @@
                 id: "admin-disable-user-form" %>
 
         <%= if @user_disabled_success do %>
-          <div class="alert alert-info" id="user-disabled-ok">
-            <p>User account successfully disabled.</p>
-          </div>
+          <p class="alert alert-info"
+             id="user-disabled-ok"
+             phx-click="clear-disabled-flash"
+             phx-target="<%= @myself %>">
+            User account successfully disabled.
+          </p>
         <% end %>
 
         <%= label f, :user, class: user_form_label(@active_user) %>
@@ -62,9 +65,12 @@
                 id: "admin-enable-user-form" %>
 
         <%= if @user_enabled_success do %>
-          <div class="alert alert-info" id="user-enabled-ok">
-            <p>User account successfully re-enabled.</p>
-          </div>
+          <p class="alert alert-info"
+             id="user-enabled-ok"
+             phx-click="clear-enabled-flash"
+             phx-target="<%= @myself %>">
+            User account successfully re-enabled.
+          <p>
         <% end %>
 
         <%= label f, :user, class: user_form_label(@active_user) %>

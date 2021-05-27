@@ -110,6 +110,18 @@ defmodule PhxBbWeb.UserSettingsComponent do
     {:noreply, socket}
   end
 
+  def handle_event("clear_flash", %{"flash" => message}, socket) do
+    case message do
+      "title_updated" -> {:noreply, assign(socket, title_updated: false)}
+      "timezone_updated" -> {:noreply, assign(socket, timezone_updated: false)}
+      "theme_updated" -> {:noreply, assign(socket, theme_updated: false)}
+      "confirmation_resent" -> {:noreply, assign(socket, confirmation_resent: false)}
+      "email_updated" -> {:noreply, assign(socket, email_updated: false)}
+      "avatar_updated" -> {:noreply, assign(socket, avatar_updated: false)}
+      "avatar_removed" -> {:noreply, assign(socket, avatar_removed: false)}
+    end
+  end
+
   defp upload_avatar(socket, avatar_link) do
     user = socket.assigns.active_user
 

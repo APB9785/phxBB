@@ -2,9 +2,13 @@
   <%= if !@active_user.confirmed_at do %>
     <div class="<%= confirmation_reminder_style(@active_user) %>">
       <%= if @confirmation_resent do %>
-        <div class="alert alert-info" id="confirmation-resent-ok">
-          <p>Confirmation instructions re-sent.</p>
-        </div>
+        <p class="alert alert-info"
+           id="confirmation-resent-ok"
+           phx-click="clear_flash"
+           phx-value-flash="confirmation_resent"
+           phx-target="<%= @myself %>">
+          Confirmation instructions re-sent.
+        </p>
       <% end %>
       <div class="pb-4">
         Please confirm your account by clicking the link in your email.
@@ -33,9 +37,13 @@
         </div>
       <% end %>
       <%= if @timezone_updated do %>
-        <div class="alert alert-info" id="timezone-update-ok">
-          <p>Timezone updated successfully.</p>
-        </div>
+        <p class="alert alert-info"
+           id="timezone-update-ok"
+           phx-click="clear_flash"
+           phx-value-flash="timezone_updated"
+           phx-target="<%= @myself %>">
+          Timezone updated successfully.
+        </p>
       <% end %>
 
       <%= label f, :timezone, class: user_form_label(@active_user) %>
@@ -61,9 +69,13 @@
         </div>
       <% end %>
       <%= if @title_updated do %>
-        <div class="alert alert-info" id="title-updated-ok">
-          <p>User title updated successfully.</p>
-        </div>
+        <p class="alert alert-info"
+           id="title-updated-ok"
+           phx-click="clear_flash"
+           phx-value-flash="title_updated"
+           phx-target="<%= @myself %>">
+          User title updated successfully.
+        </p>
       <% end %>
 
       <%= label f, :title, class: user_form_label(@active_user) %>
@@ -89,9 +101,13 @@
         </div>
       <% end %>
       <%= if @theme_updated do %>
-        <div class="alert alert-info" id="theme-changed-ok">
-          <p>Theme updated successfully.</p>
-        </div>
+        <p class="alert alert-info"
+           id="theme-changed-ok"
+           phx-click="clear_flash"
+           phx-value-flash="theme_updated"
+           phx-target="<%= @myself %>">
+          Theme updated successfully.
+        </p>
       <% end %>
 
       <%= label f, :theme, class: user_form_label(@active_user) %>
@@ -109,14 +125,22 @@
   <div class="text-2xl py-4 md:pl-8">Change avatar</div>
   <div class="<%= settings_block(@active_user) %>">
     <%= if @avatar_updated do %>
-      <div class="alert alert-info" id="avatar-updated-ok">
-        <p>User avatar updated successfully.</p>
-      </div>
+      <p class="alert alert-info"
+         id="avatar-updated-ok"
+         phx-click="clear_flash"
+         phx-value-flash="avatar_updated"
+         phx-target="<%= @myself %>">
+        User avatar updated successfully.
+      </p>
     <% end %>
     <%= if @avatar_removed do %>
-      <div class="alert alert-info" id="avatar-removed-ok">
-        <p>User avatar removed successfully.</p>
-      </div>
+      <p class="alert alert-info"
+         id="avatar-removed-ok"
+         phx-click="clear_flash"
+         phx-value-flash="avatar_removed"
+         phx-target="<%= @myself %>">
+        User avatar removed successfully.
+      </p>
     <% end %>
 
     <!-- Current avatar display -->
@@ -199,9 +223,13 @@
         </div>
       <% end %>
       <%= if @email_updated do %>
-        <div class="alert alert-info" id="email-updated-ok">
-          <p>A link to confirm your email change has been sent to the new address.</p>
-        </div>
+        <p class="alert alert-info"
+           id="email-updated-ok"
+           phx-click="clear_flash"
+           phx-value-flash="email_updated"
+           phx-target="<%= @myself %>">
+          A link to confirm your email change has been sent to the new address.
+        </p>
       <% end %>
 
       <%= hidden_input f, :action, name: "action", value: "update_email" %>
