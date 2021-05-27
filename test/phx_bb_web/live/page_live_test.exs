@@ -704,6 +704,7 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#delete-reply-final-#{reply.id}") |> render_click
 
       # Ensure reply was deleted
+      Process.sleep(50)
       refute render(view) =~ "Get rid of me!"
 
       view |> element("#crumb-board") |> render_click
