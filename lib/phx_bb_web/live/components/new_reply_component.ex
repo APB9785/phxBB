@@ -57,7 +57,9 @@ defmodule PhxBbWeb.NewReplyComponent do
     changeset =
       %Reply{}
       |> Replies.change_reply(params)
-      |> Map.put(:action, :insert)
+
+    # |> Map.put(:action, :insert)
+    # This is commented to disable live validation but still save the changeset
 
     socket = assign(socket, changeset: changeset)
 

@@ -8,22 +8,11 @@ defmodule PhxBbWeb.MainIndexComponent do
   import PhxBbWeb.LiveHelpers
   import PhxBbWeb.StyleHelpers
 
-  alias PhxBb.Accounts
+  alias PhxBbWeb.UserCache
 
   def update(assigns, socket) do
-    socket = assign(socket, assigns)
+    cache = UserCache.from_board_list(assigns.board_list, assigns.user_cache)
 
-    users =
-      Enum.reduce(socket.assigns.board_list, [], fn board, acc ->
-        case board.last_user do
-          nil -> acc
-          last_user -> [last_user | acc]
-        end
-      end)
-
-    cache = Accounts.build_cache(users, socket.assigns.user_cache)
-    socket = assign(socket, user_cache: cache)
-
-    {:ok, socket}
+    {:ok, socket |> assign(assigns) |> assign(user_cache: cache)}
   end
 end

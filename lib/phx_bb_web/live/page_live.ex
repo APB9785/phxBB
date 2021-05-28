@@ -11,6 +11,7 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBb.Accounts
   alias PhxBb.Accounts.User
   alias PhxBb.Boards
+  alias PhxBb.Boards.Board
   alias PhxBb.Posts
   alias PhxBb.Replies
   alias PhxBb.Replies.Reply
@@ -22,6 +23,7 @@ defmodule PhxBbWeb.PageLive do
   alias PhxBbWeb.NewReplyComponent
   alias PhxBbWeb.Presence
   alias PhxBbWeb.TopicComponent
+  alias PhxBbWeb.UserCache
   alias PhxBbWeb.UserMenuComponent
   alias PhxBbWeb.UserProfileComponent
   alias PhxBbWeb.UserRegistrationComponent
@@ -303,13 +305,30 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def handle_info({:edited_reply, new_reply}, socket) do
-    socket = edit_reply(socket, new_reply)
-    {:noreply, socket}
+    cond do
+      is_nil(socket.assigns[:active_post]) ->
+        {:noreply, socket}
+
+      socket.assigns.active_post.id == new_reply.post_id ->
+        new_reply_list = replace_reply_list(socket.assigns.reply_list, new_reply)
+        {:noreply, assign(socket, reply_list: new_reply_list)}
+
+      true ->
+        {:noreply, socket}
+    end
   end
 
   def handle_info({:edited_post, new_post}, socket) do
-    socket = edit_post(socket, new_post)
-    {:noreply, socket}
+    cond do
+      is_nil(socket.assigns[:active_post]) ->
+        {:noreply, socket}
+
+      socket.assigns.active_post.id == new_post.id ->
+        {:noreply, assign(socket, active_post: new_post)}
+
+      true ->
+        {:noreply, socket}
+    end
   end
 
   def handle_info({:user_avatar_change, user_id, avatar}, socket) do
@@ -407,42 +426,13 @@ defmodule PhxBbWeb.PageLive do
   end
 
   def update_board_list(board_list, board_id, changes) do
-    Enum.map(board_list, fn b ->
-      if b.id == board_id do
-        Enum.reduce(changes, b, fn {key, func}, acc ->
-          Map.update!(acc, key, func)
-        end)
-      else
-        b
-      end
+    Enum.map(board_list, fn
+      %Board{id: ^board_id} = board ->
+        Enum.reduce(changes, board, fn {key, func}, acc -> Map.update!(acc, key, func) end)
+
+      board ->
+        board
     end)
-  end
-
-  defp edit_post(socket, new_post) do
-    cond do
-      is_nil(socket.assigns[:active_post]) ->
-        socket
-
-      socket.assigns.active_post.id == new_post.id ->
-        assign(socket, active_post: new_post)
-
-      true ->
-        socket
-    end
-  end
-
-  defp edit_reply(socket, new_reply) do
-    cond do
-      is_nil(socket.assigns[:active_post]) ->
-        socket
-
-      socket.assigns.active_post.id == new_reply.post_id ->
-        new_reply_list = replace_reply_list(socket.assigns.reply_list, new_reply)
-        assign(socket, reply_list: new_reply_list)
-
-      true ->
-        socket
-    end
   end
 
   defp delete_reply_from_post(socket, new_reply_list, post_id) do
@@ -466,7 +456,9 @@ defmodule PhxBbWeb.PageLive do
     active_board = socket.assigns.active_board
 
     if !is_nil(active_board) and active_board.id == board_id do
-      assign(socket, post_list: Posts.list_posts(board_id))
+      post_list = Posts.list_posts(board_id)
+      cache = UserCache.from_post_list(post_list, socket.assigns.user_cache)
+      assign(socket, post_list: post_list, user_cache: cache)
     else
       socket
     end
@@ -481,7 +473,8 @@ defmodule PhxBbWeb.PageLive do
         assign(socket,
           reply_list: socket.assigns.reply_list ++ [reply],
           active_board: Map.update!(socket.assigns.active_board, :post_count, &(&1 + 1)),
-          active_post: Map.update!(socket.assigns.active_post, :reply_count, &(&1 + 1))
+          active_post: Map.update!(socket.assigns.active_post, :reply_count, &(&1 + 1)),
+          user_cache: UserCache.single_user(reply.author, socket.assigns.user_cache)
         )
 
       true ->

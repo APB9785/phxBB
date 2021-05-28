@@ -9,6 +9,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Flash messages in User Settings and Admin Panel are now dismissed on click
+- Validation of replies now waits for form submit to display error
+
+### Fixed
+
+- Fixed a bug where navigating from the Index directly to a Topic might not cache some necessary user data, causing a LV crash upon returning to the Board
 
 ## [0.5] - 2021-05-24
 

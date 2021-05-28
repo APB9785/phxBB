@@ -19,9 +19,7 @@
         Your posting privileges have been revoked by the forum administrator.
       </p>
     <% else %>
-      <%= submit "Create Reply",
-            phx_disable_with: "Posting...",
-            class: reply_button_style(@active_user)%>
+      <%= submit "Create Reply", class: reply_button_style(@active_user)%>
     <% end %>
 
   </form>

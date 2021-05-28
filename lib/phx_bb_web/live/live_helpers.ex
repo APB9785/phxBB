@@ -6,13 +6,13 @@ defmodule PhxBbWeb.LiveHelpers do
 
   import Phoenix.LiveView
 
-  alias PhxBb.Accounts
   alias PhxBb.Accounts.User
   alias PhxBb.Boards
   alias PhxBb.Boards.Board
   alias PhxBb.Posts
   alias PhxBb.Posts.Post
   alias PhxBb.Replies
+  alias PhxBbWeb.UserCache
 
   @month_abv_map %{
     1 => "Jan",
@@ -51,27 +51,11 @@ defmodule PhxBbWeb.LiveHelpers do
 
       %Post{} = post ->
         replies = Replies.list_replies(post.id)
-        user_ids = parse_user_ids(replies, post)
-        cache = Accounts.build_cache(user_ids, socket.assigns.user_cache)
+        cache = UserCache.from_topic(post, replies, socket.assigns.user_cache)
 
         socket
         |> assign_post_nav(post)
         |> assign(active_post: post, user_cache: cache, reply_list: replies)
-    end
-  end
-
-  defp parse_user_ids(replies, %Post{} = post) do
-    user_ids =
-      Enum.reduce(replies, [], fn reply, acc ->
-        case reply.edited_by do
-          nil -> [reply.author | acc]
-          editor -> [reply.author | [editor | acc]]
-        end
-      end)
-
-    case post.edited_by do
-      nil -> [post.author | user_ids]
-      editor -> [post.author | [editor | user_ids]]
     end
   end
 
@@ -82,10 +66,7 @@ defmodule PhxBbWeb.LiveHelpers do
 
       %Board{} = board ->
         post_list = Posts.list_posts(board_id)
-
-        cache =
-          Enum.reduce(post_list, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
-          |> Accounts.build_cache(socket.assigns.user_cache)
+        cache = UserCache.from_post_list(post_list, socket.assigns.user_cache)
 
         assign(socket,
           nav: :board,
@@ -104,10 +85,7 @@ defmodule PhxBbWeb.LiveHelpers do
 
       %Board{} = board ->
         post_list = Posts.list_posts(board_id)
-
-        cache =
-          Enum.reduce(post_list, [], fn p, acc -> [p.last_user | [p.author | acc]] end)
-          |> Accounts.build_cache(socket.assigns.user_cache)
+        cache = UserCache.from_post_list(post_list, socket.assigns.user_cache)
 
         assign(socket,
           nav: :create_post,
@@ -120,12 +98,10 @@ defmodule PhxBbWeb.LiveHelpers do
   end
 
   def assign_defaults(socket) do
-    boards = Boards.list_boards()
-
     assign(socket,
       active_board: nil,
       active_post: nil,
-      board_list: boards,
+      board_list: Boards.list_boards(),
       users_online: %{},
       post_list: []
     )
@@ -136,9 +112,12 @@ defmodule PhxBbWeb.LiveHelpers do
     active_board = socket.assigns[:active_board]
 
     if is_nil(active_board) or active_board.id != new_board_id do
+      post_list = Posts.list_posts(new_board_id)
+
       assign(socket,
         active_board: Boards.get_board!(new_board_id),
-        post_list: Posts.list_posts(new_board_id)
+        post_list: post_list,
+        user_cache: UserCache.from_post_list(post_list, socket.assigns.user_cache)
       )
     else
       socket

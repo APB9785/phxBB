@@ -497,7 +497,8 @@ defmodule PhxBbWeb.PageLiveTest do
 
       view |> element("#new-reply-form") |> render_change(%{reply: %{body: "X"}})
 
-      assert has_element?(view, "#new-reply-form", "should be at least 3 character(s)")
+      # This feature was removed in 0.5.1 and validation now waits for form submit
+      refute has_element?(view, "#new-reply-form", "should be at least 3 character(s)")
     end
 
     test "Return to Main Index via breadcrumb", %{conn: conn, user: user} do

@@ -88,26 +88,18 @@ defmodule PhxBb.Accounts do
     |> Repo.all()
   end
 
-  # Leverages Map.put_new_lazy/3 to check every ID and only run the query
-  # for previously unseen IDs
-  def build_cache(user_ids, cache) when is_list(user_ids) do
-    Enum.reduce(user_ids, cache, fn id, acc ->
-      fun = fn ->
-        Repo.one(
-          from u in User,
-            where: u.id == ^id,
-            select: %{
-              name: u.username,
-              joined: u.inserted_at,
-              title: u.title,
-              avatar: u.avatar,
-              post_count: u.post_count
-            }
-        )
-      end
-
-      Map.put_new_lazy(acc, id, fun)
-    end)
+  def get_user_for_cache(user_id) do
+    Repo.one(
+      from u in User,
+        where: u.id == ^user_id,
+        select: %{
+          name: u.username,
+          joined: u.inserted_at,
+          title: u.title,
+          avatar: u.avatar,
+          post_count: u.post_count
+        }
+    )
   end
 
   def added_post(user_id) do
