@@ -5,7 +5,7 @@ defmodule PhxBbWeb.PostContentBodyComponent do
 
   use PhxBbWeb, :live_component
 
-  import PhxBbWeb.LiveHelpers
+  import PhxBbWeb.LiveHelpers, only: [format_time: 2, parse_post_body: 1]
 
   def render(assigns) do
     ~L"""

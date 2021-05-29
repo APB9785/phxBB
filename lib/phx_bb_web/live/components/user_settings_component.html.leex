@@ -163,7 +163,7 @@
       <div class="border-2 p-2 md:w-1/4" phx-drop-target="<%= @uploads.avatar.ref %>">
         <%= live_file_input @uploads.avatar %>
       </div>
-      <div class="hint">
+      <div id="hint">
         (max <%= trunc(@uploads.avatar.max_file_size / 1_000) %> KB)
       </div>
 
@@ -179,11 +179,11 @@
             <%= live_img_preview entry, class: "max-h-40 w-full object-fill" %>
           </div>
 
-          <div class="progress">
-            <div class="value">
+          <div id="progress">
+            <div id="progress-value">
               <%= entry.progress %>%
             </div>
-            <div class="bar">
+            <div id="progress-bar">
               <span style="w-<%= entry.progress %>%"></span>
             </div>
           </div>

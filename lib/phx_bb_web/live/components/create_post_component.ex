@@ -5,22 +5,16 @@ defmodule PhxBbWeb.CreatePostComponent do
 
   use PhxBbWeb, :live_component
 
-  import PhxBbWeb.LiveHelpers
-  import PhxBbWeb.StyleHelpers
+  import PhxBbWeb.LiveHelpers, only: [postmaker: 4]
 
-  alias PhxBb.Accounts
-  alias PhxBb.Boards
-  alias PhxBb.Posts
+  import PhxBbWeb.StyleHelpers,
+    only: [topic_title_form_style: 1, topic_body_form_style: 1, button_style: 1]
+
+  alias PhxBb.{Accounts, Boards, Posts}
   alias PhxBb.Posts.Post
 
   def mount(socket) do
-    socket = assign(socket, changeset: Posts.change_post(%Post{}))
-    {:ok, socket}
-  end
-
-  def update(assigns, socket) do
-    socket = assign(socket, assigns)
-    {:ok, socket}
+    {:ok, assign(socket, changeset: Posts.change_post(%Post{}))}
   end
 
   def handle_event("new_post", %{"post" => params}, socket) do
@@ -37,16 +31,11 @@ defmodule PhxBbWeb.CreatePostComponent do
         message = {:new_topic, user.id, post.id, post.board_id}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "posts", message)
 
-        socket =
-          push_patch(socket,
-            to: Routes.live_path(socket, PhxBbWeb.PageLive, board: board.id)
-          )
-
-        {:noreply, socket}
+        {:noreply,
+         push_patch(socket, to: Routes.live_path(socket, PhxBbWeb.PageLive, board: board.id))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        socket = assign(socket, changeset: changeset)
-        {:noreply, socket}
+        {:noreply, assign(socket, changeset: changeset)}
 
       {:disabled} ->
         {:noreply, socket}
@@ -59,8 +48,6 @@ defmodule PhxBbWeb.CreatePostComponent do
       |> Posts.change_post(params)
       |> Map.put(:action, :insert)
 
-    socket = assign(socket, changeset: changeset)
-
-    {:noreply, socket}
+    {:noreply, assign(socket, changeset: changeset)}
   end
 end

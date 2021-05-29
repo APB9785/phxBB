@@ -213,38 +213,8 @@ defmodule PhxBbWeb.LiveHelpers do
     end
   end
 
-  def display_title(post_id) do
-    post_id
-    |> PhxBb.Posts.get_title()
-    |> shortener
-  end
-
   def replace_error(changeset, key, message, keys \\ []) when is_binary(message) do
     %{changeset | errors: [{key, {message, keys}}], valid?: false}
-  end
-
-  def topic_count_display(%Board{topic_count: 1}), do: "1 topic"
-
-  def topic_count_display(%Board{topic_count: count}) do
-    Integer.to_string(count) <> " topics"
-  end
-
-  def post_count_display(%Board{post_count: 1}), do: "1 post"
-
-  def post_count_display(%Board{post_count: count}) do
-    Integer.to_string(count) <> " posts"
-  end
-
-  def view_count_display(%Post{view_count: 1}), do: "1 view"
-
-  def view_count_display(%Post{view_count: count}) do
-    Integer.to_string(count) <> " views"
-  end
-
-  def reply_count_display(%Post{reply_count: 1}), do: "1 reply"
-
-  def reply_count_display(%Post{reply_count: count}) do
-    Integer.to_string(count) <> " replies"
   end
 
   # Post + Reply
@@ -271,17 +241,6 @@ defmodule PhxBbWeb.LiveHelpers do
 
   def add_confirm_email_param(token) do
     PhxBbWeb.Endpoint.url() <> "?confirm_email=" <> token
-  end
-
-  def display_avatar_error({:avatar, {error, _}}), do: error
-
-  def filename(entry) do
-    [ext | _] = MIME.extensions(entry.client_type)
-    "#{entry.uuid}.#{ext}"
-  end
-
-  def no_file_error(socket) do
-    replace_error(socket.assigns.avatar_changeset, :avatar, "no file was selected")
   end
 
   def cache_self(%User{} = user) do

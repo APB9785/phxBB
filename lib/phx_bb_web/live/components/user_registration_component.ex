@@ -5,48 +5,39 @@ defmodule PhxBbWeb.UserRegistrationComponent do
 
   use PhxBbWeb, :live_component
 
-  import PhxBbWeb.LiveHelpers
-  import PhxBbWeb.StyleHelpers
+  import PhxBbWeb.LiveHelpers, only: [add_confirm_param: 1]
+  import PhxBbWeb.StyleHelpers, only: [user_form_label: 1, user_form: 1, button_style: 1]
 
   alias PhxBb.Accounts
   alias PhxBb.Accounts.User
 
   def mount(socket) do
-    socket = assign(socket, changeset: Accounts.change_user_registration(%User{}))
-    {:ok, socket}
-  end
-
-  def update(assigns, socket) do
-    socket = assign(socket, assigns)
-    {:ok, socket}
+    {:ok, assign(socket, changeset: Accounts.change_user_registration(%User{}))}
   end
 
   def handle_event("new_user", %{"user" => user_params}, socket) do
-    socket =
-      user_params
-      |> Map.put("post_count", 0)
-      |> Map.put("title", "Registered User")
-      |> Map.put("theme", "default")
-      |> Map.put("admin", false)
-      |> register_new_user(socket)
+    params = Map.merge(user_params, defaults())
 
-    {:noreply, socket}
-  end
-
-  defp register_new_user(user_params, socket) do
-    case Accounts.register_user(user_params) do
+    case Accounts.register_user(params) do
       {:ok, user} ->
         Accounts.deliver_user_confirmation_instructions(user, &add_confirm_param/1)
 
         alert_message =
           "User created successfully. Please check your email for confirmation instructions."
 
-        socket
-        |> put_flash(:info, alert_message)
-        |> redirect(to: Routes.user_session_path(socket, :new))
+        {
+          :noreply,
+          socket
+          |> put_flash(:info, alert_message)
+          |> redirect(to: Routes.user_session_path(socket, :new))
+        }
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        assign(socket, changeset: changeset)
+        {:noreply, assign(socket, changeset: changeset)}
     end
+  end
+
+  defp defaults do
+    %{"post_count" => 0, "title" => "Registered User", "theme" => "default", "admin" => false}
   end
 end

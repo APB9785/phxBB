@@ -5,19 +5,14 @@ defmodule PhxBbWeb.UserProfileComponent do
 
   use PhxBbWeb, :live_component
 
-  import PhxBbWeb.LiveHelpers
-  import PhxBbWeb.StyleHelpers
+  import PhxBbWeb.LiveHelpers,
+    only: [format_date: 2, shortener: 1, format_time: 2, parse_post_body: 1]
 
-  alias PhxBb.Accounts
+  import PhxBbWeb.StyleHelpers,
+    only: [link_style: 1, user_history_bubble_style: 1, user_history_timestamp_style: 1]
 
   def update(assigns, socket) do
-    posts = Accounts.last_five_posts(assigns.view_user.id)
-
-    socket =
-      socket
-      |> assign(assigns)
-      |> assign(post_history: posts)
-
-    {:ok, socket}
+    posts = PhxBb.Accounts.last_five_posts(assigns.view_user.id)
+    {:ok, socket |> assign(assigns) |> assign(post_history: posts)}
   end
 end

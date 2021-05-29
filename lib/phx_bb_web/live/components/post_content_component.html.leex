@@ -68,7 +68,7 @@
           Cancel
         </button>
     <% else %>
-      <%= live_component @socket, PostContentBodyComponent,
+      <%= live_component @socket, PhxBbWeb.PostContentBodyComponent,
             post: @post,
             active_user: @active_user,
             user_cache: @user_cache %>

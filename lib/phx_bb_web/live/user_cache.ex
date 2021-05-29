@@ -30,8 +30,10 @@ defmodule PhxBbWeb.UserCache do
   defp check_last_user(%Board{last_user: id}, prev_ids), do: [id | prev_ids]
 
   defp parse_ids_from_topic(post, replies) do
-    reply_ids = Enum.reduce(replies, [], &parse_single_post/2)
-    parse_single_post(post, reply_ids)
+    # reply_ids = Enum.reduce(replies, [], &parse_single_post/2)
+    # parse_single_post(post, reply_ids)
+    Enum.reduce(replies, [], &parse_single_post/2)
+    |> then(&parse_single_post(post, &1))
   end
 
   defp parse_single_post(post, prev_ids) do

@@ -5,7 +5,8 @@ defmodule PhxBbWeb.AdminPanelComponent do
 
   use PhxBbWeb, :live_component
 
-  import PhxBbWeb.StyleHelpers
+  import PhxBbWeb.StyleHelpers,
+    only: [settings_block: 1, user_form_label: 1, user_form: 1, button_style: 1]
 
   alias PhxBb.Accounts
 

@@ -5,23 +5,18 @@ defmodule PhxBbWeb.NewReplyComponent do
 
   use PhxBbWeb, :live_component
 
-  import PhxBbWeb.LiveHelpers
-  import PhxBbWeb.StyleHelpers
+  import PhxBbWeb.LiveHelpers, only: [replymaker: 3]
+  import PhxBbWeb.StyleHelpers, only: [reply_form_style: 1, reply_button_style: 1]
 
-  alias PhxBb.Accounts
-  alias PhxBb.Boards
-  alias PhxBb.Posts
-  alias PhxBb.Replies
+  alias PhxBb.{Accounts, Boards, Posts, Replies}
   alias PhxBb.Replies.Reply
 
   def mount(socket) do
-    socket = assign(socket, changeset: Replies.change_reply(%Reply{}))
-    {:ok, socket}
+    {:ok, assign(socket, changeset: Replies.change_reply(%Reply{}))}
   end
 
   def update(assigns, socket) do
-    socket = assign(socket, assigns)
-    {:ok, socket}
+    {:ok, assign(socket, assigns)}
   end
 
   def handle_event("new_reply", %{"reply" => params}, socket) do
@@ -40,13 +35,10 @@ defmodule PhxBbWeb.NewReplyComponent do
         message = {:new_reply, reply, post.board_id}
         Phoenix.PubSub.broadcast(PhxBb.PubSub, "replies", message)
 
-        socket = assign(socket, changeset: Replies.change_reply(%Reply{}))
-
-        {:noreply, socket}
+        {:noreply, assign(socket, changeset: Replies.change_reply(%Reply{}))}
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        socket = assign(socket, changeset: changeset)
-        {:noreply, socket}
+        {:noreply, assign(socket, changeset: changeset)}
 
       {:disabled} ->
         {:noreply, socket}
@@ -54,15 +46,8 @@ defmodule PhxBbWeb.NewReplyComponent do
   end
 
   def handle_event("validate", %{"reply" => params}, socket) do
-    changeset =
-      %Reply{}
-      |> Replies.change_reply(params)
-
-    # |> Map.put(:action, :insert)
-    # This is commented to disable live validation but still save the changeset
-
-    socket = assign(socket, changeset: changeset)
-
-    {:noreply, socket}
+    changeset = Replies.change_reply(%Reply{}, params)
+    # No live validation but still save the changeset
+    {:noreply, assign(socket, changeset: changeset)}
   end
 end

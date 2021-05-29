@@ -6,5 +6,5 @@ defmodule PhxBbWeb.UserMenuComponent do
 
   use PhxBbWeb, :live_component
 
-  import PhxBbWeb.StyleHelpers
+  import PhxBbWeb.StyleHelpers, only: [link_style: 1, user_menu: 1]
 end

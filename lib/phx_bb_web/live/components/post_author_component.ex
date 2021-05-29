@@ -5,13 +5,12 @@ defmodule PhxBbWeb.PostAuthorComponent do
 
   use PhxBbWeb, :live_component
 
-  import PhxBbWeb.LiveHelpers
-  import PhxBbWeb.StyleHelpers
+  import PhxBbWeb.LiveHelpers, only: [format_date: 2, id_maker: 4]
+  import PhxBbWeb.StyleHelpers, only: [avatar_style: 0, link_style: 1, post_author_style: 1]
 
   def render(assigns) do
     ~L"""
-    <div class="<%= post_author_style(@active_user) %>"
-         id="post-author-info">
+    <div id="post-author-info" class="<%= post_author_style(@active_user) %>">
       <div>
         <%= live_patch @user_cache[@post.author].name,
               to: Routes.live_path(@socket, PhxBbWeb.PageLive, user: @post.author),
