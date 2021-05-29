@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Users online list now properly displays all guests
+- Fixed a bug where disconnected users would still be shown as online
+
+## [0.5.1] - 2021-05-28
+
 ### Changed
 
 - Flash messages in User Settings and Admin Panel are now dismissed on click
@@ -140,7 +147,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - User cache for reduced DB queries
 - Page title updates to reflect current view
 
-[Unreleased]: https://github.com/APB9785/phxBB/compare/0.5...HEAD
+[Unreleased]: https://github.com/APB9785/phxBB/compare/0.5.1...HEAD
+[0.5.1]: https://github.com/APB9785/phxBB/compare/0.5...0.5.1
 [0.5]: https://github.com/APB9785/phxBB/compare/0.4.1...0.5
 [0.4.1]: https://github.com/APB9785/phxBB/compare/0.4...0.4.1
 [0.4]: https://github.com/APB9785/phxBB/compare/0.3.1...0.4

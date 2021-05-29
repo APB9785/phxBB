@@ -43,7 +43,7 @@ defmodule PhxBbWeb.PageLive do
       nil ->
         # User is logged out
         if connected?(socket) do
-          Presence.track(self(), @presence, nil, %{name: "guest"})
+          Presence.track(self(), @presence, guest_id(), %{name: "guest"})
           Phoenix.PubSub.subscribe(PhxBb.PubSub, @presence)
         end
 

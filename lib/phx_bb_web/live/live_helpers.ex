@@ -313,4 +313,6 @@ defmodule PhxBbWeb.LiveHelpers do
     content_id = Integer.to_string(content_id)
     [action, type, element, content_id] |> Enum.join("-")
   end
+
+  def guest_id, do: 0 - System.unique_integer([:positive])
 end

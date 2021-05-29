@@ -3,19 +3,19 @@
     Users online:
   </h2>
   <%= for {user_id, user} <- @users_online do %>
-    <%= if user_id == "" do %>
-      <div id="online-username"
-           class="italic <%= online_user_bubble_style(@active_user) %>">
+    <div class="<%= online_user_bubble_style(@active_user) %>">
+    <%= if guest?(user_id) do %>
+      <div id="online-username" class="italic">
         <%= user.name %>
       </div>
     <% else %>
-      <div id="online-username"
-           class="<%= online_user_bubble_style(@active_user) %>">
+      <div id="online-username">
         <%= live_patch user.name,
               to: Routes.live_path(@socket, PhxBbWeb.PageLive, user: user_id),
               class: link_style(@active_user),
               phx_hook: "ScrollToTop" %>
       </div>
     <% end %>
+    </div>
   <% end %>
 </div>

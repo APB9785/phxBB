@@ -6,4 +6,6 @@ defmodule PhxBbWeb.UsersOnlineComponent do
   use PhxBbWeb, :live_component
 
   import PhxBbWeb.StyleHelpers
+
+  def guest?(id) when is_binary(id), do: String.at(id, 0) == "-"
 end
