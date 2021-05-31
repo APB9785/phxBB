@@ -15,8 +15,8 @@ defmodule PhxBbWeb.LiveHelpersTest do
       second: 5
     }
 
-    assert format_time(datetime) == "Feb 3, 1980  10:11 am"
-    assert format_time(%{datetime | hour: 13}) == "Feb 3, 1980  1:11 pm"
+    assert format_time(datetime) |> IO.iodata_to_binary() == "Feb 3, 1980  10:11 am"
+    assert format_time(%{datetime | hour: 13}) |> IO.iodata_to_binary() == "Feb 3, 1980  1:11 pm"
   end
 
   test "postmaker/4" do

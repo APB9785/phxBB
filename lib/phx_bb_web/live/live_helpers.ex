@@ -173,7 +173,8 @@ defmodule PhxBbWeb.LiveHelpers do
     day = Integer.to_string(datetime.day)
     month = month_abv(datetime.month)
     year = Integer.to_string(datetime.year)
-    "#{month} #{day}, #{year}"
+
+    [month, " ", day, ", ", year]
   end
 
   def format_time(naive_datetime, user) when is_nil(user) do
@@ -201,7 +202,7 @@ defmodule PhxBbWeb.LiveHelpers do
         x -> Integer.to_string(x)
       end
 
-    "#{month} #{day}, #{year}  #{hour}:#{minute} #{ampm}"
+    [month, " ", day, ", ", year, "  ", hour, ":", minute, " ", ampm]
   end
 
   # Display
@@ -209,7 +210,7 @@ defmodule PhxBbWeb.LiveHelpers do
   def shortener(text) do
     case String.slice(text, 0..45) do
       ^text -> text
-      short -> short <> "..."
+      short -> [short, "..."]
     end
   end
 
