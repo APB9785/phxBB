@@ -68,14 +68,14 @@ defmodule PhxBbWeb.StyleHelpers do
   end
 
   defp new_topic_form_base do
-    "py-2 w-11/12 rounded-md transition shadow-md duration-150 text-sm" <>
+    "py-2 w-11/12 rounded-md transition shadow-md duration-150 text-sm " <>
       "focus:outline-none focus:ring md:w-7/12"
   end
 
   def reply_form_style(user), do: "#{reply_form_base()} #{post_form_theme(user)}"
 
   defp reply_form_base do
-    "appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 justify-self-center" <>
+    "appearance-none w-10/12 md:w-5/12 h-32 py-2 m-2 justify-self-center " <>
       "rounded-md shadow-md transition duration-150 text-sm focus:outline-none focus:ring"
   end
 
@@ -84,11 +84,11 @@ defmodule PhxBbWeb.StyleHelpers do
   defp post_form_theme(%User{theme: theme}) do
     case theme do
       "default" ->
-        "bg-white focus:border-purple-700 focus:ring-purple-400" <>
+        "bg-white focus:border-purple-700 focus:ring-purple-400 " <>
           "md:focus:ring-purple-300 md:border-purple-400"
 
       "dark" ->
-        "bg-gray-200 focus:border-gray-900 focus:ring-gray-600" <>
+        "bg-gray-200 focus:border-gray-900 focus:ring-gray-600 " <>
           "md:focus:ring-gray-600 md:border-gray-700"
     end
   end
@@ -106,7 +106,7 @@ defmodule PhxBbWeb.StyleHelpers do
   def content_background(user), do: "#{content_bg_base()} #{content_bg_theme_md_only(user)}"
 
   defp content_bg_base do
-    "mx-auto w-11/12 bg-transparent rounded-md space-y-2 m-4 pb-4" <>
+    "mx-auto w-11/12 bg-transparent rounded-md space-y-2 m-4 pb-4 " <>
       "antialiased relative font-sans max-w-full md:shadow-md"
   end
 
@@ -170,14 +170,14 @@ defmodule PhxBbWeb.StyleHelpers do
   # Content Bubbles
 
   def post_author_style(user) do
-    "flex justify-end items-center flex-row-reverse pl-4 pb-2 pt-2" <>
-      "md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block" <>
+    "flex justify-end items-center flex-row-reverse pl-4 pb-2 pt-2 " <>
+      "md:pl-0 md:w-2/12 md:pt-4 md:text-center md:border-none md:block " <>
       author_dividers(user)
   end
 
   def topic_bubble_style(user) do
-    "p-4 block items-center rounded-lg m-1" <>
-      "md:flex md:m-0 md:bg-transparent md:rounded-none" <>
+    "p-4 block items-center rounded-lg m-1 " <>
+      "md:flex md:m-0 md:bg-transparent md:rounded-none " <>
       content_bg_theme(user)
   end
 
@@ -252,7 +252,7 @@ defmodule PhxBbWeb.StyleHelpers do
   defp board_stats_theme(%User{theme: "dark"}), do: "border-gray-500"
 
   def avatar_style do
-    "max-h-40 object-fill mr-4 h-10 w-10 border border-gray-700 rounded-xl" <>
+    "max-h-40 object-fill mr-4 h-10 w-10 border border-gray-700 rounded-xl " <>
       "md:h-auto md:w-32 md:mx-auto md:pt-2 md:border-none md:rounded-none"
   end
 
