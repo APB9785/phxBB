@@ -1,7 +1,9 @@
 defmodule PhxBbWeb.LiveHelpersTest do
   use PhxBbWeb.ConnCase
 
-  import PhxBbWeb.LiveHelpers
+  import PhxBb.AccountsFixtures, only: [user_fixture: 1]
+  import PhxBbWeb.LiveHelpers, only: [format_time: 1, postmaker: 4, replymaker: 3]
+  import PhxBbWeb.StyleHelpers, only: [post_form_theme: 1, confirmation_reminder_theme: 1]
 
   alias PhxBb.Accounts.User
 
@@ -27,5 +29,15 @@ defmodule PhxBbWeb.LiveHelpersTest do
   test "replymaker/3" do
     now = NaiveDateTime.utc_now()
     assert replymaker("test body", 1, %User{disabled_at: now}) == {:disabled}
+  end
+
+  test "StyleHelpers.post_form_theme/1" do
+    user = user_fixture(%{theme: "default"})
+    assert post_form_theme(nil) == post_form_theme(user)
+  end
+
+  test "StyleHelpers.confirmation_reminder_theme/1" do
+    user = user_fixture(%{theme: "default"})
+    assert confirmation_reminder_theme(nil) == confirmation_reminder_theme(user)
   end
 end

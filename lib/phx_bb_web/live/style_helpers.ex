@@ -83,9 +83,9 @@ defmodule PhxBbWeb.StyleHelpers do
     ]
   end
 
-  defp post_form_theme(nil), do: post_form_theme(%User{theme: "default"})
+  def post_form_theme(nil), do: post_form_theme(%User{theme: "default"})
 
-  defp post_form_theme(%User{theme: theme}) do
+  def post_form_theme(%User{theme: theme}) do
     case theme do
       "default" ->
         [
@@ -215,9 +215,9 @@ defmodule PhxBbWeb.StyleHelpers do
     ["md:mx-8 px-4 py-6 shadow rounded-lg ", confirmation_reminder_theme(user)]
   end
 
-  defp confirmation_reminder_theme(nil), do: confirmation_reminder_theme(%User{theme: "default"})
-  defp confirmation_reminder_theme(%User{theme: "default"}), do: "bg-purple-200"
-  defp confirmation_reminder_theme(%User{theme: "dark"}), do: "bg-purple-900 text-gray-300"
+  def confirmation_reminder_theme(nil), do: confirmation_reminder_theme(%User{theme: "default"})
+  def confirmation_reminder_theme(%User{theme: "default"}), do: "bg-purple-200"
+  def confirmation_reminder_theme(%User{theme: "dark"}), do: "bg-purple-900 text-gray-300"
 
   # UsersOnlineComponent helpers
 
