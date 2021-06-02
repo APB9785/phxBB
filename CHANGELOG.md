@@ -6,10 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Optimized some styling by replacing string interpolation with IO Lists
+
 ### Fixed
 
 - Users online list now properly displays all guests
 - Fixed a bug where disconnected users would still be shown as online
+- Users can now properly reset their avatar even if the file was corrupted or missing
 
 ## [0.5.1] - 2021-05-28
 

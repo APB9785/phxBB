@@ -163,7 +163,7 @@ defmodule PhxBbWeb.UserSettingsComponent do
 
   def handle_event("remove_avatar", _params, socket) do
     user = socket.assigns.active_user
-    (Application.app_dir(:phx_bb, "priv/static") <> user.avatar) |> File.rm!()
+    (Application.app_dir(:phx_bb, "priv/static") <> user.avatar) |> File.rm()
     {:ok, user} = Accounts.update_user_avatar(user, %{avatar: nil})
 
     send(self(), {:updated_user, user})
