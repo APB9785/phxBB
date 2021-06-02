@@ -11,15 +11,13 @@ defmodule PhxBbWeb.AdminPanelComponent do
   alias PhxBb.Accounts
 
   def mount(socket) do
-    socket =
-      assign(socket,
-        confirm_disable: false,
-        confirm_enable: false,
-        user_disabled_success: false,
-        user_enabled_success: false
-      )
-
-    {:ok, socket}
+    {:ok,
+     assign(socket,
+       confirm_disable: false,
+       confirm_enable: false,
+       user_disabled_success: false,
+       user_enabled_success: false
+     )}
   end
 
   def update(assigns, socket) do
@@ -27,35 +25,27 @@ defmodule PhxBbWeb.AdminPanelComponent do
     users = Accounts.list_other_users(auid) |> Enum.map(&{&1.name, &1.id})
     disabled_users = Accounts.list_disabled_users(auid) |> Enum.map(&{&1.name, &1.id})
 
-    {
-      :ok,
-      socket
-      |> assign(assigns)
-      |> assign_disable_user(users)
-      |> assign_enable_user(disabled_users)
-    }
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign_disable_user(users)
+     |> assign_enable_user(disabled_users)}
   end
 
   def handle_event("validate", %{"disable_user" => params}, socket) do
-    choice = params["user"]
-    socket = assign(socket, select_disable: choice)
-    {:noreply, socket}
+    {:noreply, assign(socket, select_disable: params["user"])}
   end
 
   def handle_event("validate", %{"enable_user" => params}, socket) do
-    choice = params["user"]
-    socket = assign(socket, select_enable: choice)
-    {:noreply, socket}
+    {:noreply, assign(socket, select_enable: params["user"])}
   end
 
   def handle_event("disable_user_prompt", _params, socket) do
-    socket = assign(socket, confirm_disable: true)
-    {:noreply, socket}
+    {:noreply, assign(socket, confirm_disable: true)}
   end
 
   def handle_event("enable_user_prompt", _params, socket) do
-    socket = assign(socket, confirm_enable: true)
-    {:noreply, socket}
+    {:noreply, assign(socket, confirm_enable: true)}
   end
 
   def handle_event("disable_user", %{"disable_user" => params}, socket) do
@@ -67,13 +57,11 @@ defmodule PhxBbWeb.AdminPanelComponent do
     new_user_list = Enum.reject(socket.assigns.user_list, fn {_name, id} -> id == user.id end)
     new_disabled_list = [{user.username, user.id} | socket.assigns.disabled_user_list]
 
-    {
-      :noreply,
-      socket
-      |> assign(user_disabled_success: true, confirm_disable: false)
-      |> assign_disable_user(new_user_list)
-      |> assign_enable_user(new_disabled_list)
-    }
+    {:noreply,
+     socket
+     |> assign(user_disabled_success: true, confirm_disable: false)
+     |> assign_disable_user(new_user_list)
+     |> assign_enable_user(new_disabled_list)}
   end
 
   def handle_event("enable_user", %{"enable_user" => params}, socket) do
@@ -87,13 +75,11 @@ defmodule PhxBbWeb.AdminPanelComponent do
 
     new_user_list = [{user.username, user.id} | socket.assigns.user_list]
 
-    {
-      :noreply,
-      socket
-      |> assign(user_enabled_success: true, confirm_enable: false)
-      |> assign_enable_user(new_disabled_list)
-      |> assign_disable_user(new_user_list)
-    }
+    {:noreply,
+     socket
+     |> assign(user_enabled_success: true, confirm_enable: false)
+     |> assign_enable_user(new_disabled_list)
+     |> assign_disable_user(new_user_list)}
   end
 
   def handle_event("clear-enabled-flash", _params, socket) do

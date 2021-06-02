@@ -38,7 +38,7 @@
       <% end %>
       <%= if @timezone_updated do %>
         <p class="alert alert-info"
-           id="timezone-update-ok"
+           id="timezone-updated-ok"
            phx-click="clear_flash"
            phx-value-flash="timezone_updated"
            phx-target="<%= @myself %>">

@@ -302,6 +302,8 @@ defmodule PhxBbWeb.PageLiveTest do
       view |> element("#resend-verification-button") |> render_click
 
       assert has_element?(view, "#confirmation-resent-ok")
+      view |> element("#confirmation-resent-ok") |> render_click
+      refute has_element?(view, "#confirmation-resent-ok")
     end
 
     test "Update user email address", %{conn: conn, user: user} do
@@ -316,6 +318,8 @@ defmodule PhxBbWeb.PageLiveTest do
       |> render_submit
 
       assert has_element?(view, "#email-updated-ok")
+      view |> element("#email-updated-ok") |> render_click
+      refute has_element?(view, "#email-updated-ok")
     end
 
     test "Fail to update user email address", %{conn: conn, user: user} do
@@ -343,6 +347,8 @@ defmodule PhxBbWeb.PageLiveTest do
       |> render_submit
 
       assert has_element?(view, "#title-updated-ok")
+      view |> element("#title-updated-ok") |> render_click
+      refute has_element?(view, "#title-updated-ok")
     end
 
     test "Attempt invalid user title update", %{conn: conn, user: user} do
@@ -365,7 +371,9 @@ defmodule PhxBbWeb.PageLiveTest do
       |> form("#change-user-timezone-form", %{user: %{timezone: "US/Central"}})
       |> render_submit
 
-      assert has_element?(view, "#timezone-update-ok")
+      assert has_element?(view, "#timezone-updated-ok")
+      view |> element("#timezone-updated-ok") |> render_click
+      refute has_element?(view, "#timezone-updated-ok")
     end
 
     test "Attempt invalid timezone update", %{conn: conn, user: user} do
@@ -465,6 +473,8 @@ defmodule PhxBbWeb.PageLiveTest do
       |> render_submit
 
       assert has_element?(view, "#theme-changed-ok")
+      view |> element("#theme-changed-ok") |> render_click
+      refute has_element?(view, "#theme-changed-ok")
 
       {:ok, view, _html} = live(conn, "/?create=1&board=#{board.id}")
       assert render(view) =~ "bg-gray-900"
@@ -969,6 +979,8 @@ defmodule PhxBbWeb.PageLiveTest do
     end
 
     test "Disable and re-enable a user account", %{conn: conn, user: user, board: board} do
+      user_2 = user_fixture()
+      _user_3 = user_fixture()
       admin_user = user_fixture(%{admin: true})
       admin_conn = login_fixture(conn, admin_user)
       user_conn = login_fixture(conn, user)
@@ -979,17 +991,47 @@ defmodule PhxBbWeb.PageLiveTest do
       {:ok, admin_view, _html} = live(admin_conn, "/?admin=1")
       assert render(admin_view) =~ "Admin Panel"
 
+      # Test validation first, then submit
+      admin_view
+      |> form("#admin-disable-user-form")
+      |> render_change(%{disable_user: %{user: user.id}})
+
+      admin_view |> element("#disable-user-button") |> render_click
+
+      assert has_element?(admin_view, "#confirm-disable-user")
+
       admin_view
       |> form("#admin-disable-user-form", %{disable_user: %{user: user.id}})
       |> render_submit
 
-      # Give time for the PubSub message to be received
+      # Disabling a second user ensures that the "#user-enabled-ok" alert
+      # will be visible after re-enabling the first one
+      admin_view
+      |> form("#admin-disable-user-form", %{disable_user: %{user: user_2.id}})
+      |> render_submit
+
+      assert has_element?(admin_view, "#user-disabled-ok")
+      admin_view |> element("#user-disabled-ok") |> render_click
+      refute has_element?(admin_view, "#user-disabled-ok")
+
+      # Give time for the PubSub messages to be received
       Process.sleep(50)
       refute has_element?(user_view, "#new-post-button-top")
 
+      # Repeat for enabling
       admin_view
-      |> form("#admin-enable-user-form", %{enable_user: %{user: user.id}})
-      |> render_submit
+      |> form("#admin-enable-user-form")
+      |> render_change(%{enable_user: %{user: user.id}})
+
+      admin_view |> element("#enable-user-button") |> render_click
+
+      assert has_element?(admin_view, "#confirm-enable-user")
+
+      admin_view |> form("#admin-enable-user-form") |> render_submit
+
+      assert has_element?(admin_view, "#user-enabled-ok")
+      admin_view |> element("#user-enabled-ok") |> render_click
+      refute has_element?(admin_view, "#user-enabled-ok")
 
       Process.sleep(50)
       assert has_element?(user_view, "#new-post-button-top")

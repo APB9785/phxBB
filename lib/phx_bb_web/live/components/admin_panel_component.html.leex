@@ -34,7 +34,8 @@
           <div class="flex justify-end md:justify-center">
             <%= submit "Confirm disable?",
                   phx_disable_with: "Disabling...",
-                  class: "font-bold text-red-500 hover:underline" %>
+                  class: "font-bold text-red-500 hover:underline",
+                  id: "confirm-disable-user" %>
           </div>
         <% else %>
           <button phx-click="disable_user_prompt"
@@ -82,7 +83,8 @@
           <div class="flex justify-end md:justify-center">
             <%= submit "Confirm re-enable?",
                   phx_disable_with: "Re-enabling...",
-                  class: "font-bold text-red-500 hover:underline" %>
+                  class: "font-bold text-red-500 hover:underline",
+                  id: "confirm-enable-user" %>
           </div>
         <% else %>
           <button phx-click="enable_user_prompt"
