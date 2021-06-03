@@ -61,7 +61,7 @@ defmodule PhxBbWeb.PageLive do
          socket
          |> assign(bg_color: get_theme_background(user))
          |> assign(active_user: user)
-         |> assign(user_cache: %{user.id => cache_self(user)})
+         |> assign(user_cache: %{user.id => UserCache.cache_self(user)})
          |> assign_defaults
          |> handle_joins(Presence.list(@presence))
          |> allow_upload(:avatar,

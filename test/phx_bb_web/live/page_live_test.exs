@@ -410,6 +410,10 @@ defmodule PhxBbWeb.PageLiveTest do
 
       view |> element("#change-user-avatar-form") |> render_submit
 
+      assert has_element?(view, "#avatar-updated-ok")
+      view |> element("#avatar-updated-ok") |> render_click
+      refute has_element?(view, "#avatar-updated-ok")
+
       # Avatar should be uploaded OK, now see if it displays
       {:ok, view, _html} = live(conn, "/?post=#{post.id}")
       assert has_element?(view, "#post-author-avatar-#{post.id}")
@@ -417,7 +421,10 @@ defmodule PhxBbWeb.PageLiveTest do
       # Remove the avatar
       {:ok, view, _html} = live(conn, "/?settings=1")
       view |> element("#remove-avatar-link") |> render_click
-      assert render(view) =~ "User avatar removed successfully."
+
+      assert has_element?(view, "#avatar-removed-ok")
+      view |> element("#avatar-removed-ok") |> render_click
+      refute has_element?(view, "#avatar-removed-ok")
     end
 
     test "Discard avatar before uploading", %{conn: conn, user: user} do
@@ -981,6 +988,7 @@ defmodule PhxBbWeb.PageLiveTest do
     test "Disable and re-enable a user account", %{conn: conn, user: user, board: board} do
       user_2 = user_fixture()
       _user_3 = user_fixture()
+      post = post_fixture(user, board)
       admin_user = user_fixture(%{admin: true})
       admin_conn = login_fixture(conn, admin_user)
       user_conn = login_fixture(conn, user)
@@ -1017,6 +1025,23 @@ defmodule PhxBbWeb.PageLiveTest do
       # Give time for the PubSub messages to be received
       Process.sleep(50)
       refute has_element?(user_view, "#new-post-button-top")
+
+      # Even if they go to URL manually, the disabled user cannot post
+      {:ok, user_view, _html} = live(user_conn, "/?board=#{board.id}&create_post=1")
+
+      user_view
+      |> form("#new-topic-form", %{post: %{title: "a1s2d3", body: "j7k8l9"}})
+      |> render_submit
+
+      user_view |> element("#crumb-board") |> render_click
+      refute has_element?(user_view, "#post-listing-link", "a1s2d3")
+
+      # Disabled user cannot reply
+      user_view |> element("#post-listing-link", post.title) |> render_click
+      user_view |> form("#new-reply-form", %{reply: %{body: "a1s2d3"}}) |> render_submit
+      refute render(user_view) =~ "a1s2d3"
+
+      user_view |> element("#crumb-board") |> render_click
 
       # Repeat for enabling
       admin_view

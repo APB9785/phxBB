@@ -7,6 +7,16 @@ defmodule PhxBbWeb.UserCache do
   alias PhxBb.Accounts.User
   alias PhxBb.Boards.Board
 
+  def cache_self(%User{} = user) do
+    %{
+      name: user.username,
+      joined: user.inserted_at,
+      title: user.title,
+      avatar: user.avatar,
+      post_count: user.post_count
+    }
+  end
+
   def from_post_list(post_list, cache) do
     post_list
     |> Enum.reduce([], fn p, acc -> [p.last_user | [p.author | acc]] end)

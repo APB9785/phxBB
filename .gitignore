@@ -33,5 +33,7 @@ npm-debug.log
 # this depending on your deployment strategy.
 /priv/static/*
 !/priv/static/uploads
+/priv/static/uploads/*
+!/priv/static/uploads/include_this_directory
 
 .DS_Store

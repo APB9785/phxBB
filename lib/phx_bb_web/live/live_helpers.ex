@@ -54,8 +54,8 @@ defmodule PhxBbWeb.LiveHelpers do
         cache = UserCache.from_topic(post, replies, socket.assigns.user_cache)
 
         socket
-        |> assign_post_nav(post)
         |> assign(active_post: post, user_cache: cache, reply_list: replies)
+        |> assign_post_nav(post)
     end
   end
 
@@ -242,16 +242,6 @@ defmodule PhxBbWeb.LiveHelpers do
 
   def add_confirm_email_param(token) do
     PhxBbWeb.Endpoint.url() <> "?confirm_email=" <> token
-  end
-
-  def cache_self(%User{} = user) do
-    %{
-      name: user.username,
-      joined: user.inserted_at,
-      title: user.title,
-      avatar: user.avatar,
-      post_count: user.post_count
-    }
   end
 
   def admin?(nil), do: false

@@ -111,7 +111,7 @@ defmodule PhxBbWeb.UserSettingsComponent do
         user = socket.assigns.active_user
 
         if user.avatar,
-          do: (Application.app_dir(:phx_bb, "priv/static") <> user.avatar) |> File.rm!()
+          do: (Application.app_dir(:phx_bb, "priv/static") <> user.avatar) |> File.rm()
 
         {:ok, user} = Accounts.update_user_avatar(user, %{avatar: avatar_link})
 
