@@ -18,11 +18,14 @@
         <div class="px-4 md:w-7/12">
           <%= live_patch post.title,
                 to: Routes.live_path(@socket, PhxBbWeb.PageLive, post: post.id),
-                class: link_style(@active_user), id: "post-listing-link" %>
+                class: link_style(@active_user),
+                phx_hook: "ScrollToTop",
+                id: "post-listing-link" %>
           <p class="text-sm hidden md:block">
             by <%= live_patch @user_cache[post.author].name,
                      to: Routes.live_path(@socket, PhxBbWeb.PageLive, user: post.author),
                      class: link_style(@active_user),
+                     phx_hook: "ScrollToTop",
                      id: "post-author-link" %> at
             <%= format_time(post.inserted_at, @active_user) %>
           </p>
@@ -38,7 +41,8 @@
           <p class="text-sm md:text-base">
             Last post by <%= live_patch @user_cache[post.last_user].name,
                                to: Routes.live_path(@socket, PhxBbWeb.PageLive, user: post.last_user),
-                               class: link_style(@active_user) %>
+                               class: link_style(@active_user),
+                               phx_hook: "ScrollToTop" %>
           </p>
           <p class="px-1 text-sm md:hidden">at</p>
           <p class="text-sm"><%= format_time(post.last_reply_at, @active_user) %></p>
@@ -54,6 +58,7 @@
             to: Routes.live_path(@socket, PhxBbWeb.PageLive,
                                  [board: @active_board.id, create_post: 1]),
             class: new_post_button_style(@active_user),
+            phx_hook: "ScrollToTop",
             id: "new-post-button-bottom" %>
     </div>
   <% end %>

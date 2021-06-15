@@ -7,6 +7,7 @@
           <%= live_patch board.name,
                 to: Routes.live_path(@socket, PhxBbWeb.PageLive, board: board.id),
                 class: board_title_style(@active_user),
+                phx_hook: "ScrollToTop",
                 id: "board-name" %>
         </div>
         <div class="text-sm" id="board-description">
@@ -29,13 +30,17 @@
             <div id="last-post-by">
               Last post by <%= live_patch @user_cache[board.last_user].name,
                                  to: Routes.live_path(@socket, PhxBbWeb.PageLive, user: board.last_user),
-                                 class: link_style(@active_user), id: "last-post-author-link" %>
+                                 class: link_style(@active_user),
+                                 phx_hook: "ScrollToTop",
+                                 id: "last-post-author-link" %>
             </div>
             <div>
               in
               <%= live_patch display_title(board.last_post),
                     to: Routes.live_path(@socket, PhxBbWeb.PageLive, post: board.last_post),
-                    class: link_style(@active_user), id: "last-post-link" %>
+                    class: link_style(@active_user),
+                    phx_hook: "ScrollToTop",
+                    id: "last-post-link" %>
             </div>
             <div class="hidden md:block">
               <%= format_time(board.updated_at, @active_user) %>

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed a bug where updates to the user cache were not taking effect and causing the LiveView to crash
+- Fixed some links not resetting scroll position upon click
 
 ## [0.5.2] - 2021-06-02
 
