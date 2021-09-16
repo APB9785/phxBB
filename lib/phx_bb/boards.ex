@@ -19,7 +19,11 @@ defmodule PhxBb.Boards do
 
   """
   def list_boards do
-    Repo.all(from b in Board, order_by: [asc: b.id], preload: [:recent_topic, :recent_user])
+    Repo.all(
+      from b in Board,
+        order_by: [asc: b.id],
+        preload: [:recent_topic, :recent_user]
+    )
   end
 
   @doc """

@@ -26,6 +26,10 @@
 
 See [CHANGELOG.md](https://github.com/APB9785/phxBB/blob/master/CHANGELOG.md) for the full list of changes
 
+## Demo
+
+You can try a demo of phxBB [here](https://phxbb.herokuapp.com/forum)! Note that you must register and login before making any new posts.
+
 ## Installation   
 
 To start a local phxBB server:
