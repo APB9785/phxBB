@@ -28,7 +28,7 @@ defmodule PhxBbWeb.UsersOnlineTest do
     view_2 |> element("#user-menu-login") |> render_click
 
     # Give time for message to be received
-    _ = :sys.get_state(view.pid)
+    Process.sleep(50)
 
     refute render(view) =~ "guest"
   end
