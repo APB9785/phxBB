@@ -1,5 +1,6 @@
 # phxBB
 [![Elixir CI](https://github.com/APB9785/phxBB/actions/workflows/elixir.yml/badge.svg)](https://github.com/APB9785/phxBB/actions/workflows/elixir.yml)
+[![Coverage Status](https://coveralls.io/repos/github/APB9785/phxBB/badge.svg?branch=master)](https://coveralls.io/github/APB9785/phxBB?branch=master)
 ![GitHub](https://img.shields.io/github/license/APB9785/phxBB)
 ![GitHub last commit](https://img.shields.io/github/last-commit/APB9785/phxBB)
 
