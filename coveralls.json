@@ -1,0 +1,9 @@
+{
+  "skip_files": [
+    "test",
+    "lib/phx_bb_web.ex",
+    "lib/phx_bb_web/router.ex",
+    "lib/phx_bb_web/telemetry.ex",
+    "lib/phx_bb/application.ex"
+  ]
+}
