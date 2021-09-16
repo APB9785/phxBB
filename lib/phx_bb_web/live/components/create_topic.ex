@@ -52,11 +52,11 @@ defmodule PhxBbWeb.CreateTopic do
   ## Tailwind Styles
 
   def topic_title_form_style(user) do
-    ["mb-4 ", new_topic_form_base(), StyleHelpers.post_form_theme(user)]
+    [new_topic_form_base(), StyleHelpers.post_form_theme(user)]
   end
 
   def topic_body_form_style(user) do
-    ["h-64 ", new_topic_form_base(), StyleHelpers.post_form_theme(user)]
+    ["h-64 mt-4 ", new_topic_form_base(), StyleHelpers.post_form_theme(user)]
   end
 
   defp new_topic_form_base do

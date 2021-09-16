@@ -13,7 +13,6 @@ defmodule PhxBbWeb.AdminPanelTest do
     %{
       user: user,
       user_2: user_fixture(),
-      user_3: user_fixture(),
       board: board,
       topic: topic_fixture(user, board),
       admin: admin,
@@ -39,14 +38,14 @@ defmodule PhxBbWeb.AdminPanelTest do
 
     admin_view |> form("#admin-disable-user-form", disable) |> render_submit
 
+    assert has_element?(admin_view, "#user-disabled-ok")
+    admin_view |> element("#user-disabled-ok") |> render_click
+    refute has_element?(admin_view, "#user-disabled-ok")
+
     # Disabling a second user ensures that the "#user-enabled-ok" alert
     # will be visible after re-enabling the first one
     disable_2 = %{disable_user: %{user: context[:user_2].id}}
     admin_view |> form("#admin-disable-user-form", disable_2) |> render_submit
-
-    assert has_element?(admin_view, "#user-disabled-ok")
-    admin_view |> element("#user-disabled-ok") |> render_click
-    refute has_element?(admin_view, "#user-disabled-ok")
 
     # Give time for the PubSub messages to be received
     _ = :sys.get_state(user_view.pid)

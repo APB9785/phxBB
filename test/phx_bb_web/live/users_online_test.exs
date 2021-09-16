@@ -23,5 +23,13 @@ defmodule PhxBbWeb.UsersOnlineTest do
 
     assert render(view) =~ "guest"
     assert has_element?(view_2, "#online-user-#{user.id}", user.username)
+
+    # Shutdown the guest's LiveView by going to the Login page
+    view_2 |> element("#user-menu-login") |> render_click
+
+    # Give time for message to be received
+    _ = :sys.get_state(view.pid)
+
+    refute render(view) =~ "guest"
   end
 end

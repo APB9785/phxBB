@@ -31,16 +31,6 @@ defmodule PhxBb.Topics do
     )
   end
 
-  def most_recent_topic(board_id) do
-    Repo.all(
-      from t in Topic,
-        where: t.board_id == ^board_id,
-        order_by: [desc: t.last_post_at],
-        limit: 1
-    )
-    |> hd
-  end
-
   @doc """
   Gets a single topic.
 
@@ -144,42 +134,23 @@ defmodule PhxBb.Topics do
     |> Repo.update_all(inc: [view_count: 1])
   end
 
-  def deleted_post(topic_id) do
-    from(Topic, where: [id: ^topic_id])
-    |> Repo.update_all(inc: [post_count: -1])
-  end
-
-  def deleted_last_post(topic_id, user_id, time) do
-    from(t in Topic,
-      update: [inc: [post_count: -1], set: [last_user: ^user_id, last_post_at: ^time]],
-      where: t.id == ^topic_id
-    )
-    |> Repo.update_all([])
-  end
-
-  def deleted_only_post(%Topic{id: id, author: author, inserted_at: time}) do
-    from(t in Topic,
-      update: [inc: [post_count: -1], set: [last_user: ^author, last_post_at: ^time]],
-      where: t.id == ^id
-    )
-    |> Repo.update_all([])
-  end
-
-  @doc """
-  Deletes a topic.
-
-  ## Examples
-
-      iex> delete_topic(topic)
-      {:ok, %Topic{}}
-
-      iex> delete_topic(topic)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_topic(%Topic{} = topic) do
-    Repo.delete(topic)
-  end
+  # @doc """
+  # Deletes a topic.  Currently unused - when implemented will require handling
+  # of cases where the topic is currently associated with a board as the most
+  # recent topic.
+  #
+  # ## Examples
+  #
+  #     iex> delete_topic(topic)
+  #     {:ok, %Topic{}}
+  #
+  #     iex> delete_topic(topic)
+  #     {:error, %Ecto.Changeset{}}
+  #
+  # """
+  # def delete_topic(%Topic{} = topic) do
+  #   Repo.delete(topic)
+  # end
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking topic changes.

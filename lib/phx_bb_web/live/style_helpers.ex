@@ -69,8 +69,6 @@ defmodule PhxBbWeb.StyleHelpers do
     end
   end
 
-  def post_form_theme(nil), do: post_form_theme(%User{theme: @default})
-
   def post_form_theme(%User{theme: theme}) do
     case theme do
       "elixir" ->

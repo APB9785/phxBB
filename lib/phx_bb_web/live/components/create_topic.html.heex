@@ -5,12 +5,14 @@
     <%= text_input f, :title, placeholder: "Subject",
           phx_debounce: "blur", autocomplete: "off",
           class: topic_title_form_style(@active_user) %>
-    <%= error_tag f, :title %>
+    <div class="pl-6 pt-4">
+      <%= error_tag f, :title %>
+    </div>
 
     <%= textarea f, :body, placeholder: "You may user Markdown to format your post",
           phx_debounce: "blur", autocomplete: "off",
           class: topic_body_form_style(@active_user) %>
-    <div class="pt-4">
+    <div class="pl-6 pt-4">
       <%= error_tag f, :body %>
     </div>
 

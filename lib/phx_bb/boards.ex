@@ -7,7 +7,6 @@ defmodule PhxBb.Boards do
 
   alias PhxBb.Boards.Board
   alias PhxBb.Repo
-  alias PhxBb.Topics.Topic
 
   @doc """
   Returns the list of boards.
@@ -43,8 +42,6 @@ defmodule PhxBb.Boards do
   def get_board!(id), do: Repo.get!(Board, id) |> Repo.preload([:recent_topic, :recent_user])
 
   def get_board(id), do: Repo.get(Board, id) |> Repo.preload([:recent_topic, :recent_user])
-
-  def get_board_with_topics(id), do: Repo.get(Board, id) |> Repo.preload(:topics)
 
   @doc """
   Creates a board.
@@ -83,55 +80,6 @@ defmodule PhxBb.Boards do
     board
     |> Board.changeset(attrs)
     |> Repo.update()
-  end
-
-  def added_topic(board_id, topic_id, user_id) do
-    now = NaiveDateTime.utc_now()
-
-    from(b in Board,
-      update: [
-        inc: [topic_count: 1, topic_count: 1],
-        set: [recent_topic: ^topic_id, recent_user: ^user_id, updated_at: ^now]
-      ],
-      where: b.id == ^board_id
-    )
-    |> Repo.update_all([])
-  end
-
-  def added_post(board_id, topic_id, user_id) do
-    now = NaiveDateTime.utc_now()
-
-    from(b in Board,
-      update: [
-        inc: [topic_count: 1],
-        set: [recent_topic: ^topic_id, recent_user: ^user_id, updated_at: ^now]
-      ],
-      where: b.id == ^board_id
-    )
-    |> Repo.update_all([])
-  end
-
-  def deleted_post(board_id) do
-    from(b in Board,
-      update: [inc: [topic_count: -1]],
-      where: b.id == ^board_id
-    )
-    |> Repo.update_all([])
-  end
-
-  def deleted_latest_post(board_id, %Topic{
-        id: topic_id,
-        recent_user: recent_user,
-        last_post_at: time
-      }) do
-    from(b in Board,
-      update: [
-        inc: [topic_count: -1],
-        set: [recent_topic: ^topic_id, recent_user: ^recent_user, updated_at: ^time]
-      ],
-      where: b.id == ^board_id
-    )
-    |> Repo.update_all([])
   end
 
   @doc """

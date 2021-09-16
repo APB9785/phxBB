@@ -31,4 +31,14 @@ defmodule PhxBbWeb.CreateTopicTest do
     assert has_element?(view, "#new-topic-form", "can't be blank")
     assert has_element?(view, "#new-topic-form", "should be at least 3 character(s)")
   end
+
+  test "Attempt to create a new topic with invalid data", %{conn: conn, board: board} do
+    {:ok, view, _html} = live(conn, "/forum?board=#{board.id}&create_topic=1")
+
+    attrs = %{new_topic: %{title: "", body: "X"}}
+    view |> form("#new-topic-form", attrs) |> render_submit
+
+    # A successful submission would take us back to the board
+    refute has_element?(view, "#board-header", board.name)
+  end
 end

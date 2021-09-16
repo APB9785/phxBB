@@ -19,6 +19,7 @@ defmodule PhxBbWeb.UserMenu do
 
   def login_link do
     Link.link("Log in",
+      id: "user-menu-login",
       to: Routes.user_session_path(Endpoint, :new),
       class: StyleHelpers.link_style(nil)
     )
@@ -26,6 +27,7 @@ defmodule PhxBbWeb.UserMenu do
 
   def user_profile_link(user) do
     live_patch(user.username,
+      id: "user-menu-profile",
       to: Routes.live_path(Endpoint, ForumLive, user: user.id),
       class: StyleHelpers.link_style(user)
     )

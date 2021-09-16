@@ -146,7 +146,7 @@ defmodule PhxBbWeb.UserSettings do
 
   def handle_event("remove_avatar", _params, socket) do
     user = socket.assigns.active_user
-    path = Application.app_dir(:phx_bb, "priv/static") <> user.avatar
+    path = Path.join([:code.priv_dir(:phx_bb), "static", user.avatar])
     File.rm(path)
     {:ok, user} = Accounts.update_user_avatar(user, %{avatar: nil})
 
@@ -191,12 +191,6 @@ defmodule PhxBbWeb.UserSettings do
       dest = Path.join([:code.priv_dir(:phx_bb), "static", "uploads", name])
       File.cp!(path, dest)
       Routes.static_path(socket, "/uploads/#{name}")
-      # dir = Application.app_dir(:phx_bb, "priv/static/uploads")
-      # destination = Path.join([:code.priv_dir(:my_app), "static", "uploads", Path.basename(path)])
-      #
-      # File.cp!(meta.path, destination)
-      #
-      # Routes.static_path(socket, "/uploads/#{name}")
     end)
   end
 
@@ -224,9 +218,6 @@ defmodule PhxBbWeb.UserSettings do
   def confirmation_reminder_style(user) do
     ["md:mx-8 px-4 py-6 shadow rounded-lg ", confirmation_reminder_theme(user)]
   end
-
-  def confirmation_reminder_theme(nil),
-    do: confirmation_reminder_theme(%User{theme: StyleHelpers.default()})
 
   def confirmation_reminder_theme(%User{theme: "elixir"}), do: "bg-purple-200"
   def confirmation_reminder_theme(%User{theme: "dark"}), do: "bg-purple-900 text-gray-200"

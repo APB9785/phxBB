@@ -12,6 +12,18 @@ defmodule PhxBbWeb.UserSettingsTest do
     %{board: board_fixture()}
   end
 
+  def avatar_fixture(view) do
+    file_input(view, "#change-user-avatar-form", :avatar, [
+      %{
+        last_modified: 1_594_171_879_000,
+        name: "elixir.png",
+        content: File.read!("test/support/fixtures/elixir.png"),
+        size: 2_118,
+        type: "image/png"
+      }
+    ])
+  end
+
   test "Re-send user confirmation link", %{conn: conn} do
     {:ok, view, _html} = live(conn, "/forum?settings=1")
 
@@ -104,16 +116,7 @@ defmodule PhxBbWeb.UserSettingsTest do
     refute render(view) =~ "100%"
     refute has_element?(view, "#remove-avatar-link")
 
-    avatar =
-      file_input(view, "#change-user-avatar-form", :avatar, [
-        %{
-          last_modified: 1_594_171_879_000,
-          name: "elixir.png",
-          content: File.read!("test/support/fixtures/elixir.png"),
-          size: 2_118,
-          type: "image/png"
-        }
-      ])
+    avatar = avatar_fixture(view)
 
     assert render_upload(avatar, "elixir.png") =~ "100%"
 
@@ -130,6 +133,17 @@ defmodule PhxBbWeb.UserSettingsTest do
 
     assert has_element?(view, "#post-#{post.id}-author-avatar")
 
+    # Replace the avatar
+    {:ok, view, _html} = live(conn, "/forum?settings=1")
+
+    avatar = avatar_fixture(view)
+
+    assert render_upload(avatar, "elixir.png") =~ "100%"
+
+    view |> element("#change-user-avatar-form") |> render_submit
+
+    assert has_element?(view, "#avatar-updated-ok")
+
     # Remove the avatar
     {:ok, view, _html} = live(conn, "/forum?settings=1")
 
@@ -145,16 +159,7 @@ defmodule PhxBbWeb.UserSettingsTest do
   test "Discard avatar before uploading", %{conn: conn} do
     {:ok, view, _html} = live(conn, "/forum?settings=1")
 
-    avatar =
-      file_input(view, "#change-user-avatar-form", :avatar, [
-        %{
-          last_modified: 1_594_171_879_000,
-          name: "elixir.png",
-          content: File.read!("test/support/fixtures/elixir.png"),
-          size: 2_118,
-          type: "image/png"
-        }
-      ])
+    avatar = avatar_fixture(view)
 
     render_upload(avatar, "elixir.png")
 
