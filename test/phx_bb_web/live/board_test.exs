@@ -12,7 +12,16 @@ defmodule PhxBbWeb.BoardTest do
     }
   end
 
-  test "display list of topics", %{conn: conn, user: user, board: board} do
+  test "topic post count", %{conn: conn, user: user, board: board} do
+    topic = topic_fixture(user, board)
+    Enum.each(0..4, fn _ -> post_fixture(user, topic) end)
+
+    {:ok, view, _html} = live(conn, "/forum?board=#{board.id}")
+
+    render(view) =~ "6 posts"
+  end
+
+  test "scroll list of topics", %{conn: conn, user: user, board: board} do
     Enum.each(0..4, fn x ->
       topic_fixture(user, board, "Test-#{x}")
     end)

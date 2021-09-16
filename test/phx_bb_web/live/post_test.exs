@@ -16,9 +16,9 @@ defmodule PhxBbWeb.PostTest do
 
   test "Author info box", %{conn: conn, user: user, topic: topic, post: post} do
     user_join_date_fragment = "#{user.inserted_at.day}, #{user.inserted_at.year}"
+
     {:ok, view, _html} = live(conn, "/forum?topic=#{topic.id}")
 
-    # assert render(view) =~ "booty"
     assert has_element?(view, "#post-#{post.id}-author-profile-link", user.username)
     assert has_element?(view, "#post-#{post.id}-author-title", user.title)
     assert has_element?(view, "#post-#{post.id}-author-post-count", "1")
