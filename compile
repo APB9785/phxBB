@@ -3,6 +3,8 @@ cd $phoenix_dir
 mix assets.deploy
 rm -f _build/esbuild
 
+mkdir _build/prod/lib/phx_bb/priv/static/uploads
+
 mix "${phoenix_ex}.digest"
 
 if mix help "${phoenix_ex}.digest.clean" 1>/dev/null 2>&1; then
