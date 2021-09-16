@@ -1,6 +1,6 @@
 defmodule PhxBb.Posts.Post do
   @moduledoc """
-  This module defines the Post schema and changeset.
+  This module defines the Reply schema and changeset.
   """
 
   use Ecto.Schema
@@ -8,39 +8,19 @@ defmodule PhxBb.Posts.Post do
   import Ecto.Changeset
 
   schema "posts" do
-    field :author, :integer
+    belongs_to :author, PhxBb.Accounts.User
+    belongs_to :edited_by, PhxBb.Accounts.User
     field :body, :string
-    field :title, :string
-    field :last_user, :integer
-    field :last_reply_at, :naive_datetime
-    field :edited_by, :integer
-    field :view_count, :integer
-    field :reply_count, :integer
-    has_many :replies, PhxBb.Replies.Reply, on_delete: :delete_all
-    belongs_to :board, PhxBb.Boards.Board
+    belongs_to :topic, PhxBb.Topics.Topic
 
     timestamps()
   end
 
   @doc false
-  def changeset(post, attrs) do
-    post
-    |> cast(
-      attrs,
-      [
-        :title,
-        :body,
-        :board_id,
-        :author,
-        :last_user,
-        :view_count,
-        :reply_count,
-        :last_reply_at,
-        :edited_by
-      ]
-    )
-    |> validate_required([:title, :body, :board_id, :author, :view_count, :reply_count])
-    |> validate_length(:title, min: 3)
+  def changeset(reply, attrs) do
+    reply
+    |> cast(attrs, [:body, :author_id, :topic_id, :edited_by_id])
+    |> validate_required([:body, :author_id, :topic_id])
     |> validate_length(:body, min: 3)
   end
 end

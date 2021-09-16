@@ -12,8 +12,9 @@ defmodule PhxBb.Boards.Board do
     field :name, :string
     field :topic_count, :integer
     field :post_count, :integer
-    field :last_post, :integer
-    field :last_user, :integer
+    belongs_to :recent_topic, PhxBb.Topics.Topic
+    belongs_to :recent_user, PhxBb.Accounts.User
+    has_many :topics, PhxBb.Topics.Topic, on_delete: :delete_all
 
     timestamps()
   end
@@ -25,8 +26,8 @@ defmodule PhxBb.Boards.Board do
       :description,
       :topic_count,
       :post_count,
-      :last_post,
-      :last_user
+      :recent_topic_id,
+      :recent_user_id
     ]
 
     board

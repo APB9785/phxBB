@@ -1,18 +1,15 @@
 defmodule PhxBb.Accounts.User do
   @moduledoc """
-  This module contains the User schema and functions for building
-  changesets for users, and validating user account info.
+  This module defines the User schema and changeset.
   """
 
   use Ecto.Schema
-
   import Ecto.Changeset
 
-  @derive {Inspect, except: [:password]}
   schema "users" do
     field :email, :string
-    field :password, :string, virtual: true
-    field :hashed_password, :string
+    field :password, :string, virtual: true, redact: true
+    field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
     field :disabled_at, :naive_datetime
     field :username, :string
@@ -55,6 +52,7 @@ defmodule PhxBb.Accounts.User do
     changeset
     |> validate_required([:username])
     |> validate_length(:username, min: 3, max: 16)
+    |> unsafe_validate_unique(:username, PhxBb.Repo)
     |> unique_constraint(:username)
   end
 
@@ -63,6 +61,7 @@ defmodule PhxBb.Accounts.User do
     |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
+    |> unsafe_validate_unique(:email, PhxBb.Repo)
     |> unique_constraint(:email)
   end
 

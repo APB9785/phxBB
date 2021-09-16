@@ -4,14 +4,20 @@ defmodule PhxBb.MixProject do
   def project do
     [
       app: :phx_bb,
-      version: "0.5.2",
+      version: "0.6.0",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: [:gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      test_coverage: [tool: ExCoveralls]
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -34,29 +40,28 @@ defmodule PhxBb.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:bcrypt_elixir, "~> 2.3"},
-      {:phoenix, "~> 1.5.8"},
-      {:phoenix_ecto, "~> 4.2.1"},
-      {:ecto_sql, "~> 3.5.4"},
+      {:bcrypt_elixir, "~> 2.0"},
+      {:phoenix, "~> 1.6.0-rc.0", override: true},
+      {:phoenix_ecto, "~> 4.4"},
+      {:ecto_sql, "~> 3.7"},
       {:postgrex, ">= 0.0.0"},
-      {:phoenix_live_view, "~> 0.15.5"},
-      {:floki, ">= 0.27.0", only: :test},
-      {:phoenix_html, "~> 2.14.3"},
-      {:phoenix_html_sanitizer, github: "APB9785/phoenix_html_sanitizer", tag: "1.1.2"},
+      {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_dashboard, "~> 0.4"},
-      {:telemetry_metrics, "~> 0.4"},
-      {:telemetry_poller, "~> 0.4"},
+      {:phoenix_live_view, "~> 0.16.3"},
+      {:floki, ">= 0.30.0", only: :test},
+      {:phoenix_live_dashboard, "~> 0.5"},
+      {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
+      {:swoosh, "~> 1.3"},
+      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
-      {:jason, "~> 1.0"},
-      {:phx_gen_auth, "~> 0.6", only: [:dev], runtime: false},
+      {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:tzdata, "~> 1.1"},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.14.0"},
-      {:swoosh, "~> 1.3.4"},
-      {:hackney, "~> 1.17"},
-      {:earmark, "~> 1.4"}
+      {:credo, "~> 1.5.6", only: [:dev, :test], runtime: false},
+      {:tzdata, github: "lau/tzdata"},
+      {:phoenix_html_sanitizer, github: "APB9785/phoenix_html_sanitizer"},
+      {:earmark, "~> 1.4"},
+      {:excoveralls, "~> 0.14", only: :test}
     ]
   end
 
@@ -68,10 +73,15 @@ defmodule PhxBb.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
+      setup: ["deps.get", "ecto.setup", "cmd --cd assets npm install"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.drop --quiet", "ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      "assets.deploy": [
+        "cmd --cd assets npm run deploy",
+        "esbuild default --minify",
+        "phx.digest"
+      ]
     ]
   end
 end

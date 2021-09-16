@@ -1,37 +1,33 @@
 defmodule PhxBb.ForumFixtures do
   @moduledoc """
-  This module contains functions for creating test replies, posts, and boards.
+  This module contains functions for creating test topics, posts, and boards.
   """
 
-  def reply_fixture(attrs \\ %{}) do
-    {:ok, reply} =
-      Map.merge(%{body: "some body"}, attrs)
-      |> PhxBb.Replies.create_reply()
+  alias PhxBb.{Boards, Posts, Topics}
 
-    reply
-  end
-
-  def post_fixture(attrs \\ %{}) do
-    {:ok, post} =
-      Map.merge(
-        %{
-          board_id: 1,
-          body: "some body",
-          title: "some title",
-          reply_count: 0,
-          view_count: 0
-        },
-        attrs
-      )
-      |> PhxBb.Posts.create_post()
+  def post_fixture(user, topic, body \\ "some body") do
+    attrs = %{body: body, author_id: user.id, topic_id: topic.id}
+    {:ok, post} = Posts.create_post(attrs)
 
     post
   end
 
-  def board_fixture(attrs \\ %{}) do
-    {:ok, board} =
-      Map.merge(%{name: "some name", description: "some description"}, attrs)
-      |> PhxBb.Boards.create_board()
+  def topic_fixture(user, board, title \\ "test title", body \\ "test body") do
+    attrs = %{
+      body: body,
+      title: title,
+      board_id: board.id,
+      author_id: user.id,
+      recent_user_id: user.id
+    }
+
+    {:ok, topic} = Topics.create_topic(attrs)
+
+    topic
+  end
+
+  def board_fixture(name \\ "some name", description \\ "some description") do
+    {:ok, board} = Boards.create_board(%{name: name, description: description})
 
     board
   end

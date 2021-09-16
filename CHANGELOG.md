@@ -4,11 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.6] - 2021-09-16
+
+### Added
+
+- Pagination of topic list with "infinite scroll"
+
+### Changed
+
+- All html templates upgraded to HEEx
+- Post and Topic creation operations are now performed atomically with `Ecto.Multi`
+- User info is no longer cached; now efficiently preloaded from the DB as needed
+- Post and Topic listings are now temporary assigns to further reduce the amount of data held in memory
+- Test suite organized into many smaller modules
 
 ### Fixed
 
-- Fixed a bug where updates to the user cache were not taking effect and causing the LiveView to crash
 - Fixed some links not resetting scroll position upon click
 
 ## [0.5.2] - 2021-06-02
@@ -159,7 +170,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - User cache for reduced DB queries
 - Page title updates to reflect current view
 
-[Unreleased]: https://github.com/APB9785/phxBB/compare/0.5.2...HEAD
+[0.6]: https://github.com/APB9785/phxBB/compare/0.5.2...0.6
 [0.5.2]: https://github.com/APB9785/phxBB/compare/0.5.1...0.5.2
 [0.5.1]: https://github.com/APB9785/phxBB/compare/0.5...0.5.1
 [0.5]: https://github.com/APB9785/phxBB/compare/0.4.1...0.5

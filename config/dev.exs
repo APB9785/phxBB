@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # Configure your database
 config :phx_bb, PhxBb.Repo,
@@ -14,18 +14,22 @@ config :phx_bb, PhxBb.Repo,
 #
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
-# with webpack to recompile .js and .css sources.
+# with esbuild to bundle .js and .css sources.
 config :phx_bb, PhxBbWeb.Endpoint,
-  http: [port: 4000],
+  # Binding to loopback ipv4 address prevents access from other machines.
+  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
+  http: [ip: {127, 0, 0, 1}, port: 4000],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
   watchers: [
-    node: [
-      "node_modules/webpack/bin/webpack.js",
-      "--mode",
-      "development",
-      "--watch-stdin",
+    # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    npx: [
+      "tailwindcss",
+      "--input=css/app.css",
+      "--output=../priv/static/assets/app.css",
+      "--watch",
       cd: Path.expand("../assets", __DIR__)
     ]
   ]
@@ -58,7 +62,7 @@ config :phx_bb, PhxBbWeb.Endpoint,
 config :phx_bb, PhxBbWeb.Endpoint,
   live_reload: [
     patterns: [
-      ~r"priv/static/(?!uploads).*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
       ~r"lib/phx_bb_web/(live|views)/.*(ex)$",
       ~r"lib/phx_bb_web/templates/.*(eex)$"

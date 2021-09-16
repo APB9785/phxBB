@@ -6,8 +6,8 @@ defmodule PhxBb.Boards do
   import Ecto.Query, warn: false
 
   alias PhxBb.Boards.Board
-  alias PhxBb.Posts.Post
   alias PhxBb.Repo
+  alias PhxBb.Topics.Topic
 
   @doc """
   Returns the list of boards.
@@ -19,7 +19,7 @@ defmodule PhxBb.Boards do
 
   """
   def list_boards do
-    Repo.all(from b in Board, order_by: [asc: b.id])
+    Repo.all(from b in Board, order_by: [asc: b.id], preload: [:recent_topic, :recent_user])
   end
 
   @doc """
@@ -36,9 +36,11 @@ defmodule PhxBb.Boards do
       ** (Ecto.NoResultsError)
 
   """
-  def get_board!(id), do: Repo.get!(Board, id)
+  def get_board!(id), do: Repo.get!(Board, id) |> Repo.preload([:recent_topic, :recent_user])
 
-  def get_board(id), do: Repo.get(Board, id)
+  def get_board(id), do: Repo.get(Board, id) |> Repo.preload([:recent_topic, :recent_user])
+
+  def get_board_with_topics(id), do: Repo.get(Board, id) |> Repo.preload(:topics)
 
   @doc """
   Creates a board.
@@ -53,6 +55,9 @@ defmodule PhxBb.Boards do
 
   """
   def create_board(attrs \\ %{}) do
+    attrs =
+      Map.merge(attrs, %{post_count: 0, topic_count: 0, recent_topic: nil, recent_user: nil})
+
     %Board{}
     |> Board.changeset(attrs)
     |> Repo.insert()
@@ -76,45 +81,49 @@ defmodule PhxBb.Boards do
     |> Repo.update()
   end
 
-  def added_post(board_id, post_id, user_id) do
+  def added_topic(board_id, topic_id, user_id) do
     now = NaiveDateTime.utc_now()
 
     from(b in Board,
       update: [
-        inc: [post_count: 1, topic_count: 1],
-        set: [last_post: ^post_id, last_user: ^user_id, updated_at: ^now]
+        inc: [topic_count: 1, topic_count: 1],
+        set: [recent_topic: ^topic_id, recent_user: ^user_id, updated_at: ^now]
       ],
       where: b.id == ^board_id
     )
     |> Repo.update_all([])
   end
 
-  def added_reply(board_id, post_id, user_id) do
+  def added_post(board_id, topic_id, user_id) do
     now = NaiveDateTime.utc_now()
 
     from(b in Board,
       update: [
-        inc: [post_count: 1],
-        set: [last_post: ^post_id, last_user: ^user_id, updated_at: ^now]
+        inc: [topic_count: 1],
+        set: [recent_topic: ^topic_id, recent_user: ^user_id, updated_at: ^now]
       ],
       where: b.id == ^board_id
     )
     |> Repo.update_all([])
   end
 
-  def deleted_reply(board_id) do
+  def deleted_post(board_id) do
     from(b in Board,
-      update: [inc: [post_count: -1]],
+      update: [inc: [topic_count: -1]],
       where: b.id == ^board_id
     )
     |> Repo.update_all([])
   end
 
-  def deleted_latest_reply(board_id, %Post{id: post_id, last_user: last_user, last_reply_at: time}) do
+  def deleted_latest_post(board_id, %Topic{
+        id: topic_id,
+        recent_user: recent_user,
+        last_post_at: time
+      }) do
     from(b in Board,
       update: [
-        inc: [post_count: -1],
-        set: [last_post: ^post_id, last_user: ^last_user, updated_at: ^time]
+        inc: [topic_count: -1],
+        set: [recent_topic: ^topic_id, recent_user: ^recent_user, updated_at: ^time]
       ],
       where: b.id == ^board_id
     )

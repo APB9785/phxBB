@@ -2,6 +2,7 @@ defmodule PhxBb.AccountsTest do
   use PhxBb.DataCase
 
   alias PhxBb.Accounts
+
   import PhxBb.AccountsFixtures
   alias PhxBb.Accounts.{User, UserToken}
 
@@ -58,7 +59,7 @@ defmodule PhxBb.AccountsTest do
     end
 
     test "validates email and password when given" do
-      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "short"})
+      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "invalid"})
 
       assert %{
                email: ["must have the @ sign and no spaces"],
@@ -75,24 +76,17 @@ defmodule PhxBb.AccountsTest do
 
     test "validates email uniqueness" do
       %{email: email} = user_fixture()
-      attrs = %{username: "tester", password: "test1234", email: email}
-      {:error, changeset} = Accounts.register_user(attrs)
+      {:error, changeset} = Accounts.register_user(%{email: email})
       assert "has already been taken" in errors_on(changeset).email
 
       # Now try with the upper cased email too, to check that email case is ignored.
-      attrs = %{username: "tester2", password: "test5678", email: String.upcase(email)}
-      {:error, changeset} = Accounts.register_user(attrs)
+      {:error, changeset} = Accounts.register_user(%{email: String.upcase(email)})
       assert "has already been taken" in errors_on(changeset).email
     end
 
     test "registers users with a hashed password" do
       email = unique_user_email()
-      name = unique_user()
-
-      {:ok, user} =
-        %{email: email, password: valid_user_password(), username: name, lowercase: name}
-        |> Accounts.register_user()
-
+      {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
       assert user.email == email
       assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)
@@ -109,13 +103,18 @@ defmodule PhxBb.AccountsTest do
     test "allows fields to be set" do
       email = unique_user_email()
       password = valid_user_password()
-      name = unique_user()
-      changes = %{email: email, password: password, username: name, lowercase: name}
-      changeset = Accounts.change_user_registration(%User{}, changes)
+      username = unique_user()
+
+      changeset =
+        Accounts.change_user_registration(
+          %User{},
+          valid_user_attributes(email: email, password: password, username: username)
+        )
 
       assert changeset.valid?
       assert get_change(changeset, :email) == email
       assert get_change(changeset, :password) == password
+      assert get_change(changeset, :username) == username
       assert is_nil(get_change(changeset, :hashed_password))
     end
   end
@@ -153,7 +152,6 @@ defmodule PhxBb.AccountsTest do
       assert "should be at most 160 character(s)" in errors_on(changeset).email
     end
 
-    # Applying for a change of email does not hit the DB
     test "validates email uniqueness", %{user: user} do
       %{email: email} = user_fixture()
 
@@ -178,67 +176,67 @@ defmodule PhxBb.AccountsTest do
     end
   end
 
-  # describe "deliver_update_email_instructions/3" do
-  #   setup do
-  #     %{user: user_fixture()}
-  #   end
-  #
-  #   test "sends token through notification", %{user: user} do
-  #     token =
-  #       extract_user_token(fn url ->
-  #         Accounts.deliver_update_email_instructions(user, "current@example.com", url)
-  #       end)
-  #
-  #     {:ok, token} = Base.url_decode64(token, padding: false)
-  #     assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-  #     assert user_token.user_id == user.id
-  #     assert user_token.sent_to == user.email
-  #     assert user_token.context == "change:current@example.com"
-  #   end
-  # end
+  describe "deliver_update_email_instructions/3" do
+    setup do
+      %{user: user_fixture()}
+    end
 
-  # describe "update_user_email/2" do
-  #   setup do
-  #     user = user_fixture()
-  #     email = unique_user_email()
-  #
-  #     token =
-  #       extract_user_token(fn url ->
-  #         Accounts.deliver_update_email_instructions(%{user | email: email}, user.email, url)
-  #       end)
-  #
-  #     %{user: user, token: token, email: email}
-  #   end
+    test "sends token through notification", %{user: user} do
+      token =
+        extract_user_token(fn url ->
+          Accounts.deliver_update_email_instructions(user, "current@example.com", url)
+        end)
 
-  # test "updates the email with a valid token", %{user: user, token: token, email: email} do
-  #   assert Accounts.update_user_email(user, token) == :ok
-  #   changed_user = Repo.get!(User, user.id)
-  #   assert changed_user.email != user.email
-  #   assert changed_user.email == email
-  #   assert changed_user.confirmed_at
-  #   assert changed_user.confirmed_at != user.confirmed_at
-  #   refute Repo.get_by(UserToken, user_id: user.id)
-  # end
+      {:ok, token} = Base.url_decode64(token, padding: false)
+      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
+      assert user_token.user_id == user.id
+      assert user_token.sent_to == user.email
+      assert user_token.context == "change:current@example.com"
+    end
+  end
 
-  # test "does not update email with invalid token", %{user: user} do
-  #   assert Accounts.update_user_email(user, "oops") == :error
-  #   assert Repo.get!(User, user.id).email == user.email
-  #   assert Repo.get_by(UserToken, user_id: user.id)
-  # end
+  describe "update_user_email/2" do
+    setup do
+      user = user_fixture()
+      email = unique_user_email()
 
-  # test "does not update email if user email changed", %{user: user, token: token} do
-  #   assert Accounts.update_user_email(%{user | email: "current@example.com"}, token) == :error
-  #   assert Repo.get!(User, user.id).email == user.email
-  #   assert Repo.get_by(UserToken, user_id: user.id)
-  # end
+      token =
+        extract_user_token(fn url ->
+          Accounts.deliver_update_email_instructions(%{user | email: email}, user.email, url)
+        end)
 
-  #   test "does not update email if token expired", %{user: user, token: token} do
-  #     {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-  #     assert Accounts.update_user_email(user, token) == :error
-  #     assert Repo.get!(User, user.id).email == user.email
-  #     assert Repo.get_by(UserToken, user_id: user.id)
-  #   end
-  # end
+      %{user: user, token: token, email: email}
+    end
+
+    test "updates the email with a valid token", %{user: user, token: token, email: email} do
+      assert Accounts.update_user_email(user, token) == :ok
+      changed_user = Repo.get!(User, user.id)
+      assert changed_user.email != user.email
+      assert changed_user.email == email
+      assert changed_user.confirmed_at
+      assert changed_user.confirmed_at != user.confirmed_at
+      refute Repo.get_by(UserToken, user_id: user.id)
+    end
+
+    test "does not update email with invalid token", %{user: user} do
+      assert Accounts.update_user_email(user, "oops") == :error
+      assert Repo.get!(User, user.id).email == user.email
+      assert Repo.get_by(UserToken, user_id: user.id)
+    end
+
+    test "does not update email if user email changed", %{user: user, token: token} do
+      assert Accounts.update_user_email(%{user | email: "current@example.com"}, token) == :error
+      assert Repo.get!(User, user.id).email == user.email
+      assert Repo.get_by(UserToken, user_id: user.id)
+    end
+
+    test "does not update email if token expired", %{user: user, token: token} do
+      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
+      assert Accounts.update_user_email(user, token) == :error
+      assert Repo.get!(User, user.id).email == user.email
+      assert Repo.get_by(UserToken, user_id: user.id)
+    end
+  end
 
   describe "change_user_password/2" do
     test "returns a user changeset" do
@@ -266,7 +264,7 @@ defmodule PhxBb.AccountsTest do
     test "validates password", %{user: user} do
       {:error, changeset} =
         Accounts.update_user_password(user, valid_user_password(), %{
-          password: "short",
+          password: "invalid",
           password_confirmation: "another"
         })
 
@@ -366,106 +364,106 @@ defmodule PhxBb.AccountsTest do
     end
   end
 
-  # describe "deliver_user_confirmation_instructions/2" do
-  #   setup do
-  #     %{user: user_fixture()}
-  #   end
+  describe "deliver_user_confirmation_instructions/2" do
+    setup do
+      %{user: user_fixture()}
+    end
 
-  #   test "sends token through notification", %{user: user} do
-  #     token =
-  #       extract_user_token(fn url ->
-  #         Accounts.deliver_user_confirmation_instructions(user, url)
-  #       end)
-  #
-  #     {:ok, token} = Base.url_decode64(token, padding: false)
-  #     assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-  #     assert user_token.user_id == user.id
-  #     assert user_token.sent_to == user.email
-  #     assert user_token.context == "confirm"
-  #   end
-  # end
+    test "sends token through notification", %{user: user} do
+      token =
+        extract_user_token(fn url ->
+          Accounts.deliver_user_confirmation_instructions(user, url)
+        end)
 
-  # describe "confirm_user/2" do
-  #   setup do
-  #     user = user_fixture()
-  #
-  #     token =
-  #       extract_user_token(fn url ->
-  #         Accounts.deliver_user_confirmation_instructions(user, url)
-  #       end)
-  #
-  #     %{user: user, token: token}
-  #   end
+      {:ok, token} = Base.url_decode64(token, padding: false)
+      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
+      assert user_token.user_id == user.id
+      assert user_token.sent_to == user.email
+      assert user_token.context == "confirm"
+    end
+  end
 
-  # test "confirms the email with a valid token", %{user: user, token: token} do
-  #   assert {:ok, confirmed_user} = Accounts.confirm_user(token)
-  #   assert confirmed_user.confirmed_at
-  #   assert confirmed_user.confirmed_at != user.confirmed_at
-  #   assert Repo.get!(User, user.id).confirmed_at
-  #   refute Repo.get_by(UserToken, user_id: user.id)
-  # end
+  describe "confirm_user/1" do
+    setup do
+      user = user_fixture()
 
-  # test "does not confirm with invalid token", %{user: user} do
-  #   assert Accounts.confirm_user("oops") == :error
-  #   refute Repo.get!(User, user.id).confirmed_at
-  #   assert Repo.get_by(UserToken, user_id: user.id)
-  # end
+      token =
+        extract_user_token(fn url ->
+          Accounts.deliver_user_confirmation_instructions(user, url)
+        end)
 
-  #   test "does not confirm email if token expired", %{user: user, token: token} do
-  #     {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-  #     assert Accounts.confirm_user(token) == :error
-  #     refute Repo.get!(User, user.id).confirmed_at
-  #     assert Repo.get_by(UserToken, user_id: user.id)
-  #   end
-  # end
+      %{user: user, token: token}
+    end
 
-  # describe "deliver_user_reset_password_instructions/2" do
-  #   setup do
-  #     %{user: user_fixture()}
-  #   end
-  #
-  #   test "sends token through notification", %{user: user} do
-  #     token =
-  #       extract_user_token(fn url ->
-  #         Accounts.deliver_user_reset_password_instructions(user, url)
-  #       end)
-  #
-  #     {:ok, token} = Base.url_decode64(token, padding: false)
-  #     assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-  #     assert user_token.user_id == user.id
-  #     assert user_token.sent_to == user.email
-  #     assert user_token.context == "reset_password"
-  #   end
-  # end
+    test "confirms the email with a valid token", %{user: user, token: token} do
+      assert {:ok, confirmed_user} = Accounts.confirm_user(token)
+      assert confirmed_user.confirmed_at
+      assert confirmed_user.confirmed_at != user.confirmed_at
+      assert Repo.get!(User, user.id).confirmed_at
+      refute Repo.get_by(UserToken, user_id: user.id)
+    end
 
-  # describe "get_user_by_reset_password_token/1" do
-  #   setup do
-  #     user = user_fixture()
-  #
-  #     token =
-  #       extract_user_token(fn url ->
-  #         Accounts.deliver_user_reset_password_instructions(user, url)
-  #       end)
-  #
-  #     %{user: user, token: token}
-  #   end
+    test "does not confirm with invalid token", %{user: user} do
+      assert Accounts.confirm_user("oops") == :error
+      refute Repo.get!(User, user.id).confirmed_at
+      assert Repo.get_by(UserToken, user_id: user.id)
+    end
 
-  # test "returns the user with valid token", %{user: %{id: id}, token: token} do
-  #   assert %User{id: ^id} = Accounts.get_user_by_reset_password_token(token)
-  #   assert Repo.get_by(UserToken, user_id: id)
-  # end
+    test "does not confirm email if token expired", %{user: user, token: token} do
+      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
+      assert Accounts.confirm_user(token) == :error
+      refute Repo.get!(User, user.id).confirmed_at
+      assert Repo.get_by(UserToken, user_id: user.id)
+    end
+  end
 
-  # test "does not return the user with invalid token", %{user: user} do
-  #   refute Accounts.get_user_by_reset_password_token("oops")
-  #   assert Repo.get_by(UserToken, user_id: user.id)
-  # end
+  describe "deliver_user_reset_password_instructions/2" do
+    setup do
+      %{user: user_fixture()}
+    end
 
-  # test "does not return the user if token expired", %{user: user, token: token} do
-  #   {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-  #   refute Accounts.get_user_by_reset_password_token(token)
-  #   assert Repo.get_by(UserToken, user_id: user.id)
-  # end
-  # end
+    test "sends token through notification", %{user: user} do
+      token =
+        extract_user_token(fn url ->
+          Accounts.deliver_user_reset_password_instructions(user, url)
+        end)
+
+      {:ok, token} = Base.url_decode64(token, padding: false)
+      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
+      assert user_token.user_id == user.id
+      assert user_token.sent_to == user.email
+      assert user_token.context == "reset_password"
+    end
+  end
+
+  describe "get_user_by_reset_password_token/1" do
+    setup do
+      user = user_fixture()
+
+      token =
+        extract_user_token(fn url ->
+          Accounts.deliver_user_reset_password_instructions(user, url)
+        end)
+
+      %{user: user, token: token}
+    end
+
+    test "returns the user with valid token", %{user: %{id: id}, token: token} do
+      assert %User{id: ^id} = Accounts.get_user_by_reset_password_token(token)
+      assert Repo.get_by(UserToken, user_id: id)
+    end
+
+    test "does not return the user with invalid token", %{user: user} do
+      refute Accounts.get_user_by_reset_password_token("oops")
+      assert Repo.get_by(UserToken, user_id: user.id)
+    end
+
+    test "does not return the user if token expired", %{user: user, token: token} do
+      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
+      refute Accounts.get_user_by_reset_password_token(token)
+      assert Repo.get_by(UserToken, user_id: user.id)
+    end
+  end
 
   describe "reset_user_password/2" do
     setup do
@@ -475,7 +473,7 @@ defmodule PhxBb.AccountsTest do
     test "validates password", %{user: user} do
       {:error, changeset} =
         Accounts.reset_user_password(user, %{
-          password: "short",
+          password: "invalid",
           password_confirmation: "another"
         })
 

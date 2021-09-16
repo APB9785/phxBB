@@ -1,0 +1,117 @@
+<!--   User Menu   -->
+<%= live_component @socket, PhxBbWeb.UserMenu, active_user: @active_user %>
+
+<!-- JS Hook for changing background color -->
+<div id="bg-color-setter" phx-hook="BackgroundColorChange" data-value={@bg_color}></div>
+
+<div class={StyleHelpers.content_background(@active_user)}>
+
+  <%= case @nav do %>
+
+  <% :main -> %>
+    <div class={main_header_style(@active_user)} id="main-header">
+      Welcome to the Forum!
+    </div>
+
+    <%= live_component @socket, PhxBbWeb.MainIndex, active_user: @active_user %>
+
+    <%= live_component @socket, PhxBbWeb.UsersOnline,
+          active_user: @active_user,
+          users_online: @users_online %>
+
+  <% :board -> %>
+  <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+     > <%= link_to_index(@active_user) %>
+  </div>
+    <div class="text-2xl pb-4 md:pl-8" id="board-header">
+      <%= @active_board.name %>
+    </div>
+    <%= live_component @socket, PhxBbWeb.Board,
+          active_user: @active_user,
+          active_board: @active_board,
+          id: "board-component" %>
+
+  <% :topic -> %>
+    <div id="breadcrumb" class="pt-4 pb-4 md:pl-8 md:pt-8">
+       > <%= link_to_index(@active_user) %>
+       > <%= link_to_board(@active_topic.board, @active_user) %>
+    </div>
+    <div id="topic-header" class="text-2xl pb-4 md:pl-8">
+      <%= @active_topic.title %>
+    </div>
+    <%= live_component @socket, PhxBbWeb.Topic,
+          active_user: @active_user,
+          active_topic: @active_topic,
+          post_list: @post_list,
+          id: "topic-component" %>
+    <!-- New Post form -->
+    <%= if @active_user do %>
+      <%= live_component @socket, PhxBbWeb.CreatePost,
+            active_user: @active_user,
+            active_topic: @active_topic,
+            id: "new-post-component" %>
+    <% end %>
+
+  <% :create_topic -> %>
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+       > <%= link_to_index(@active_user) %>
+       > <%= link_to_board(@active_board, @active_user) %>
+    </div>
+    <div class="text-2xl pb-4 md:pl-8" id="create-topic-header">
+      Create New Topic
+    </div>
+    <%= live_component @socket, PhxBbWeb.CreateTopic,
+          active_user: @active_user,
+          active_board: @active_board,
+          id: "create-topic-component" %>
+
+  <% :user_profile -> %>
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+       > <%= link_to_index(@active_user) %>
+    </div>
+    <%= live_component @socket, PhxBbWeb.UserProfile,
+          active_user: @active_user,
+          view_user: @view_user %>
+
+  <% :settings -> %>
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+       > <%= link_to_index(@active_user) %>
+    </div>
+    <%= live_component @socket, PhxBbWeb.UserSettings,
+          active_user: @active_user,
+          uploads: @uploads,
+          id: "user-settings-component" %>
+
+  <% :admin -> %>
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+       > <%= link_to_index(@active_user) %>
+    </div>
+    <%= live_component @socket, PhxBbWeb.AdminPanel,
+          active_user: @active_user,
+          id: "admin-panel-component" %>
+
+  <% :register -> %>
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+       > <%= link_to_index(@active_user) %>
+    </div>
+    <div class="text-2xl p-4 md:pl-8" id="register-header">
+      Register
+    </div>
+    <%= live_component @socket, PhxBbWeb.UserRegistration,
+          active_user: @active_user,
+          id: "user-registration-component" %>
+
+  <% :invalid -> %>
+    <div class="text-2xl p-8 text-center" id="page-not-found-live">
+      404 Page Not Found
+    </div>
+    <div class="text-center pb-8">
+      <%= live_patch "Return to Main Index",
+            to: Routes.live_path(@socket, __MODULE__),
+            class: StyleHelpers.link_style(@active_user),
+            id: "return-from-invalid" %>
+    </div>
+
+  <% end %>
+
+</div>

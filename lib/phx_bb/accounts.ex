@@ -5,16 +5,9 @@ defmodule PhxBb.Accounts do
 
   import Ecto.Query, warn: false
 
-  alias PhxBb.Accounts.User
-  alias PhxBb.Accounts.UserNotifier
-  alias PhxBb.Accounts.UserToken
+  alias PhxBb.Accounts.{User, UserNotifier, UserToken}
   alias PhxBb.Posts.Post
-  alias PhxBb.Replies.Reply
   alias PhxBb.Repo
-
-  def subscribe do
-    Phoenix.PubSub.subscribe(PhxBb.PubSub, "accounts")
-  end
 
   ## Database getters
 
@@ -88,63 +81,34 @@ defmodule PhxBb.Accounts do
     |> Repo.all()
   end
 
-  def get_user_for_cache(user_id) do
-    Repo.one(
-      from u in User,
-        where: u.id == ^user_id,
-        select: %{
-          name: u.username,
-          joined: u.inserted_at,
-          title: u.title,
-          avatar: u.avatar,
-          post_count: u.post_count
-        }
-    )
-  end
-
-  def added_post(user_id) do
-    from(u in User,
-      update: [inc: [post_count: 1]],
-      where: u.id == ^user_id
-    )
-    |> Repo.update_all([])
-  end
-
-  def deleted_post(user_id) do
-    from(u in User,
-      update: [inc: [post_count: -1]],
-      where: u.id == ^user_id
-    )
-    |> Repo.update_all([])
-  end
-
   def last_five_posts(user_id) do
-    post_query =
-      from p in Post,
-        where: p.author == ^user_id,
-        order_by: [desc: p.inserted_at],
-        limit: 5
+    from(Post,
+      where: [author_id: ^user_id],
+      order_by: [desc: :inserted_at],
+      limit: 5,
+      preload: [:topic]
+    )
+    |> Repo.all()
+  end
 
-    reply_query =
-      from r in Reply,
-        join: p in Post,
-        on: r.post_id == p.id,
-        select: %Post{
-          body: r.body,
-          author: r.author,
-          inserted_at: r.inserted_at,
-          title: p.title,
-          id: p.id
-        },
-        where: r.author == ^user_id,
-        order_by: [desc: r.inserted_at],
-        limit: 5
+  def disable_user!(user_id) do
+    user = Repo.get!(User, user_id)
+    user = User.disable_changeset(user, %{disabled_at: NaiveDateTime.utc_now()})
+    user = Repo.update!(user)
 
-    posts = Repo.all(post_query)
-    replies = Repo.all(reply_query)
+    Phoenix.PubSub.broadcast(PhxBb.PubSub, "user:#{user.id}", {:updated_user, user})
 
-    Enum.sort_by(posts ++ replies, & &1.inserted_at, {:desc, NaiveDateTime})
-    |> Enum.take(5)
+    user
+  end
+
+  def enable_user!(user_id) do
+    user = Repo.get!(User, user_id)
+    user = User.disable_changeset(user, %{disabled_at: nil})
+    user = Repo.update!(user)
+
+    Phoenix.PubSub.broadcast(PhxBb.PubSub, "user:#{user.id}", {:updated_user, user})
+
+    user
   end
 
   ## User registration
@@ -225,18 +189,10 @@ defmodule PhxBb.Accounts do
 
   """
   def apply_user_email(user, password, attrs) do
-    changeset =
-      user
-      |> User.email_changeset(attrs)
-      |> User.validate_current_password(password)
-
-    if Map.has_key?(changeset.changes, :email) and
-         Repo.get_by(User, email: changeset.changes.email) do
-      {:error, Ecto.Changeset.add_error(changeset, :email, "has already been taken")}
-    else
-      changeset
-      |> Ecto.Changeset.apply_action(:update)
-    end
+    user
+    |> User.email_changeset(attrs)
+    |> User.validate_current_password(password)
+    |> Ecto.Changeset.apply_action(:update)
   end
 
   @doc """
@@ -349,18 +305,6 @@ defmodule PhxBb.Accounts do
     |> Repo.update()
   end
 
-  def disable_user(%User{} = user) do
-    user
-    |> User.disable_changeset(%{disabled_at: NaiveDateTime.utc_now()})
-    |> Repo.update()
-  end
-
-  def enable_user(%User{} = user) do
-    user
-    |> User.disable_changeset(%{disabled_at: nil})
-    |> Repo.update()
-  end
-
   ## Session
 
   @doc """
@@ -397,10 +341,10 @@ defmodule PhxBb.Accounts do
 
   ## Examples
 
-      iex> deliver_user_confirmation_instructions(user, &Routes.user_confirmation_url(conn, :confirm, &1))
+      iex> deliver_user_confirmation_instructions(user, &Routes.user_confirmation_url(conn, :edit, &1))
       {:ok, %{to: ..., body: ...}}
 
-      iex> deliver_user_confirmation_instructions(confirmed_user, &Routes.user_confirmation_url(conn, :confirm, &1))
+      iex> deliver_user_confirmation_instructions(confirmed_user, &Routes.user_confirmation_url(conn, :edit, &1))
       {:error, :already_confirmed}
 
   """
@@ -425,6 +369,7 @@ defmodule PhxBb.Accounts do
     with {:ok, query} <- UserToken.verify_email_token_query(token, "confirm"),
          %User{} = user <- Repo.one(query),
          {:ok, %{user: user}} <- Repo.transaction(confirm_user_multi(user)) do
+      Phoenix.PubSub.broadcast(PhxBb.PubSub, "user:#{user.id}", {:updated_user, user})
       {:ok, user}
     else
       _ -> :error
@@ -445,7 +390,7 @@ defmodule PhxBb.Accounts do
   ## Examples
 
       iex> deliver_user_reset_password_instructions(user, &Routes.user_reset_password_url(conn, :edit, &1))
-      token
+      {:ok, %{to: ..., body: ...}}
 
   """
   def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)

@@ -20,8 +20,8 @@ board_base = %Board{
   description: nil,
   post_count: 0,
   topic_count: 0,
-  last_post: nil,
-  last_user: nil
+  recent_topic: nil,
+  recent_user: nil
 }
 
 # Create Administrator Account

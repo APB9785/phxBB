@@ -5,65 +5,45 @@ defmodule PhxBb.Posts do
 
   import Ecto.Query, warn: false
 
+  alias PhxBb.Accounts.User
+  alias PhxBb.Boards.Board
   alias PhxBb.Posts.Post
   alias PhxBb.Repo
-
-  def subscribe do
-    Phoenix.PubSub.subscribe(PhxBb.PubSub, "posts")
-  end
+  alias PhxBb.Topics.Topic
 
   @doc """
-  Returns the list of posts.
+  Returns the sorted list of posts.
 
   ## Examples
 
-      iex> list_posts(board_id)
+      iex> list_posts(topic_id)
       [%Post{}, ...]
 
   """
-  def list_posts(board_id) do
+  def list_posts(topic_id) do
     Repo.all(
-      from p in Post,
-        where: p.board_id == ^board_id,
-        order_by: [desc: p.last_reply_at]
+      from Post,
+        where: [topic_id: ^topic_id],
+        order_by: [asc: :inserted_at],
+        preload: [:author, :edited_by]
     )
-  end
-
-  def most_recent_post(board_id) do
-    Repo.all(
-      from p in Post,
-        where: p.board_id == ^board_id,
-        order_by: [desc: p.last_reply_at],
-        limit: 1
-    )
-    |> hd
   end
 
   @doc """
   Gets a single post.
 
-  Raises nil if the Post does not exist.
+  Raises `Ecto.NoResultsError` if the Post does not exist.
 
   ## Examples
 
-      iex> get_post(123)
+      iex> get_post!(123)
       %Post{}
 
-      iex> get_post(456)
-      nil
+      iex> get_post!(456)
+      ** (Ecto.NoResultsError)
 
   """
-  def get_post(id), do: Repo.get(Post, id)
-
-  def get_post!(id), do: Repo.get!(Post, id)
-
-  def get_title(id) do
-    Repo.one(
-      from p in Post,
-        where: p.id == ^id,
-        select: p.title
-    )
-  end
+  def get_post!(id), do: Repo.get!(Post, id) |> Repo.preload([:author, :edited_by])
 
   @doc """
   Creates a post.
@@ -79,11 +59,36 @@ defmodule PhxBb.Posts do
   """
   def create_post(attrs \\ %{}) do
     now = NaiveDateTime.utc_now()
-    attrs = Map.merge(attrs, %{view_count: 0, reply_count: 0, last_reply_at: now})
+    user_id = attrs.author_id
+    topic_id = attrs.topic_id
+    # Including board_id in attrs is optional, but saves a DB hit when included
+    board_id =
+      case attrs[:board_id] do
+        nil -> Repo.get!(Topic, topic_id) |> Map.fetch!(:board_id)
+        id -> id
+      end
 
-    %Post{}
-    |> Post.changeset(attrs)
-    |> Repo.insert()
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:post, Post.changeset(%Post{}, attrs))
+    |> Ecto.Multi.update_all(:board, from(Board, where: [id: ^board_id]),
+      inc: [post_count: 1],
+      set: [recent_topic_id: topic_id, recent_user_id: user_id, updated_at: now]
+    )
+    |> Ecto.Multi.update_all(:topic, from(Topic, where: [id: ^topic_id]),
+      inc: [post_count: 1],
+      set: [recent_user_id: user_id, last_post_at: now]
+    )
+    |> Ecto.Multi.update_all(:user, from(User, where: [id: ^user_id]), inc: [post_count: +1])
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{post: post}} ->
+        post = PhxBb.Repo.preload(post, [:author, :edited_by])
+        Phoenix.PubSub.broadcast(PhxBb.PubSub, "topic:#{topic_id}", {:update_post_list, post})
+        {:ok, post}
+
+      {:error, operation, value, changes} ->
+        {:error, operation, value, changes}
+    end
   end
 
   @doc """
@@ -102,45 +107,21 @@ defmodule PhxBb.Posts do
     post
     |> Post.changeset(attrs)
     |> Repo.update()
-  end
+    |> case do
+      {:ok, post} ->
+        post = PhxBb.Repo.preload(post, [:author, :edited_by], force: true)
 
-  def viewed(post_id) do
-    from(p in Post, update: [inc: [view_count: 1]], where: p.id == ^post_id)
-    |> Repo.update_all([])
-  end
+        Phoenix.PubSub.broadcast(
+          PhxBb.PubSub,
+          "topic:#{post.topic_id}",
+          {:update_post_list, post}
+        )
 
-  def added_reply(post_id, user_id) do
-    now = NaiveDateTime.utc_now()
+        {:ok, post}
 
-    from(p in Post,
-      update: [inc: [reply_count: 1], set: [last_user: ^user_id, last_reply_at: ^now]],
-      where: p.id == ^post_id
-    )
-    |> Repo.update_all([])
-  end
-
-  def deleted_reply(post_id) do
-    from(p in Post,
-      update: [inc: [reply_count: -1]],
-      where: p.id == ^post_id
-    )
-    |> Repo.update_all([])
-  end
-
-  def deleted_last_reply(post_id, user_id, time) do
-    from(p in Post,
-      update: [inc: [reply_count: -1], set: [last_user: ^user_id, last_reply_at: ^time]],
-      where: p.id == ^post_id
-    )
-    |> Repo.update_all([])
-  end
-
-  def deleted_only_reply(%Post{id: id, author: author, inserted_at: time}) do
-    from(p in Post,
-      update: [inc: [reply_count: -1], set: [last_user: ^author, last_reply_at: ^time]],
-      where: p.id == ^id
-    )
-    |> Repo.update_all([])
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   @doc """

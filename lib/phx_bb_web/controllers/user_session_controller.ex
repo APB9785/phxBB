@@ -5,7 +5,7 @@ defmodule PhxBbWeb.UserSessionController do
   alias PhxBbWeb.UserAuth
 
   def new(conn, _params) do
-    render(conn, "new.html", error_message: nil)
+    render(conn, "new.html", error_message: nil, page_title: "Login")
   end
 
   def create(conn, %{"user" => user_params}) do
@@ -14,7 +14,8 @@ defmodule PhxBbWeb.UserSessionController do
     if user = Accounts.get_user_by_email_and_password(email, password) do
       UserAuth.log_in_user(conn, user, user_params)
     else
-      render(conn, "new.html", error_message: "Invalid email or password")
+      # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
+      render(conn, "new.html", error_message: "Invalid email or password", page_title: "Login")
     end
   end
 

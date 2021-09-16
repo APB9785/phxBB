@@ -1,0 +1,18 @@
+<div class={users_online_style(@active_user)}>
+  <h2 class="pr-2 text-lg text-gray-200">
+    Users online:
+  </h2>
+  <%= for {user_id, user} <- @users_online do %>
+    <div class={online_user_bubble_style(@active_user)}>
+    <%= if guest?(user_id) do %>
+      <div id={"online-guest#{user_id}"} class="italic">
+        <%= user.name %>
+      </div>
+    <% else %>
+      <div>
+        <%= link_to_user(user.name, user_id, @active_user) %>
+      </div>
+    <% end %>
+    </div>
+  <% end %>
+</div>

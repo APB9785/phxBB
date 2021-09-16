@@ -1,7 +1,6 @@
 defmodule PhxBbWeb.Telemetry do
   @moduledoc """
-  This module defines metrics to provide a view of the system's behavior
-  over time.
+  Telemetry
   """
 
   use Supervisor
@@ -36,11 +35,27 @@ defmodule PhxBbWeb.Telemetry do
       ),
 
       # Database Metrics
-      summary("phx_bb.repo.query.total_time", unit: {:native, :millisecond}),
-      summary("phx_bb.repo.query.decode_time", unit: {:native, :millisecond}),
-      summary("phx_bb.repo.query.query_time", unit: {:native, :millisecond}),
-      summary("phx_bb.repo.query.queue_time", unit: {:native, :millisecond}),
-      summary("phx_bb.repo.query.idle_time", unit: {:native, :millisecond}),
+      summary("phx_bb.repo.query.total_time",
+        unit: {:native, :millisecond},
+        description: "The sum of the other measurements"
+      ),
+      summary("phx_bb.repo.query.decode_time",
+        unit: {:native, :millisecond},
+        description: "The time spent decoding the data received from the database"
+      ),
+      summary("phx_bb.repo.query.query_time",
+        unit: {:native, :millisecond},
+        description: "The time spent executing the query"
+      ),
+      summary("phx_bb.repo.query.queue_time",
+        unit: {:native, :millisecond},
+        description: "The time spent waiting for a database connection"
+      ),
+      summary("phx_bb.repo.query.idle_time",
+        unit: {:native, :millisecond},
+        description:
+          "The time the connection spent waiting before being checked out for the query"
+      ),
 
       # VM Metrics
       summary("vm.memory.total", unit: {:byte, :kilobyte}),

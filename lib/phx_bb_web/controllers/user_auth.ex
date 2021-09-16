@@ -1,7 +1,6 @@
 defmodule PhxBbWeb.UserAuth do
   @moduledoc """
-  This module contains the logic for users logging in and out.  It requires
-  access to the session so it must be handled with a Controller. (for now...)
+  User Auth
   """
 
   import Plug.Conn
@@ -86,7 +85,7 @@ defmodule PhxBbWeb.UserAuth do
     conn
     |> renew_session()
     |> delete_resp_cookie(@remember_me_cookie)
-    |> redirect(to: "/")
+    |> redirect(to: "/forum")
   end
 
   @doc """
@@ -150,5 +149,5 @@ defmodule PhxBbWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: "/"
+  defp signed_in_path(_conn), do: "/forum"
 end
