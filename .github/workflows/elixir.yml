@@ -8,9 +8,7 @@ on:
 
 env:
   MIX_ENV: test
-  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
-  MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:
@@ -20,8 +18,8 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.12.1]
-        otp: [23.3]
+        elixir: [1.12.3]
+        otp: [24.0.6]
 
     services:
       postgres:
@@ -34,7 +32,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
     - uses: actions/checkout@v2
 
@@ -64,11 +61,4 @@ jobs:
       run: mkdir -p /home/runner/work/phxBB/phxBB/_build/test/lib/phx_bb/priv/static/uploads
 
     - name: Run tests
-      run: mix coveralls.json
-      env:
-          DB_PASSWORD: postgres
-          DB_HOST: postgres
-
-    - name: Upload test coverage
-      id: codecov
-      run: bash <(curl -s https://codecov.io/bash)
+      run: mix coveralls.github
