@@ -9,7 +9,7 @@
 ## Features
 
 - Real-time content updates via `Phoenix.PubSub`
-- Upload your own image for a user avatar
+- Upload your own image for a user avatar via AWS S3
 - User authentication with `phx.gen.auth`
 - Live form validations
 - All site navigation (minus login) done via LiveView patching - no page reloads!

@@ -9,6 +9,8 @@ on:
 env:
   MIX_ENV: test
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
   build:
@@ -56,9 +58,6 @@ jobs:
 
     - name: Run Credo
       run: mix credo --strict
-
-    - name: Ensure uploads folder is created
-      run: mkdir -p /home/runner/work/phxBB/phxBB/_build/test/lib/phx_bb/priv/static/uploads
 
     - name: Run tests
       run: mix coveralls.github

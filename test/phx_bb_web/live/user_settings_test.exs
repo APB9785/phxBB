@@ -107,6 +107,7 @@ defmodule PhxBbWeb.UserSettingsTest do
     assert has_element?(view, "#change-user-timezone-form", "did not change")
   end
 
+  @tag :aws
   test "Upload, view, and remove user avatar", %{conn: conn, user: user, board: board} do
     topic = topic_fixture(user, board) |> PhxBb.Repo.preload([:posts])
     [post] = topic.posts
