@@ -9,9 +9,13 @@ defmodule PhxBbWeb.UserSettings do
   alias PhxBb.Accounts.User
   alias PhxBbWeb.StyleHelpers
 
+  @s3_bucket "phxbb-demo-uploads"
+  @region "us-east-2"
+
   def mount(socket) do
     {:ok,
-     assign(socket,
+     socket
+     |> assign(
        title_updated: false,
        timezone_updated: false,
        theme_updated: false,
@@ -19,14 +23,20 @@ defmodule PhxBbWeb.UserSettings do
        email_updated: false,
        avatar_updated: false,
        avatar_removed: false
+     )
+     |> allow_upload(:avatar,
+       accept: ~w(.png .jpeg .jpg),
+       max_entries: 1,
+       max_file_size: 100_000,
+       external: &presign_upload/2
      )}
   end
 
-  def update(%{active_user: user} = assigns, socket) do
+  def update(%{active_user: user} = _assigns, socket) do
     {:ok,
      socket
-     |> assign(assigns)
      |> assign(
+       active_user: user,
        email_changeset: Accounts.change_user_email(user),
        password_changeset: Accounts.change_user_password(user),
        tz_changeset: Accounts.change_user_timezone(user),
@@ -43,6 +53,25 @@ defmodule PhxBbWeb.UserSettings do
     )
 
     {:noreply, assign(socket, confirmation_resent: true)}
+  end
+
+  def handle_event("update_email", params, socket) do
+    user = socket.assigns.active_user
+
+    case Accounts.apply_user_email(user, params["current_password"], params["user"]) do
+      {:ok, applied_user} ->
+        Accounts.deliver_update_email_instructions(
+          applied_user,
+          user.email,
+          &add_confirm_email_param/1
+        )
+
+        changeset = Accounts.change_user_email(user)
+        {:noreply, assign(socket, email_updated: true, email_changeset: changeset)}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, email_changeset: changeset)}
+    end
   end
 
   def handle_event("change_timezone", %{"user" => params}, socket) do
@@ -83,23 +112,36 @@ defmodule PhxBbWeb.UserSettings do
     end
   end
 
+  def handle_event("change_user_theme", %{"user" => params}, socket) do
+    case Accounts.update_user_theme(socket.assigns.active_user, params) do
+      {:ok, user} ->
+        send(self(), {:updated_theme, user})
+        {:noreply, assign(socket, theme_updated: true)}
+
+      {:error, changeset} ->
+        {:noreply, assign(socket, theme_changeset: changeset)}
+    end
+  end
+
   def handle_event("upload_avatar", _params, socket) do
-    case consume_avatars(socket) do
-      [] ->
+    case uploaded_entries(socket, :avatar) do
+      {[], []} ->
         changeset =
           replace_error(socket.assigns.avatar_changeset, :avatar, "no file was selected")
 
         {:noreply, assign(socket, avatar_changeset: changeset)}
 
-      [avatar_link] ->
+      {[entry], []} ->
         user = socket.assigns.active_user
 
-        if user.avatar do
-          path = Application.app_dir(:phx_bb, "priv/static") <> user.avatar
-          File.rm(path)
-        end
+        # Delete previous avatar
+        if user.avatar, do: s3_delete_avatar(user.avatar)
+
+        avatar_link = Path.join(s3_url(), filename(entry))
 
         {:ok, user} = Accounts.update_user_avatar(user, %{avatar: avatar_link})
+
+        consume_uploaded_entries(socket, :avatar, fn _, _ -> :ok end)
 
         send(self(), {:updated_user, user})
 
@@ -109,25 +151,6 @@ defmodule PhxBbWeb.UserSettings do
            avatar_updated: true,
            avatar_removed: false
          )}
-    end
-  end
-
-  def handle_event("update_email", params, socket) do
-    user = socket.assigns.active_user
-
-    case Accounts.apply_user_email(user, params["current_password"], params["user"]) do
-      {:ok, applied_user} ->
-        Accounts.deliver_update_email_instructions(
-          applied_user,
-          user.email,
-          &add_confirm_email_param/1
-        )
-
-        changeset = Accounts.change_user_email(user)
-        {:noreply, assign(socket, email_updated: true, email_changeset: changeset)}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, email_changeset: changeset)}
     end
   end
 
@@ -146,8 +169,9 @@ defmodule PhxBbWeb.UserSettings do
 
   def handle_event("remove_avatar", _params, socket) do
     user = socket.assigns.active_user
-    path = Path.join([:code.priv_dir(:phx_bb), "static", user.avatar])
-    File.rm(path)
+
+    s3_delete_avatar(user.avatar)
+
     {:ok, user} = Accounts.update_user_avatar(user, %{avatar: nil})
 
     send(self(), {:updated_user, user})
@@ -158,17 +182,6 @@ defmodule PhxBbWeb.UserSettings do
        avatar_removed: true,
        avatar_updated: false
      )}
-  end
-
-  def handle_event("change_user_theme", %{"user" => params}, socket) do
-    case Accounts.update_user_theme(socket.assigns.active_user, params) do
-      {:ok, user} ->
-        send(self(), {:updated_theme, user})
-        {:noreply, assign(socket, theme_updated: true)}
-
-      {:error, changeset} ->
-        {:noreply, assign(socket, theme_changeset: changeset)}
-    end
   end
 
   def handle_event("clear_flash", %{"flash" => message}, socket) do
@@ -185,13 +198,41 @@ defmodule PhxBbWeb.UserSettings do
 
   # Helpers
 
-  defp consume_avatars(socket) do
-    consume_uploaded_entries(socket, :avatar, fn %{path: path}, entry ->
-      name = filename(entry)
-      dest = Path.join([:code.priv_dir(:phx_bb), "static", "uploads", name])
-      File.cp!(path, dest)
-      Routes.static_path(socket, "/uploads/#{name}")
-    end)
+  defp s3_url, do: "http://#{@s3_bucket}.s3.#{@region}.amazonaws.com"
+
+  defp presign_upload(entry, socket) do
+    uploads = socket.assigns.uploads
+    key = filename(entry)
+
+    config = %{
+      region: @region,
+      access_key_id: System.fetch_env!("AWS_ACCESS_KEY_ID"),
+      secret_access_key: System.fetch_env!("AWS_SECRET_ACCESS_KEY")
+    }
+
+    {:ok, fields} =
+      PhxBb.SimpleS3Upload.sign_form_upload(config, @s3_bucket,
+        key: key,
+        content_type: entry.client_type,
+        max_file_size: uploads.avatar.max_file_size,
+        expires_in: :timer.hours(1)
+      )
+
+    meta = %{
+      uploader: "S3",
+      key: key,
+      url: s3_url(),
+      fields: fields
+    }
+
+    {:ok, meta, socket}
+  end
+
+  def s3_delete_avatar(avatar_url) do
+    [_, filename] = String.split(avatar_url, ".com/")
+
+    ExAws.S3.delete_object(@s3_bucket, filename)
+    |> ExAws.request!()
   end
 
   defp display_avatar_error({:avatar, {error, _}}), do: error

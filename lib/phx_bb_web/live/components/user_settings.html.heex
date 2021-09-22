@@ -142,7 +142,7 @@
 
     <!-- Current avatar display -->
     <div class="w-32">
-      <%= img_tag @active_user.avatar, class: "max-h-40 w-full object-fill pb-4" %>
+      <img src={@active_user.avatar} class="max-h-40 w-full object-fill pb-4">
     </div>
     <%= if @active_user.avatar do %>
       <button id="remove-avatar-link"

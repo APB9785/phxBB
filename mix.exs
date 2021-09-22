@@ -61,7 +61,11 @@ defmodule PhxBb.MixProject do
       {:tzdata, github: "lau/tzdata"},
       {:phoenix_html_sanitizer, github: "APB9785/phoenix_html_sanitizer"},
       {:earmark, "~> 1.4"},
-      {:excoveralls, "~> 0.14", only: :test}
+      {:excoveralls, "~> 0.14", only: :test},
+      {:ex_aws, "~> 2.2"},
+      {:ex_aws_s3, github: "ex-aws/ex_aws_s3"},
+      {:hackney, "~> 1.17"},
+      {:sweet_xml, "~> 0.7.1"}
     ]
   end
 

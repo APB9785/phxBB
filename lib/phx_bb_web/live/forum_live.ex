@@ -14,43 +14,39 @@ defmodule PhxBbWeb.ForumLive do
   @presence "phx_bb:presence"
 
   def mount(_params, session, socket) do
-    case Accounts.get_user_by_session_token(session["user_token"]) do
-      nil ->
-        # User is logged out
-        if connected?(socket) do
-          Presence.track(self(), @presence, guest_id(), %{name: "guest"})
-          Phoenix.PubSub.subscribe(PhxBb.PubSub, @presence)
-        end
+    socket =
+      case Accounts.get_user_by_session_token(session["user_token"]) do
+        nil ->
+          # User is logged out
+          if connected?(socket) do
+            Presence.track(self(), @presence, guest_id(), %{name: "guest"})
+            Phoenix.PubSub.subscribe(PhxBb.PubSub, @presence)
+          end
 
-        {:ok,
-         socket
-         |> assign(active_user: nil)
-         |> assign(bg_color: StyleHelpers.get_default_background())
-         |> assign(users_online: %{})
-         |> assign(active_subscription: nil)
-         |> handle_joins(Presence.list(@presence)), temporary_assigns: [post_list: []]}
+          socket
+          |> assign(active_user: nil)
+          |> assign(bg_color: StyleHelpers.get_default_background())
+          |> assign(users_online: %{})
+          |> assign(active_subscription: nil)
+          |> handle_joins(Presence.list(@presence))
 
-      user ->
-        # User is logged in
-        if connected?(socket) do
-          Presence.track(self(), @presence, user.id, %{name: user.username})
-          Phoenix.PubSub.subscribe(PhxBb.PubSub, @presence)
-          Phoenix.PubSub.subscribe(PhxBb.PubSub, "user:#{user.id}")
-        end
+        user ->
+          # User is logged in
+          if connected?(socket) do
+            Presence.track(self(), @presence, user.id, %{name: user.username})
+            Phoenix.PubSub.subscribe(PhxBb.PubSub, @presence)
+            Phoenix.PubSub.subscribe(PhxBb.PubSub, "user:#{user.id}")
+          end
 
-        {:ok,
-         socket
-         |> assign(active_user: user)
-         |> assign(bg_color: StyleHelpers.get_theme_background(user))
-         |> assign(users_online: %{})
-         |> assign(active_subscription: nil)
-         |> handle_joins(Presence.list(@presence))
-         |> allow_upload(:avatar,
-           accept: ~w(.png .jpeg .jpg),
-           max_entries: 1,
-           max_file_size: 100_000
-         ), temporary_assigns: [post_list: []]}
-    end
+          socket
+          |> assign(active_user: user)
+          |> assign(bg_color: StyleHelpers.get_theme_background(user))
+          |> assign(users_online: %{})
+          |> assign(active_subscription: nil)
+          |> handle_joins(Presence.list(@presence))
+      end
+
+    {:ok, socket, temporary_assigns: [post_list: []]}
   end
 
   def handle_params(%{"create_topic" => "1", "board" => _}, _url, socket)

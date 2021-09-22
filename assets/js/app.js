@@ -26,43 +26,13 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
-let Hooks = {}
-
-Hooks.ScrollToTop = {
-	mounted() {
-		this.el.addEventListener("click", e => {
-			window.scrollTo(0, 0);
-		})
-	}
-}
-
-Hooks.BackgroundColorChange = {
-	value() {
-		return this.el.dataset.value;
-	},
-	mounted() {
-		document.body.style.background = this.value();
-	},
-	updated() {
-		document.body.style.background = this.value();
-	}
-}
-
-Hooks.InfiniteScroll = {
-	mounted() {
-		const observer = new IntersectionObserver(entries => {
-			const entry = entries[0];
-			if (entry.isIntersecting) {
-				this.pushEventTo(this.el, "load_more");
-			}
-		});
-		observer.observe(this.el);
-	}
-}
+import Hooks from "./hooks";
+import Uploaders from "./uploaders";
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   hooks: Hooks,
+	uploaders: Uploaders,
   params: {_csrf_token: csrfToken}
 })
 
