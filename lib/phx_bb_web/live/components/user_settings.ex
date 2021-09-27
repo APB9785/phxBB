@@ -198,7 +198,7 @@ defmodule PhxBbWeb.UserSettings do
 
   # Helpers
 
-  defp s3_url, do: "http://#{@s3_bucket}.s3.#{@region}.amazonaws.com"
+  defp s3_url, do: "//#{@s3_bucket}.s3.#{@region}.amazonaws.com"
 
   defp presign_upload(entry, socket) do
     uploads = socket.assigns.uploads

@@ -4,7 +4,7 @@ defmodule PhxBb.MixProject do
   def project do
     [
       app: :phx_bb,
-      version: "0.7.0",
+      version: "0.7.1",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:gettext] ++ Mix.compilers(),

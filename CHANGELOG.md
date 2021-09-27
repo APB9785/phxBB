@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.7.1] - 2021-09-27
+
+### Fixed
+
+- Avatar uploads now work properly over HTTPS
+
 ## [0.7] - 2021-09-27
 
 ### Added
@@ -181,6 +187,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - User cache for reduced DB queries
 - Page title updates to reflect current view
 
+[0.7.1]: https://github.com/APB9785/phxBB/compare/0.7...0.7.1
 [0.7]: https://github.com/APB9785/phxBB/compare/0.6...0.7
 [0.6]: https://github.com/APB9785/phxBB/compare/0.5.2...0.6
 [0.5.2]: https://github.com/APB9785/phxBB/compare/0.5.1...0.5.2
