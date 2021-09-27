@@ -17,12 +17,9 @@
 - See who's online with `Phoenix.Presence`
 - Full test suite
 
-## What's New - v0.6
+## What's New - v0.7
 
-- Upgraded to use Phoenix 1.6 and LiveView 0.16
-- Major code refactoring for performance and readability
-- Significantly reduced the amount of data held in LiveView assigns
-- "Infinite scroll" for topics list
+- User avatars hosted on AWS S3
 
 See [CHANGELOG.md](https://github.com/APB9785/phxBB/blob/master/CHANGELOG.md) for the full list of changes
 
