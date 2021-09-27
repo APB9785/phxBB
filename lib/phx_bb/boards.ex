@@ -39,9 +39,11 @@ defmodule PhxBb.Boards do
       ** (Ecto.NoResultsError)
 
   """
-  def get_board!(id), do: Repo.get!(Board, id) |> Repo.preload([:recent_topic, :recent_user])
+  def get_board!(id),
+    do: Repo.get!(Board, id) |> Repo.preload([:recent_topic, :recent_user])
 
-  def get_board(id), do: Repo.get(Board, id) |> Repo.preload([:recent_topic, :recent_user])
+  def get_board(id),
+    do: Repo.get(Board, id) |> Repo.preload([:recent_topic, :recent_user])
 
   @doc """
   Creates a board.

@@ -25,10 +25,10 @@ config :phx_bb, PhxBbWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :phx_bb, PhxBb.Mailer, adapter: Swoosh.Adapters.Local
-
-# Swoosh API client is needed for adapters other than SMTP.
-config :swoosh, :api_client, false
+config :phx_bb, PhxBb.Mailer,
+  adapter: Swoosh.Adapters.Mailjet,
+  api_key: {:system, "MAILJET_API_KEY"},
+  secret: {:system, "MAILJET_SECRET_KEY"}
 
 # Configure esbuild (the version is required)
 config :esbuild,

@@ -25,6 +25,8 @@ config :phx_bb, PhxBbWeb.Endpoint,
 # In test we don't send emails.
 config :phx_bb, PhxBb.Mailer, adapter: Swoosh.Adapters.Test
 
+config :swoosh, :api_client, false
+
 # Print only warnings and errors during test
 config :logger, level: :warn
 

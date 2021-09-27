@@ -43,7 +43,8 @@ defmodule PhxBb.Posts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_post!(id), do: Repo.get!(Post, id) |> Repo.preload([:author, :edited_by])
+  def get_post!(id),
+    do: Repo.get!(Post, id) |> Repo.preload([:author, :edited_by])
 
   @doc """
   Creates a post.
