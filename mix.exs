@@ -66,7 +66,8 @@ defmodule PhxBb.MixProject do
       {:ex_aws_s3, github: "ex-aws/ex_aws_s3"},
       {:hackney, "~> 1.17"},
       {:sweet_xml, "~> 0.7.1"},
-      {:mime, "~> 2.0", override: true}
+      {:mime, "~> 2.0", override: true},
+      {:sobelow, "~> 0.10", only: :dev}
     ]
   end
 

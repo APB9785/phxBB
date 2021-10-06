@@ -8,14 +8,16 @@ defmodule PhxBb.Topics.Topic do
   import Ecto.Changeset
 
   schema "topics" do
-    belongs_to :author, PhxBb.Accounts.User
-    field :title, :string
-    belongs_to :recent_user, PhxBb.Accounts.User
     field :last_post_at, :naive_datetime
-    field :view_count, :integer
     field :post_count, :integer
+    field :title, :string
+    field :view_count, :integer
+
     has_many :posts, PhxBb.Posts.Post, on_delete: :delete_all
+
+    belongs_to :author, PhxBb.Accounts.User
     belongs_to :board, PhxBb.Boards.Board
+    belongs_to :recent_user, PhxBb.Accounts.User
 
     timestamps()
   end

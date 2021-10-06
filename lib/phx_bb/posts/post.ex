@@ -8,9 +8,10 @@ defmodule PhxBb.Posts.Post do
   import Ecto.Changeset
 
   schema "posts" do
+    field :body, :string
+
     belongs_to :author, PhxBb.Accounts.User
     belongs_to :edited_by, PhxBb.Accounts.User
-    field :body, :string
     belongs_to :topic, PhxBb.Topics.Topic
 
     timestamps()

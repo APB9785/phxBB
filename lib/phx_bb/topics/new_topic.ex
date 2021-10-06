@@ -7,14 +7,14 @@ defmodule PhxBb.Topics.NewTopic do
   import Ecto.Changeset
 
   embedded_schema do
-    field :title, :string
     field :body, :string
+    field :title, :string
   end
 
   def changeset(new_topic, attrs) do
     new_topic
-    |> cast(attrs, [:title, :body])
-    |> validate_required([:title, :body])
+    |> cast(attrs, [:body, :title])
+    |> validate_required([:body, :title])
     |> validate_length(:title, min: 3)
     |> validate_length(:body, min: 3)
   end

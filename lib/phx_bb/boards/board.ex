@@ -10,10 +10,12 @@ defmodule PhxBb.Boards.Board do
   schema "boards" do
     field :description, :string
     field :name, :string
-    field :topic_count, :integer
     field :post_count, :integer
+    field :topic_count, :integer
+
     belongs_to :recent_topic, PhxBb.Topics.Topic
     belongs_to :recent_user, PhxBb.Accounts.User
+
     has_many :topics, PhxBb.Topics.Topic, on_delete: :delete_all
 
     timestamps()
