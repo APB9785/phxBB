@@ -1,4 +1,8 @@
 defmodule PhxBb.SeenTopics.SeenTopic do
+  @moduledoc """
+  Schema for SeenTopic.
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 
