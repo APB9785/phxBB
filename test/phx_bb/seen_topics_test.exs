@@ -16,11 +16,13 @@ defmodule PhxBb.SeenTopicsTest do
   end
 
   describe "seen_topics" do
-    @invalid_attrs %{seen_at: nil}
+    @invalid_attrs %{time: nil}
 
-    test "list_seen_topics/0 returns all seen_topics", %{user: user, topic: topic} do
-      seen_topic = seen_topic_fixture(user, topic)
-      assert SeenTopics.list_seen_topics() == [seen_topic]
+    test "get_seen_topic/2 returns the seen_topic", %{user: user, topic: topic} do
+      assert %SeenTopic{} = seen_topic = SeenTopics.get_seen_topic(user.id, topic.id)
+      assert seen_topic.topic_id == topic.id
+      assert seen_topic.user_id == user.id
+      assert %NaiveDateTime{} = seen_topic.time
     end
 
     test "get_seen_topic!/1 returns the seen_topic with given id", %{user: user, topic: topic} do
@@ -29,10 +31,10 @@ defmodule PhxBb.SeenTopicsTest do
     end
 
     test "create_seen_topic/1 with valid data creates a seen_topic", %{user: user, topic: topic} do
-      valid_attrs = %{user_id: user.id, topic_id: topic.id, seen_at: ~N[2021-10-05 20:05:00]}
+      valid_attrs = %{user_id: user.id, topic_id: topic.id, time: ~N[2021-10-05 20:05:00]}
 
       assert {:ok, %SeenTopic{} = seen_topic} = SeenTopics.create_seen_topic(valid_attrs)
-      assert seen_topic.seen_at == ~N[2021-10-05 20:05:00]
+      assert seen_topic.time == ~N[2021-10-05 20:05:00]
     end
 
     test "create_seen_topic/1 with invalid data returns error changeset" do
@@ -41,12 +43,12 @@ defmodule PhxBb.SeenTopicsTest do
 
     test "update_seen_topic/2 with valid data updates the seen_topic", %{user: user, topic: topic} do
       seen_topic = seen_topic_fixture(user, topic)
-      update_attrs = %{seen_at: ~N[2021-10-06 20:05:00]}
+      update_attrs = %{time: ~N[2021-10-06 20:05:00]}
 
       assert {:ok, %SeenTopic{} = seen_topic} =
                SeenTopics.update_seen_topic(seen_topic, update_attrs)
 
-      assert seen_topic.seen_at == ~N[2021-10-06 20:05:00]
+      assert seen_topic.time == ~N[2021-10-06 20:05:00]
     end
 
     test "update_seen_topic/2 with invalid data returns error changeset", %{

@@ -5,9 +5,12 @@ defmodule PhxBbWeb.ForumLive do
 
   use PhxBbWeb, :live_view
 
-  alias PhxBb.{Accounts, Boards, Topics}
+  alias PhxBb.Accounts
   alias PhxBb.Accounts.User
+  alias PhxBb.Boards
   alias PhxBb.Boards.Board
+  alias PhxBb.SeenTopics
+  alias PhxBb.Topics
   alias PhxBb.Topics.Topic
   alias PhxBbWeb.{Endpoint, Presence, StyleHelpers}
 
@@ -71,6 +74,9 @@ defmodule PhxBbWeb.ForumLive do
         {:noreply, assign_invalid(socket)}
 
       %Topic{} = topic ->
+        user = socket.assigns.active_user
+        user_id = if user, do: user.id, else: nil
+        SeenTopics.seen_now(user_id, topic.id)
         Topics.increment_view_count(topic.id)
         posts = PhxBb.Posts.list_posts(topic.id)
 

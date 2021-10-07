@@ -4,21 +4,28 @@ defmodule PhxBb.SeenTopics do
   """
 
   import Ecto.Query, warn: false
-  alias PhxBb.Repo
 
+  alias PhxBb.Repo
   alias PhxBb.SeenTopics.SeenTopic
 
   @doc """
-  Returns the list of seen_topics.
+  Returns the SeenTopic struct for the given User and Topic, if it exists.
+  Otherwise returns nil.
 
   ## Examples
 
-      iex> list_seen_topics()
-      [%SeenTopic{}, ...]
+      iex> get_seen_topic(%User{}, %Topic{})
+      %SeenTopic{}
+
+      iex> get_seen_topic(%User{}, %Topic{id: "bad_id"})
+      nil
 
   """
-  def list_seen_topics do
-    Repo.all(SeenTopic)
+  def get_seen_topic(user_id, topic_id) do
+    Repo.one(
+      from SeenTopic,
+        where: [user_id: ^user_id, topic_id: ^topic_id]
+    )
   end
 
   @doc """
@@ -100,5 +107,32 @@ defmodule PhxBb.SeenTopics do
   """
   def change_seen_topic(%SeenTopic{} = seen_topic, attrs \\ %{}) do
     SeenTopic.changeset(seen_topic, attrs)
+  end
+
+  @doc """
+  Updates the database to record that the User with given user_id has just seen
+  the Topic with given topic_id. Has no effect if the user_id is nil.
+
+  ## Examples
+
+      iex> seen_now(123, 456)
+      {:ok, %SeenTopic{}}
+
+      iex> seen_now(nil, 456)
+      :ok
+
+  """
+  def seen_now(nil, _topic), do: :ok
+
+  def seen_now(user_id, topic_id) do
+    now = NaiveDateTime.utc_now()
+
+    case get_seen_topic(user_id, topic_id) do
+      %SeenTopic{} = seen_topic ->
+        update_seen_topic(seen_topic, %{time: now})
+
+      nil ->
+        create_seen_topic(%{user_id: user_id, topic_id: topic_id, time: now})
+    end
   end
 end

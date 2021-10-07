@@ -1,8 +1,3 @@
-<script>
-  const bgColor = "<%= StyleHelpers.get_default_background() %>";
-  document.body.style.backgroundColor = bgColor;
-</script>
-
 <div class="px-6 mt-8 mx-auto w-full max-w-md" id="login-page">
 
   <.form let={f} for={@conn} action={Routes.user_session_path(@conn, :create)} as={:user}

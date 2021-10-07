@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.8] - 2021-10-07
+
+### Added
+
+- Links to topics will now appear greyed after a user has read the topic
+
+### Security
+
+- Enabled HTTP Content Security Policy
+
 ## [0.7.1] - 2021-09-27
 
 ### Fixed
@@ -187,6 +197,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - User cache for reduced DB queries
 - Page title updates to reflect current view
 
+[0.8]: https://github.com/APB9785/phxBB/compare/0.7.1...0.8
 [0.7.1]: https://github.com/APB9785/phxBB/compare/0.7...0.7.1
 [0.7]: https://github.com/APB9785/phxBB/compare/0.6...0.7
 [0.6]: https://github.com/APB9785/phxBB/compare/0.5.2...0.6

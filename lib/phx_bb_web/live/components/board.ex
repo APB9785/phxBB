@@ -6,6 +6,7 @@ defmodule PhxBbWeb.Board do
   use PhxBbWeb, :live_component
 
   alias PhxBb.Accounts.User
+  alias PhxBb.Topics
   alias PhxBb.Topics.Topic
   alias PhxBbWeb.{Endpoint, ForumLive, StyleHelpers, Timestamps}
 
@@ -14,18 +15,18 @@ defmodule PhxBbWeb.Board do
   end
 
   def update(assigns, socket) do
-    topics = PhxBb.Topics.list_topics(assigns.active_board.id, socket.assigns.page)
+    board = assigns.active_board
+    user = assigns.active_user
+    page = socket.assigns.page
+    topics = PhxBb.Topics.list_topics(board.id, page, user)
 
-    {:ok,
-     socket
-     |> assign(assigns)
-     |> assign(topic_list: topics)}
+    {:ok, assign(socket, topic_list: topics, active_user: user, active_board: board)}
   end
 
-  def link_to_topic(%Topic{title: title, id: id}, active_user) do
+  def link_to_topic(%Topic{title: title, id: id} = topic, active_user) do
     live_patch(title,
       to: Routes.live_path(Endpoint, ForumLive, topic: id),
-      class: StyleHelpers.link_style(active_user),
+      class: topic_link_style(active_user, topic),
       phx_hook: "ScrollToTop",
       id: "topic-listing-link-#{id}"
     )
@@ -59,7 +60,9 @@ defmodule PhxBbWeb.Board do
 
   def handle_event("load_more", _params, socket) do
     new_page = socket.assigns.page + 1
-    topics = PhxBb.Topics.list_topics(socket.assigns.active_board.id, new_page)
+    board = socket.assigns.active_board
+    user = socket.assigns.active_user
+    topics = PhxBb.Topics.list_topics(board.id, new_page, user)
     {:noreply, assign(socket, page: new_page, topic_list: topics)}
   end
 
@@ -89,5 +92,11 @@ defmodule PhxBbWeb.Board do
       "md:flex md:m-0 md:bg-transparent md:rounded-none ",
       StyleHelpers.content_bg_theme(user)
     ]
+  end
+
+  def topic_link_style(user, topic) do
+    greyed = if Topics.up_to_date?(topic), do: " text-gray-600", else: ""
+
+    [StyleHelpers.link_style(user), greyed]
   end
 end

@@ -4,6 +4,7 @@ defmodule PhxBb.TopicsTest do
   import PhxBb.AccountsFixtures
   import PhxBb.ForumFixtures
 
+  alias PhxBb.SeenTopics.SeenTopic
   alias PhxBb.Topics
   alias PhxBb.Topics.Topic
 
@@ -19,9 +20,11 @@ defmodule PhxBb.TopicsTest do
   end
 
   describe "topics" do
-    test "list_topics/2 returns all topics in a board", %{board: board, topic: topic} do
-      topic = PhxBb.Repo.preload(topic, [:author, :recent_user])
-      assert Topics.list_topics(board.id, 1) == [topic]
+    test "list_topics/3 returns all topics in a board", %{user: user, board: board, topic: topic} do
+      seen_query = from(s in SeenTopic, where: s.user_id == ^user.id)
+      topic = PhxBb.Repo.preload(topic, author: [], recent_user: [], seen_at: seen_query)
+
+      assert Topics.list_topics(board.id, 1, user) == [topic]
     end
 
     test "get_topic!/1 returns the topic with given id", %{topic: topic} do

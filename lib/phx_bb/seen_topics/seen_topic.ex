@@ -7,7 +7,7 @@ defmodule PhxBb.SeenTopics.SeenTopic do
   import Ecto.Changeset
 
   schema "seen_topics" do
-    field :seen_at, :naive_datetime
+    field :time, :naive_datetime
 
     belongs_to :topic, PhxBb.Topics.Topic
     belongs_to :user, PhxBb.Accounts.User
@@ -16,7 +16,7 @@ defmodule PhxBb.SeenTopics.SeenTopic do
   @doc false
   def changeset(seen_topic, attrs) do
     seen_topic
-    |> cast(attrs, [:seen_at, :topic_id, :user_id])
-    |> validate_required([:seen_at, :topic_id, :user_id])
+    |> cast(attrs, [:time, :topic_id, :user_id])
+    |> validate_required([:time, :topic_id, :user_id])
   end
 end

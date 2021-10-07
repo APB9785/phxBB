@@ -13,7 +13,8 @@ defmodule PhxBb.Topics.Topic do
     field :title, :string
     field :view_count, :integer
 
-    has_many :posts, PhxBb.Posts.Post, on_delete: :delete_all
+    has_many :posts, PhxBb.Posts.Post
+    has_many :seen_at, PhxBb.SeenTopics.SeenTopic
 
     belongs_to :author, PhxBb.Accounts.User
     belongs_to :board, PhxBb.Boards.Board

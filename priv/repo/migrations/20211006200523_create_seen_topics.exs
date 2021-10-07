@@ -3,7 +3,7 @@ defmodule PhxBb.Repo.Migrations.CreateSeenTopics do
 
   def change do
     create table(:seen_topics) do
-      add :seen_at, :naive_datetime
+      add :time, :naive_datetime
       add :user_id, references(:users, on_delete: :delete_all)
       add :topic_id, references(:topics, on_delete: :delete_all)
     end

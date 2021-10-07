@@ -9,6 +9,7 @@ defmodule PhxBb.Posts do
   alias PhxBb.Boards.Board
   alias PhxBb.Posts.Post
   alias PhxBb.Repo
+  alias PhxBb.SeenTopics
   alias PhxBb.Topics.Topic
 
   @doc """
@@ -79,6 +80,7 @@ defmodule PhxBb.Posts do
       inc: [post_count: 1],
       set: [recent_user_id: user_id, last_post_at: now]
     )
+    |> Ecto.Multi.run(:seen, fn _, _ -> SeenTopics.seen_now(user_id, topic_id) end)
     |> Ecto.Multi.update_all(:user, from(User, where: [id: ^user_id]), inc: [post_count: +1])
     |> Repo.transaction()
     |> case do

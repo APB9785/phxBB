@@ -1,8 +1,3 @@
-<script>
-  const bgColor = "<%= StyleHelpers.get_default_background() %>";
-  document.body.style.backgroundColor = bgColor;
-</script>
-
 <div class="px-6 mt-8 mx-auto w-full max-w-md">
 
   <.form let={f} for={:user} action={Routes.user_reset_password_path(@conn, :create)}

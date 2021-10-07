@@ -10,16 +10,17 @@
 
 - Real-time content updates via `Phoenix.PubSub`
 - Upload your own image for a user avatar via AWS S3
-- User authentication with `phx.gen.auth`
+- User & administrator authentication
+- Email verification via `Swoosh` + `Mailjet`
 - Live form validations
 - All site navigation (minus login) done via LiveView patching - no page reloads!
 - Markdown parsing in posts with `Earmark` + `PhoenixHtmlSanitizer`
 - See who's online with `Phoenix.Presence`
 - Full test suite
 
-## What's New - v0.7
+## What's New - v0.8
 
-- User avatars hosted on AWS S3
+- Topic listing now distinguishes between read and unread topics
 
 See [CHANGELOG.md](https://github.com/APB9785/phxBB/blob/master/CHANGELOG.md) for the full list of changes
 
@@ -34,6 +35,7 @@ To start a local phxBB server:
   * Install app dependencies with `mix deps.get`
   * Create and migrate your database with `mix ecto.setup`
   * Install Node.js dependencies with `npm install` inside the `assets` directory
+  * Set environment variables `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `MAILJET_API_KEY`, and `MAILJET_SECRET_KEY`
   * Start Phoenix endpoint with `mix phx.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.

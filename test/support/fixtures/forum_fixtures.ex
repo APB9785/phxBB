@@ -32,8 +32,8 @@ defmodule PhxBb.ForumFixtures do
     board
   end
 
-  def seen_topic_fixture(user, topic, seen_at \\ ~N[2021-10-05 20:05:00]) do
-    attrs = %{user_id: user.id, topic_id: topic.id, seen_at: seen_at}
+  def seen_topic_fixture(user, topic, time \\ ~N[2021-10-05 20:05:00]) do
+    attrs = %{user_id: user.id, topic_id: topic.id, time: time}
     {:ok, seen_topic} = PhxBb.SeenTopics.create_seen_topic(attrs)
 
     seen_topic

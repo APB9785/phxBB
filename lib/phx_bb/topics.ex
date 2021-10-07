@@ -9,6 +9,8 @@ defmodule PhxBb.Topics do
   alias PhxBb.Boards.Board
   alias PhxBb.Posts.Post
   alias PhxBb.Repo
+  alias PhxBb.SeenTopics
+  alias PhxBb.SeenTopics.SeenTopic
   alias PhxBb.Topics.{NewTopic, Topic}
 
   @doc """
@@ -20,16 +22,21 @@ defmodule PhxBb.Topics do
       [%Topic{}, ...]
 
   """
-  def list_topics(board_id, page) do
+  def list_topics(board_id, page, user) do
+    seen_query = seen_query(user)
+
     Repo.all(
       from Topic,
         where: [board_id: ^board_id],
         offset: ^((page - 1) * 5),
         limit: 5,
         order_by: [{:desc, :last_post_at}],
-        preload: [:author, :recent_user]
+        preload: [author: [], recent_user: [], seen_at: ^seen_query]
     )
   end
+
+  defp seen_query(nil), do: from(s in SeenTopic, where: is_nil(s.user_id))
+  defp seen_query(user), do: from(s in SeenTopic, where: s.user_id == ^user.id)
 
   @doc """
   Gets a single topic.
@@ -99,6 +106,9 @@ defmodule PhxBb.Topics do
     |> Ecto.Multi.insert(:post, fn %{topic: topic} ->
       Post.changeset(%Post{}, %{body: body, author_id: user_id, topic_id: topic.id})
     end)
+    |> Ecto.Multi.run(:seen, fn _repo, %{topic: topic} ->
+      SeenTopics.seen_now(user_id, topic.id)
+    end)
     |> Ecto.Multi.update_all(:user, from(User, where: [id: ^user_id]), inc: [post_count: +1])
     |> Repo.transaction()
     |> case do
@@ -167,5 +177,11 @@ defmodule PhxBb.Topics do
 
   def new_topic_changeset(%NewTopic{} = new_topic, attrs \\ %{}) do
     NewTopic.changeset(new_topic, attrs)
+  end
+
+  def up_to_date?(%Topic{seen_at: []}), do: false
+
+  def up_to_date?(%Topic{seen_at: [%SeenTopic{time: seen}], last_post_at: latest}) do
+    NaiveDateTime.compare(seen, latest) != :lt
   end
 end
