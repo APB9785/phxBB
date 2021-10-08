@@ -3,13 +3,15 @@ defmodule PhxBbWeb.Router do
 
   import PhxBbWeb.UserAuth
 
+  @csp "default-src 'self';img-src phxbb-demo-uploads.s3.us-east-2.amazonaws.com blob: 'self';connect-src 'self' phxbb-demo-uploads.s3.us-east-2.amazonaws.com;style-src 'self' 'unsafe-inline'"
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, {PhxBbWeb.LayoutView, :root}
     plug :protect_from_forgery
-    plug :put_secure_browser_headers, %{"content-security-policy" => "default-src 'self'"}
+    plug :put_secure_browser_headers, %{"content-security-policy" => @csp}
     plug :fetch_current_user
   end
 
