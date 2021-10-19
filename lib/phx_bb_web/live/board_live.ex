@@ -47,7 +47,7 @@ defmodule PhxBbWeb.BoardLive do
   end
 
   def handle_info({:new_topic, topic}, %{assigns: %{active_user: user}} = socket) do
-    if user[:id] == topic.author.id do
+    if is_nil(user) or user.id == topic.author.id do
       {:noreply, socket}
     else
       topic = Topics.load_seen_at(topic, user)

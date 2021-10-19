@@ -19,7 +19,8 @@
   <%= if @topic_queue == [] do %>
     <div class="h-12"></div>
   <% else %>
-    <div class="h-12 pl-8 m-1 md:m-0 rounded-lg bg-blue-200 flex items-center" phx-click="update">
+    <div class="h-12 pl-8 m-1 md:m-0 rounded-lg bg-blue-200 flex items-center cursor-pointer"
+         phx-click="update">
       There are new updates - click here to load them
     </div>
   <% end %>
