@@ -47,8 +47,7 @@ defmodule PhxBbWeb.BoardTest do
     refute render(view) =~ "Test-0"
 
     # Simulate the InfiniteScroll hook
-    target = "#board-#{board.id}-component"
-    view |> with_target(target) |> render_hook("load_more")
+    view |> find_live_child("board-liveview") |> render_hook("load_more")
 
     # Now all 10 topics should be visible
     assert render(view) =~ "Test-0"

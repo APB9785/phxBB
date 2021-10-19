@@ -20,9 +20,10 @@
           users_online: @users_online %>
 
   <% :board -> %>
-  <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-     > <%= link_to_index(@active_user) %>
-  </div>
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+       > <%= link_to_index(@active_user) %>
+    </div>
+
     <%= live_render @socket, PhxBbWeb.BoardLive,
           id: "board-liveview",
           session: %{

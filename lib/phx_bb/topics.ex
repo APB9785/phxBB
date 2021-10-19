@@ -35,6 +35,10 @@ defmodule PhxBb.Topics do
     )
   end
 
+  def load_seen_at(%Topic{} = topic, nil) do
+    Map.put(topic, :seen_at, [])
+  end
+
   def load_seen_at(%Topic{} = topic, %User{} = user) do
     seen_query = seen_query(user)
     Repo.preload(topic, seen_at: seen_query)
@@ -63,8 +67,6 @@ defmodule PhxBb.Topics do
       topic -> Repo.preload(topic, [:board, [posts: [:author, :edited_by]]])
     end
   end
-
-  def get_topic!(id), do: Repo.get!(Topic, id)
 
   # def get_title(id) do
   #   Repo.one(

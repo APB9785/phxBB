@@ -60,7 +60,12 @@ defmodule PhxBbWeb.ForumLive do
 
       %Board{} = board ->
         {:noreply,
-         assign(socket, nav: :create_topic, page_title: "Create Topic", active_board: board)}
+         assign(socket,
+           nav: :create_topic,
+           page_title: "Create Topic",
+           active_board: board,
+           child_pid: nil
+         )}
     end
   end
 
@@ -79,7 +84,13 @@ defmodule PhxBbWeb.ForumLive do
         {:noreply,
          socket
          |> resubscribe("topic:" <> topic_id)
-         |> assign(nav: :topic, page_title: topic.title, active_topic: topic, post_list: posts)}
+         |> assign(
+           nav: :topic,
+           page_title: topic.title,
+           active_topic: topic,
+           post_list: posts,
+           child_pid: nil
+         )}
     end
   end
 
@@ -99,7 +110,13 @@ defmodule PhxBbWeb.ForumLive do
         {:noreply, assign_invalid(socket)}
 
       user ->
-        {:noreply, assign(socket, nav: :user_profile, page_title: user.username, view_user: user)}
+        {:noreply,
+         assign(socket,
+           nav: :user_profile,
+           page_title: user.username,
+           view_user: user,
+           child_pid: nil
+         )}
     end
   end
 
@@ -109,13 +126,13 @@ defmodule PhxBbWeb.ForumLive do
         {:noreply, push_redirect(socket, to: "/users/log_in")}
 
       _user ->
-        {:noreply, assign(socket, nav: :settings, page_title: "User Settings")}
+        {:noreply, assign(socket, nav: :settings, page_title: "User Settings", child_pid: nil)}
     end
   end
 
   def handle_params(%{"admin" => "1"}, _url, socket) do
     if is_admin?(socket.assigns.active_user) do
-      {:noreply, assign(socket, nav: :admin, page_title: "Admin Panel")}
+      {:noreply, assign(socket, nav: :admin, page_title: "Admin Panel", child_pid: nil)}
     else
       {:noreply, assign_invalid(socket)}
     end
@@ -123,7 +140,7 @@ defmodule PhxBbWeb.ForumLive do
 
   def handle_params(%{"register" => "1"}, _url, socket) do
     if is_nil(socket.assigns.active_user) do
-      {:noreply, assign(socket, nav: :register, page_title: "Register")}
+      {:noreply, assign(socket, nav: :register, page_title: "Register", child_pid: nil)}
     else
       {:noreply,
        socket
@@ -164,10 +181,14 @@ defmodule PhxBbWeb.ForumLive do
   end
 
   def handle_params(params, _url, socket) when params == %{} do
-    {:noreply, assign(socket, nav: :main, page_title: "Board Index")}
+    {:noreply, assign(socket, nav: :main, page_title: "Board Index", child_pid: nil)}
   end
 
   def handle_params(_params, _url, socket), do: {:noreply, assign_invalid(socket)}
+
+  # This duplicate event gets sent to the parent LV when the InfiniteScroll hook
+  # gets triggered from the child LV.
+  def handle_event("load_more", _params, socket), do: {:noreply, socket}
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
     {:noreply,
@@ -176,11 +197,17 @@ defmodule PhxBbWeb.ForumLive do
      |> handle_joins(diff.joins)}
   end
 
+  def handle_info({:child_pid, pid}, socket) do
+    {:noreply, assign(socket, child_pid: pid)}
+  end
+
   def handle_info({:update_post_list, post}, socket) do
     {:noreply, assign(socket, post_list: [post])}
   end
 
-  def handle_info({:updated_user, user}, socket) do
+  def handle_info({:updated_user, user}, %{assigns: %{child_pid: c_pid}} = socket) do
+    if c_pid, do: send(c_pid, {:updated_user, user})
+
     {:noreply, assign(socket, active_user: user)}
   end
 
@@ -190,7 +217,7 @@ defmodule PhxBbWeb.ForumLive do
   end
 
   def assign_invalid(socket) do
-    assign(socket, nav: :invalid, page_title: "404 Page Not Found")
+    assign(socket, nav: :invalid, page_title: "404 Page Not Found", child_pid: nil)
   end
 
   def assign_defaults(socket) do
@@ -198,6 +225,7 @@ defmodule PhxBbWeb.ForumLive do
     |> assign(users_online: %{})
     |> assign(topic_queue: [])
     |> assign(active_subscription: nil)
+    |> assign(child_pid: nil)
     |> handle_joins(Presence.list(@presence))
   end
 

@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Prompt to fetch new content appears when a new topic is made in the active board
 
+### Changed
+
+- New Topic button moved
+- Boards now display their topics in a child LiveView (instead of LiveComponent)
+
 ## [0.8.1] - 2021-10-08
 
 ### Fixed

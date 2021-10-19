@@ -11,6 +11,8 @@ defmodule PhxBbWeb.BoardLive do
   alias PhxBbWeb.{Endpoint, ForumLive, StyleHelpers, Timestamps}
 
   def mount(_params, session, socket) do
+    if connected?(socket), do: send(socket.parent_pid, {:child_pid, self()})
+
     board = session["active_board"]
     user = session["active_user"]
     page = 1
@@ -45,12 +47,16 @@ defmodule PhxBbWeb.BoardLive do
   end
 
   def handle_info({:new_topic, topic}, %{assigns: %{active_user: user}} = socket) do
-    if user.id == topic.author.id do
+    if user[:id] == topic.author.id do
       {:noreply, socket}
     else
       topic = Topics.load_seen_at(topic, user)
       {:noreply, update(socket, :topic_queue, &[topic | &1])}
     end
+  end
+
+  def handle_info({:updated_user, user}, socket) do
+    {:noreply, assign(socket, active_user: user)}
   end
 
   def link_to_topic(%Topic{title: title, id: id} = topic, active_user) do

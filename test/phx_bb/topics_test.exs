@@ -4,6 +4,7 @@ defmodule PhxBb.TopicsTest do
   import PhxBb.AccountsFixtures
   import PhxBb.ForumFixtures
 
+  alias PhxBb.Boards.Board
   alias PhxBb.SeenTopics.SeenTopic
   alias PhxBb.Topics
   alias PhxBb.Topics.Topic
@@ -27,8 +28,9 @@ defmodule PhxBb.TopicsTest do
       assert Topics.list_topics(board.id, 1, user) == [topic]
     end
 
-    test "get_topic!/1 returns the topic with given id", %{topic: topic} do
-      assert Topics.get_topic!(topic.id) == topic
+    test "get_topic/1 returns the topic with given id", %{board: board, topic: topic} do
+      board_id = board.id
+      assert %Topic{board: %Board{id: ^board_id}} = Topics.get_topic(topic.id)
     end
 
     test "create_topic/1 with valid data creates a topic", context do
@@ -70,14 +72,14 @@ defmodule PhxBb.TopicsTest do
 
     test "update_topic/2 with invalid data returns error changeset", %{topic: topic} do
       assert {:error, %Ecto.Changeset{}} = Topics.update_topic(topic, %{title: ""})
-      assert topic == Topics.get_topic!(topic.id)
+      assert %Topic{title: "test title"} = Topics.get_topic(topic.id)
     end
 
     # ** (Ecto.ConstraintError) constraint error when attempting to delete struct:
     #     * boards_recent_topic_id_fkey (foreign_key_constraint)
     # test "delete_topic/1 deletes the topic", %{topic: topic} do
     #   assert {:ok, %Topic{}} = Topics.delete_topic(topic)
-    #   assert_raise Ecto.NoResultsError, fn -> Topics.get_topic!(topic.id) end
+    #   assert_raise Ecto.NoResultsError, fn -> Topics.get_topic(topic.id) end
     # end
 
     test "change_topic/1 returns a topic changeset", %{topic: topic} do
