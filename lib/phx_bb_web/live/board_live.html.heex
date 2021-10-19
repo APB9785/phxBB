@@ -1,13 +1,31 @@
 <div id={"board-#{@active_board.id}-component"}>
 
-  <%= if may_create_topic?(@active_user) do %>
-    <div class="pb-4 pl-2 md:pl-8 pt-4">
-      <%= new_topic_button(@active_board.id, @active_user) %>
+  <div class="flex justify-between pb-4">
+    <div class="text-2xl md:pl-8 flex items-center" id="board-header">
+      <%= @active_board.name %>
+    </div>
+
+    <%= if may_create_topic?(@active_user) do %>
+      <div class="pl-2 md:pr-8 flex items-center">
+        <%= new_topic_button(@active_board.id, @active_user) %>
+      </div>
+    <% else %>
+      <div class="md:pr-8 flex items-center">
+        You must register to create a post
+      </div>
+    <% end %>
+  </div>
+
+  <%= if @topic_queue == [] do %>
+    <div class="h-12"></div>
+  <% else %>
+    <div class="h-12 pl-8 m-1 md:m-0 rounded-lg bg-blue-200 flex items-center" phx-click="update">
+      There are new updates - click here to load them
     </div>
   <% end %>
 
   <!-- Topic listing -->
-  <div id="topic-listing" class={post_dividers(@active_user)} phx-update="append">
+  <div id="topic-listing" class={post_dividers(@active_user)} phx-update={@update_toggle}>
     <%= for topic <- @topic_list do %>
       <div id={"topic-#{topic.id}"} class={topic_bubble_style(@active_user)}>
 

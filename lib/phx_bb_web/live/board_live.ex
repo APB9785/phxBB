@@ -1,26 +1,56 @@
-defmodule PhxBbWeb.Board do
+defmodule PhxBbWeb.BoardLive do
   @moduledoc """
-  Board view.
+  LiveView to display a board and its topics.
   """
 
-  use PhxBbWeb, :live_component
+  use PhxBbWeb, :live_view
 
   alias PhxBb.Accounts.User
   alias PhxBb.Topics
   alias PhxBb.Topics.Topic
   alias PhxBbWeb.{Endpoint, ForumLive, StyleHelpers, Timestamps}
 
-  def mount(socket) do
-    {:ok, assign(socket, page: 1), temporary_assigns: [topic_list: []]}
-  end
-
-  def update(assigns, socket) do
-    board = assigns.active_board
-    user = assigns.active_user
-    page = socket.assigns.page
+  def mount(_params, session, socket) do
+    board = session["active_board"]
+    user = session["active_user"]
+    page = 1
     topics = PhxBb.Topics.list_topics(board.id, page, user)
 
-    {:ok, assign(socket, topic_list: topics, active_user: user, active_board: board)}
+    Phoenix.PubSub.subscribe(PhxBb.PubSub, "board:#{board.id}")
+
+    socket =
+      assign(socket,
+        page: page,
+        update_toggle: "append",
+        topic_list: topics,
+        topic_queue: [],
+        active_board: board,
+        active_user: user
+      )
+
+    {:ok, socket, temporary_assigns: [topic_list: []]}
+  end
+
+  def handle_event("load_more", _params, socket) do
+    new_page = socket.assigns.page + 1
+    board = socket.assigns.active_board
+    user = socket.assigns.active_user
+    topics = Topics.list_topics(board.id, new_page, user)
+
+    {:noreply, assign(socket, update_toggle: "append", page: new_page, topic_list: topics)}
+  end
+
+  def handle_event("update", _params, %{assigns: %{topic_queue: queue}} = socket) do
+    {:noreply, assign(socket, update_toggle: "prepend", topic_list: queue, topic_queue: [])}
+  end
+
+  def handle_info({:new_topic, topic}, %{assigns: %{active_user: user}} = socket) do
+    if user.id == topic.author.id do
+      {:noreply, socket}
+    else
+      topic = Topics.load_seen_at(topic, user)
+      {:noreply, update(socket, :topic_queue, &[topic | &1])}
+    end
   end
 
   def link_to_topic(%Topic{title: title, id: id} = topic, active_user) do
@@ -56,14 +86,6 @@ defmodule PhxBbWeb.Board do
       class: new_post_button_style(user),
       id: "new-topic-button"
     )
-  end
-
-  def handle_event("load_more", _params, socket) do
-    new_page = socket.assigns.page + 1
-    board = socket.assigns.active_board
-    user = socket.assigns.active_user
-    topics = PhxBb.Topics.list_topics(board.id, new_page, user)
-    {:noreply, assign(socket, page: new_page, topic_list: topics)}
   end
 
   def view_count_display(%Topic{view_count: 1}), do: "1 view"

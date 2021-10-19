@@ -1,5 +1,5 @@
 <!--   User Menu   -->
-<%= live_component @socket, PhxBbWeb.UserMenu, active_user: @active_user %>
+<%= live_component PhxBbWeb.UserMenu, active_user: @active_user %>
 
 <!-- JS Hook for changing background color -->
 <div id="bg-color-setter" phx-hook="BackgroundColorChange" data-value={@bg_color}></div>
@@ -13,9 +13,9 @@
       Welcome to the Forum!
     </div>
 
-    <%= live_component @socket, PhxBbWeb.MainIndex, active_user: @active_user %>
+    <%= live_component PhxBbWeb.MainIndex, active_user: @active_user %>
 
-    <%= live_component @socket, PhxBbWeb.UsersOnline,
+    <%= live_component PhxBbWeb.UsersOnline,
           active_user: @active_user,
           users_online: @users_online %>
 
@@ -23,13 +23,12 @@
   <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
      > <%= link_to_index(@active_user) %>
   </div>
-    <div class="text-2xl pb-4 md:pl-8" id="board-header">
-      <%= @active_board.name %>
-    </div>
-    <%= live_component @socket, PhxBbWeb.Board,
-          active_user: @active_user,
-          active_board: @active_board,
-          id: "board-component" %>
+    <%= live_render @socket, PhxBbWeb.BoardLive,
+          id: "board-liveview",
+          session: %{
+            "active_user" => @active_user,
+            "active_board" => @active_board
+          } %>
 
   <% :topic -> %>
     <div id="breadcrumb" class="pt-4 pb-4 md:pl-8 md:pt-8">
@@ -39,14 +38,14 @@
     <div id="topic-header" class="text-2xl pb-4 md:pl-8">
       <%= @active_topic.title %>
     </div>
-    <%= live_component @socket, PhxBbWeb.Topic,
+    <%= live_component PhxBbWeb.Topic,
           active_user: @active_user,
           active_topic: @active_topic,
           post_list: @post_list,
           id: "topic-component" %>
     <!-- New Post form -->
     <%= if @active_user do %>
-      <%= live_component @socket, PhxBbWeb.CreatePost,
+      <%= live_component PhxBbWeb.CreatePost,
             active_user: @active_user,
             active_topic: @active_topic,
             id: "new-post-component" %>
@@ -60,7 +59,7 @@
     <div class="text-2xl pb-4 md:pl-8" id="create-topic-header">
       Create New Topic
     </div>
-    <%= live_component @socket, PhxBbWeb.CreateTopic,
+    <%= live_component PhxBbWeb.CreateTopic,
           active_user: @active_user,
           active_board: @active_board,
           id: "create-topic-component" %>
@@ -69,7 +68,7 @@
     <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
        > <%= link_to_index(@active_user) %>
     </div>
-    <%= live_component @socket, PhxBbWeb.UserProfile,
+    <%= live_component PhxBbWeb.UserProfile,
           active_user: @active_user,
           view_user: @view_user %>
 
@@ -77,7 +76,7 @@
     <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
        > <%= link_to_index(@active_user) %>
     </div>
-    <%= live_component @socket, PhxBbWeb.UserSettings,
+    <%= live_component PhxBbWeb.UserSettings,
           active_user: @active_user,
           id: "user-settings-component" %>
 
@@ -85,7 +84,7 @@
     <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
        > <%= link_to_index(@active_user) %>
     </div>
-    <%= live_component @socket, PhxBbWeb.AdminPanel,
+    <%= live_component PhxBbWeb.AdminPanel,
           active_user: @active_user,
           id: "admin-panel-component" %>
 
@@ -96,7 +95,7 @@
     <div class="text-2xl p-4 md:pl-8" id="register-header">
       Register
     </div>
-    <%= live_component @socket, PhxBbWeb.UserRegistration,
+    <%= live_component PhxBbWeb.UserRegistration,
           active_user: @active_user,
           id: "user-registration-component" %>
 

@@ -29,9 +29,7 @@ defmodule PhxBbWeb.ForumLive do
           socket
           |> assign(active_user: nil)
           |> assign(bg_color: StyleHelpers.get_default_background())
-          |> assign(users_online: %{})
-          |> assign(active_subscription: nil)
-          |> handle_joins(Presence.list(@presence))
+          |> assign_defaults()
 
         user ->
           # User is logged in
@@ -44,9 +42,7 @@ defmodule PhxBbWeb.ForumLive do
           socket
           |> assign(active_user: user)
           |> assign(bg_color: StyleHelpers.get_theme_background(user))
-          |> assign(users_online: %{})
-          |> assign(active_subscription: nil)
-          |> handle_joins(Presence.list(@presence))
+          |> assign_defaults()
       end
 
     {:ok, socket, temporary_assigns: [post_list: []]}
@@ -93,10 +89,7 @@ defmodule PhxBbWeb.ForumLive do
         {:noreply, assign_invalid(socket)}
 
       %Board{} = board ->
-        {:noreply,
-         socket
-         |> resubscribe("board:" <> board_id)
-         |> assign(nav: :board, page_title: board.name, active_board: board)}
+        {:noreply, assign(socket, nav: :board, page_title: board.name, active_board: board)}
     end
   end
 
@@ -183,11 +176,6 @@ defmodule PhxBbWeb.ForumLive do
      |> handle_joins(diff.joins)}
   end
 
-  def handle_info({:new_topic, _post}, socket) do
-    ## TO DO
-    {:noreply, socket}
-  end
-
   def handle_info({:update_post_list, post}, socket) do
     {:noreply, assign(socket, post_list: [post])}
   end
@@ -203,6 +191,14 @@ defmodule PhxBbWeb.ForumLive do
 
   def assign_invalid(socket) do
     assign(socket, nav: :invalid, page_title: "404 Page Not Found")
+  end
+
+  def assign_defaults(socket) do
+    socket
+    |> assign(users_online: %{})
+    |> assign(topic_queue: [])
+    |> assign(active_subscription: nil)
+    |> handle_joins(Presence.list(@presence))
   end
 
   def is_admin?(nil), do: false

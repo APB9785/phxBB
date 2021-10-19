@@ -35,6 +35,11 @@ defmodule PhxBb.Topics do
     )
   end
 
+  def load_seen_at(%Topic{} = topic, %User{} = user) do
+    seen_query = seen_query(user)
+    Repo.preload(topic, seen_at: seen_query)
+  end
+
   defp seen_query(nil), do: from(s in SeenTopic, where: is_nil(s.user_id))
   defp seen_query(user), do: from(s in SeenTopic, where: s.user_id == ^user.id)
 
@@ -113,7 +118,8 @@ defmodule PhxBb.Topics do
     |> Repo.transaction()
     |> case do
       {:ok, %{topic: topic}} ->
-        Phoenix.PubSub.broadcast(PhxBb.PubSub, "board:#{board_id}", {:new_topic, topic.id})
+        topic = PhxBb.Repo.preload(topic, [:author, :recent_user])
+        Phoenix.PubSub.broadcast(PhxBb.PubSub, "board:#{board_id}", {:new_topic, topic})
         {:ok, topic}
 
       {:error, operation, value, changes} ->
