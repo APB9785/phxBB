@@ -69,7 +69,7 @@
         </button>
       </.form>
     <% else %>
-      <%= live_component @socket, PhxBbWeb.PostContentBody,
+      <%= live_component PhxBbWeb.PostContentBody,
             active_post: @active_post,
             active_user: @active_user,
             id: "#{@active_post.id}" %>

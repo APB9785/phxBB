@@ -40,34 +40,35 @@ defmodule PhxBb.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:bcrypt_elixir, "~> 2.0"},
-      {:phoenix, "~> 1.6"},
+      {:bcrypt_elixir, "~> 2.3"},
+      {:phoenix, "~> 1.6.4"},
       {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.7"},
-      {:postgrex, ">= 0.0.0"},
-      {:phoenix_html, "~> 3.0"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.16.4"},
-      {:floki, ">= 0.30.0", only: :test},
-      {:phoenix_live_dashboard, "~> 0.5"},
+      {:ecto_sql, "~> 3.7.1"},
+      {:postgrex, "~> 0.15.13"},
+      {:phoenix_html, "~> 3.1"},
+      {:phoenix_live_reload, "~> 1.3", only: :dev},
+      {:phoenix_live_view, "~> 0.17.5"},
+      {:floki, ">= 0.32.0", only: :test},
+      {:phoenix_live_dashboard, "~> 0.6"},
+      # Intentionally behind, will bump later
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.5"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.18"},
+      {:gettext, "~> 0.18.2"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:credo, "~> 1.5.6", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.6.1", only: [:dev, :test], runtime: false},
       {:tzdata, github: "lau/tzdata"},
       {:phoenix_html_sanitizer, github: "APB9785/phoenix_html_sanitizer"},
-      {:earmark, "~> 1.4"},
-      {:excoveralls, "~> 0.14", only: :test},
+      {:earmark, "~> 1.4.19"},
+      {:excoveralls, "~> 0.14.4", only: :test},
       {:ex_aws, "~> 2.2"},
       {:ex_aws_s3, github: "ex-aws/ex_aws_s3"},
-      {:hackney, "~> 1.17"},
-      {:sweet_xml, "~> 0.7.1"},
+      {:hackney, "~> 1.18"},
+      {:sweet_xml, "~> 0.7.2"},
       {:mime, "~> 2.0", override: true},
-      {:sobelow, "~> 0.10", only: :dev}
+      {:sobelow, "~> 0.11.1", only: :dev}
     ]
   end
 
