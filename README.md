@@ -38,6 +38,6 @@ To start a local phxBB server:
   * Set environment variables `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `MAILJET_API_KEY`, and `MAILJET_SECRET_KEY`
   * Start Phoenix endpoint with `mix phx.server`
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+Now you can visit [`localhost:4000/forum`](http://localhost:4000/forum) from your browser.
 
 Ready to run in production? Check out the [Phoenix deployment guides](https://hexdocs.pm/phoenix/deployment.html).
