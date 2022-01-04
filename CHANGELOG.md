@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [0.8.2] - 2022-01-04
 
 ### Added
 
@@ -218,7 +218,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - User cache for reduced DB queries
 - Page title updates to reflect current view
 
-[Unreleased]: https://github.com/APB9785/phxBB/compare/0.8.1...HEAD
+[0.8.2]: https://github.com/APB9785/phxBB/compare/0.8.1...0.8.2
 [0.8.1]: https://github.com/APB9785/phxBB/compare/0.8...0.8.1
 [0.8]: https://github.com/APB9785/phxBB/compare/0.7.1...0.8
 [0.7.1]: https://github.com/APB9785/phxBB/compare/0.7...0.7.1

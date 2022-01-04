@@ -4,8 +4,8 @@ defmodule PhxBb.MixProject do
   def project do
     [
       app: :phx_bb,
-      version: "0.8.1",
-      elixir: "~> 1.12",
+      version: "0.8.2",
+      elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -41,11 +41,11 @@ defmodule PhxBb.MixProject do
   defp deps do
     [
       {:bcrypt_elixir, "~> 2.3"},
-      {:phoenix, "~> 1.6.4"},
+      {:phoenix, "~> 1.6.5"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.7.1"},
       {:postgrex, "~> 0.15.13"},
-      {:phoenix_html, "~> 3.1"},
+      {:phoenix_html, "~> 3.2"},
       {:phoenix_live_reload, "~> 1.3", only: :dev},
       {:phoenix_live_view, "~> 0.17.5"},
       {:floki, ">= 0.32.0", only: :test},

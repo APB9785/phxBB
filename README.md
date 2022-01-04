@@ -16,7 +16,6 @@
 - All site navigation (minus login) done via LiveView patching - no page reloads!
 - Markdown parsing in posts with `Earmark` + `PhoenixHtmlSanitizer`
 - See who's online with `Phoenix.Presence`
-- Full test suite
 
 ## What's New - v0.8
 
