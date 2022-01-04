@@ -21,8 +21,8 @@ jobs:
 
     strategy:
       matrix:
-        elixir: [1.12.3]
-        otp: [24.0.6]
+        elixir: [1.13.1]
+        otp: [24.1.6]
 
     services:
       postgres:
