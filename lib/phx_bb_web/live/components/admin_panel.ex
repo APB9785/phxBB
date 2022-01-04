@@ -11,8 +11,6 @@ defmodule PhxBbWeb.AdminPanel do
   def mount(socket) do
     {:ok,
      assign(socket,
-       confirm_disable: false,
-       confirm_enable: false,
        user_disabled_success: false,
        user_enabled_success: false
      )}
@@ -38,14 +36,6 @@ defmodule PhxBbWeb.AdminPanel do
     {:noreply, assign(socket, select_enable: params["user"])}
   end
 
-  def handle_event("disable_user_prompt", _params, socket) do
-    {:noreply, assign(socket, confirm_disable: true)}
-  end
-
-  def handle_event("enable_user_prompt", _params, socket) do
-    {:noreply, assign(socket, confirm_enable: true)}
-  end
-
   def handle_event("disable_user", %{"disable_user" => params}, socket) do
     user = Accounts.disable_user!(params["user"])
 
@@ -54,7 +44,7 @@ defmodule PhxBbWeb.AdminPanel do
 
     {:noreply,
      socket
-     |> assign(user_disabled_success: true, confirm_disable: false)
+     |> assign(user_disabled_success: true, user_enabled_success: false)
      |> assign_disable_user(new_user_list)
      |> assign_enable_user(new_disabled_list)}
   end
@@ -69,7 +59,7 @@ defmodule PhxBbWeb.AdminPanel do
 
     {:noreply,
      socket
-     |> assign(user_enabled_success: true, confirm_enable: false)
+     |> assign(user_enabled_success: true, user_disabled_success: false)
      |> assign_enable_user(new_disabled_list)
      |> assign_disable_user(new_user_list)}
   end

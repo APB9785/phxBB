@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - New Topic button moved
 - Boards now display their topics in a child LiveView (instead of LiveComponent)
 - Deleting posts is now confirmed with Phoenix.HTML's data-confirm prompt
+- Disabling and re-enabling users is now confirmed with Phoenix.HTML's data-confirm prompt
+- Disabling a user will clear the "user enabled" flash in the Admin panel, and vice versa
 
 ## [0.8.1] - 2021-10-08
 

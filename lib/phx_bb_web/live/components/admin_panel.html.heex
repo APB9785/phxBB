@@ -29,22 +29,13 @@
               selected: @select_disable,
               class: StyleHelpers.user_form(@active_user) %>
 
-        <%= if @confirm_disable do %>
-          <div class="flex justify-end md:justify-center">
-            <%= submit "Confirm disable?",
-                  phx_disable_with: "Disabling...",
-                  class: "font-bold text-red-500 hover:underline",
-                  id: "confirm-disable-user" %>
-          </div>
-        <% else %>
-          <button phx-click="disable_user_prompt"
-                  phx-target={@myself}
-                  class={button_style(@active_user)}
-                  type="button"
-                  id="disable-user-button">
-            Disable User
-          </button>
-        <% end %>
+        <div class="flex justify-end md:justify-center">
+          <%= submit "Disable User",
+                data_confirm: "Are you sure?",
+                phx_disable_with: "Disabling...",
+                class: button_style(@active_user),
+                id: "disable-user-button" %>
+        </div>
       </.form>
     <% end %>
   </div>
@@ -77,22 +68,13 @@
               selected: @select_enable,
               class: StyleHelpers.user_form(@active_user) %>
 
-        <%= if @confirm_enable do %>
-          <div class="flex justify-end md:justify-center">
-            <%= submit "Confirm re-enable?",
-                  phx_disable_with: "Re-enabling...",
-                  class: "font-bold text-red-500 hover:underline",
-                  id: "confirm-enable-user" %>
-          </div>
-        <% else %>
-          <button phx-click="enable_user_prompt"
-                  phx-target={@myself}
-                  class={button_style(@active_user)}
-                  type="button"
-                  id="enable-user-button">
-            Re-enable User
-          </button>
-        <% end %>
+        <div class="flex justify-end md:justify-center">
+          <%= submit "Re-enable User",
+                data_confirm: "Are you sure?",
+                phx_disable_with: "Re-enabling...",
+                class: button_style(@active_user),
+                id: "enable-user-button" %>
+        </div>
       </.form>
     <% end %>
   </div>

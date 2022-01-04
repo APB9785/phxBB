@@ -32,10 +32,6 @@ defmodule PhxBbWeb.AdminPanelTest do
     disable = %{disable_user: %{user: context[:user].id}}
     admin_view |> form("#admin-disable-user-form") |> render_change(disable)
 
-    admin_view |> element("#disable-user-button") |> render_click
-
-    assert has_element?(admin_view, "#confirm-disable-user")
-
     admin_view |> form("#admin-disable-user-form", disable) |> render_submit
 
     assert has_element?(admin_view, "#user-disabled-ok")
@@ -71,10 +67,6 @@ defmodule PhxBbWeb.AdminPanelTest do
     # Repeat for enabling
     enable = %{enable_user: %{user: context[:user].id}}
     admin_view |> form("#admin-enable-user-form") |> render_change(enable)
-
-    admin_view |> element("#enable-user-button") |> render_click
-
-    assert has_element?(admin_view, "#confirm-enable-user")
 
     admin_view |> form("#admin-enable-user-form") |> render_submit
 
