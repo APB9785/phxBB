@@ -10,7 +10,7 @@ defmodule PhxBbWeb.PostContent do
   alias PhxBbWeb.{StyleHelpers, Timestamps}
 
   def mount(socket) do
-    {:ok, assign(socket, edit: false, delete: false)}
+    {:ok, assign(socket, edit: false)}
   end
 
   def update(%{active_post: active_post, active_user: active_user}, socket) do
@@ -55,11 +55,7 @@ defmodule PhxBbWeb.PostContent do
     params = %{body: "_Post deleted._", edited_by_id: socket.assigns.active_user.id}
     {:ok, _post} = Posts.update_post(socket.assigns.active_post, params)
 
-    {:noreply, assign(socket, delete: false)}
-  end
-
-  def handle_event("delete_prompt", _params, socket) do
-    {:noreply, assign(socket, delete: true)}
+    {:noreply, socket}
   end
 
   # Helpers

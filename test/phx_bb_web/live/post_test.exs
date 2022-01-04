@@ -84,8 +84,7 @@ defmodule PhxBbWeb.PostTest do
 
     assert has_element?(view, "#post-#{post.id}-body", "test body")
 
-    view |> element("#delete-post-#{post.id}-link") |> render_click
-    view |> element("#delete-post-#{post.id}-final") |> render_click
+    view |> element("#delete-post-#{post.id}") |> render_click
 
     # Give time for the PubSub messages to be received
     _ = :sys.get_state(view.pid)

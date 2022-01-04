@@ -15,28 +15,14 @@
       </button>
       <div class={post_timestamp_style(@active_user)}>&nbsp-&nbsp</div>
 
-      <%= case @delete do %>
-
-      <% false -> %>
-        <button phx-click="delete_prompt"
-                phx-value-id={@active_post.id}
-                phx-target={@myself}
-                class={post_edit_link_style(@active_user)}
-                id={"delete-post-#{@active_post.id}-link"}>
-          Delete Post
-        </button>
-
-      <% true -> %>
-        <div class={post_timestamp_style(@active_user)}> Confirm ->&nbsp&nbsp </div>
-        <button id={"delete-post-#{@active_post.id}-final"}
-                phx-click="delete_post"
-                phx-value-id={@active_post.id}
-                phx-target={@myself}
-                class="text-sm font-bold text-red-500 hover:underline">
-          Delete Post
-        </button>
-
-      <% end %>
+      <button phx-click="delete_post"
+              data-confirm="Are you sure?"
+              phx-value-id={@active_post.id}
+              phx-target={@myself}
+              class={post_edit_link_style(@active_user)}
+              id={"delete-post-#{@active_post.id}"}>
+        Delete Post
+      </button>
     <% end %>
   </div>
 
