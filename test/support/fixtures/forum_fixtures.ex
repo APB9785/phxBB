@@ -3,7 +3,7 @@ defmodule PhxBb.ForumFixtures do
   This module contains functions for creating test topics, posts, and boards.
   """
 
-  alias PhxBb.{Boards, Posts, Topics}
+  alias PhxBb.{Boards, Messages, Posts, Topics}
 
   def post_fixture(user, topic, body \\ "some body") do
     attrs = %{body: body, author_id: user.id, topic_id: topic.id}
@@ -37,5 +37,12 @@ defmodule PhxBb.ForumFixtures do
     {:ok, seen_topic} = PhxBb.SeenTopics.create_seen_topic(attrs)
 
     seen_topic
+  end
+
+  def message_fixture(sender, recipient, subject \\ "test subject", body \\ "test message") do
+    attrs = %{"recipient_id" => recipient.id, "subject" => subject, "body" => body}
+    {:ok, message} = Messages.create_message(attrs, sender.id)
+
+    message
   end
 end

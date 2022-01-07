@@ -2,7 +2,6 @@ defmodule PhxBb.Posts do
   @moduledoc """
   The Posts context.
   """
-
   import Ecto.Query, warn: false
 
   alias PhxBb.Accounts.User

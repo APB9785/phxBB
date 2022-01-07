@@ -24,5 +24,15 @@
       &nbsp;&nbsp;&nbsp;&nbsp;
       <div><%= logout_link(user) %></div>
     </div>
+    <div class="flex justify-center">
+      <div>
+        <%= messages_link(user) %>
+      </div>
+      <%= if @unread_messages > 0 do %>
+        <div id="unread-message-notification">
+          &nbsp;(<%= @unread_messages %>)
+        </div>
+      <% end %>
+    </div>
   </div>
 <% end %>

@@ -1,5 +1,7 @@
 <!--   User Menu   -->
-<%= live_component PhxBbWeb.UserMenu, active_user: @active_user %>
+<%= live_component PhxBbWeb.UserMenu,
+      active_user: @active_user,
+      unread_messages: @unread_messages %>
 
 <!-- JS Hook for changing background color -->
 <div id="bg-color-setter" phx-hook="BackgroundColorChange" data-value={@bg_color}></div>
@@ -99,6 +101,29 @@
     <%= live_component PhxBbWeb.UserRegistration,
           active_user: @active_user,
           id: "user-registration-component" %>
+
+  <% :inbox -> %>
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+       > <%= link_to_index(@active_user) %>
+    </div>
+    <div class="text-2xl p-4 md:pl-8" id="inbox-header">
+      Inbox
+    </div>
+    <%= live_component PhxBbWeb.Inbox,
+          active_user: @active_user,
+          id: "inbox-component" %>
+
+  <% :new_message -> %>
+    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+       > <%= link_to_index(@active_user) %>
+       > <%= link_to_inbox(@active_user) %>
+    </div>
+    <div class="text-2xl p-4 md:pl-8" id="new-message-header">
+      New Message
+    </div>
+    <%= live_component PhxBbWeb.NewMessage,
+          active_user: @active_user,
+          id: "new-message-component" %>
 
   <% :invalid -> %>
     <div class="text-2xl p-8 text-center" id="page-not-found-live">

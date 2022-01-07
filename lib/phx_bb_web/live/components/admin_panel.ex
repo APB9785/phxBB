@@ -18,8 +18,8 @@ defmodule PhxBbWeb.AdminPanel do
 
   def update(assigns, socket) do
     auid = assigns.active_user.id
-    users = Accounts.list_other_users(auid) |> Enum.map(&{&1.name, &1.id})
-    disabled_users = Accounts.list_disabled_users(auid) |> Enum.map(&{&1.name, &1.id})
+    users = auid |> Accounts.list_other_users() |> Enum.map(&{&1.name, &1.id})
+    disabled_users = auid |> Accounts.list_disabled_users() |> Enum.map(&{&1.name, &1.id})
 
     {:ok,
      socket

@@ -58,6 +58,14 @@ defmodule PhxBbWeb.UserMenu do
     )
   end
 
+  def messages_link(user) do
+    live_patch("Messages",
+      to: Routes.live_path(Endpoint, ForumLive, messages: "inbox"),
+      id: "user-menu-messages",
+      class: StyleHelpers.link_style(user)
+    )
+  end
+
   ## Tailwind styles
 
   def user_menu(user) do

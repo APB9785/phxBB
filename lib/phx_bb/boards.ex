@@ -2,7 +2,6 @@ defmodule PhxBb.Boards do
   @moduledoc """
   The Boards context.
   """
-
   import Ecto.Query, warn: false
 
   alias PhxBb.Boards.Board

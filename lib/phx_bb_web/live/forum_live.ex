@@ -2,13 +2,13 @@ defmodule PhxBbWeb.ForumLive do
   @moduledoc """
   This is the main LiveView which renders the forum.
   """
-
   use PhxBbWeb, :live_view
 
   alias PhxBb.Accounts
   alias PhxBb.Accounts.User
   alias PhxBb.Boards
   alias PhxBb.Boards.Board
+  alias PhxBb.Messages
   alias PhxBb.SeenTopics
   alias PhxBb.Topics
   alias PhxBb.Topics.Topic
@@ -27,6 +27,7 @@ defmodule PhxBbWeb.ForumLive do
           end
 
           socket
+          |> assign(unread_messages: nil)
           |> assign(active_user: nil)
           |> assign(bg_color: StyleHelpers.get_default_background())
           |> assign_defaults()
@@ -40,6 +41,7 @@ defmodule PhxBbWeb.ForumLive do
           end
 
           socket
+          |> assign(unread_messages: Messages.unread_for_user(user.id))
           |> assign(active_user: user)
           |> assign(bg_color: StyleHelpers.get_theme_background(user))
           |> assign_defaults()
@@ -149,6 +151,26 @@ defmodule PhxBbWeb.ForumLive do
     end
   end
 
+  def handle_params(%{"messages" => "inbox"}, _url, socket) do
+    case socket.assigns.active_user do
+      nil ->
+        {:noreply, push_redirect(socket, to: "/users/log_in")}
+
+      _user ->
+        {:noreply, assign(socket, nav: :inbox, page_title: "Inbox", child_pid: nil)}
+    end
+  end
+
+  def handle_params(%{"messages" => "new"}, _url, socket) do
+    case socket.assigns.active_user do
+      nil ->
+        {:noreply, push_redirect(socket, to: "/users/log_in")}
+
+      _user ->
+        {:noreply, assign(socket, nav: :new_message, page_title: "New Message", child_pid: nil)}
+    end
+  end
+
   def handle_params(%{"confirm" => token}, _url, socket) do
     # Do not log in the user after confirmation to avoid a
     # leaked token giving the user access to the account.
@@ -203,6 +225,10 @@ defmodule PhxBbWeb.ForumLive do
 
   def handle_info({:update_post_list, post}, socket) do
     {:noreply, assign(socket, post_list: [post])}
+  end
+
+  def handle_info({:unread_messages, fun}, socket) do
+    {:noreply, update(socket, :unread_messages, fun)}
   end
 
   def handle_info({:updated_user, user}, %{assigns: %{child_pid: c_pid}} = socket) do
@@ -290,6 +316,14 @@ defmodule PhxBbWeb.ForumLive do
       to: Routes.live_path(Endpoint, __MODULE__, board: board.id),
       class: StyleHelpers.link_style(active_user),
       id: "crumb-board-link"
+    )
+  end
+
+  def link_to_inbox(active_user) do
+    live_patch("Inbox",
+      to: Routes.live_path(Endpoint, __MODULE__, messages: "inbox"),
+      id: "crumb-inbox-link",
+      class: StyleHelpers.link_style(active_user)
     )
   end
 end
