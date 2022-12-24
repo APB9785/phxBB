@@ -13,7 +13,7 @@ defmodule PhxBbWeb.MessageTest do
     }
   end
 
-  test "Send, recieve, toggle read", %{conn: conn, author: author, recipient: recipient} do
+  test "Send, receive, toggle read", %{conn: conn, author: author, recipient: recipient} do
     author_conn = log_in_user(conn, author)
     recipient_conn = log_in_user(conn, recipient)
 
