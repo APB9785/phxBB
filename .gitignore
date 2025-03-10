@@ -37,3 +37,6 @@ npm-debug.log
 
 # Do not include sensitive config
 .envrc
+
+# Don't force version for local dev
+.tool-versions

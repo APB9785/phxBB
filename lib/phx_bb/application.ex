@@ -8,18 +8,13 @@ defmodule PhxBb.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the Ecto repository
-      PhxBb.Repo,
-      # Start the Telemetry supervisor
+
       PhxBbWeb.Telemetry,
-      # Start the PubSub system
+      PhxBb.Repo,
+      {DNSCluster, query: Application.get_env(:phx_bb, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: PhxBb.PubSub},
-      # Start the Presence
       PhxBbWeb.Presence,
-      # Start the Endpoint (http/https)
       PhxBbWeb.Endpoint
-      # Start a worker by calling: PhxBb.Worker.start_link(arg)
-      # {PhxBb.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

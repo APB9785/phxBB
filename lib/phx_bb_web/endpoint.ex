@@ -7,11 +7,13 @@ defmodule PhxBbWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_phx_bb_key",
-    signing_salt: "+Otvz+GW"
+    signing_salt: "+Otvz+GW",
+    same_site: "Lax"
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
-    websocket: [timeout: 45_000, connect_info: [session: @session_options]]
+    websocket: [connect_info: [session: @session_options]],
+    longpoll: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -21,7 +23,7 @@ defmodule PhxBbWeb.Endpoint do
     at: "/",
     from: :phx_bb,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only: PhxBbWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

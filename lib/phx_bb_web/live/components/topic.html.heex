@@ -1,15 +1,17 @@
 <div id="post-list" class={post_dividers(@active_user)} phx-update="append">
   <%= for post <- @post_list do %>
     <div id={"post-#{post.id}"} class={topic_content_style(@active_user)}>
-      <%= live_component PhxBbWeb.AuthorInfobox,
-            active_user: @active_user,
-            active_post: post,
-            id: "post-#{post.id}-author-info" %>
+      {live_component(PhxBbWeb.AuthorInfobox,
+        active_user: @active_user,
+        active_post: post,
+        id: "post-#{post.id}-author-info"
+      )}
 
-      <%= live_component PhxBbWeb.PostContent,
-            active_user: @active_user,
-            active_post: post,
-            id: "post-#{post.id}-content" %>
+      {live_component(PhxBbWeb.PostContent,
+        active_user: @active_user,
+        active_post: post,
+        id: "post-#{post.id}-content"
+      )}
     </div>
   <% end %>
 </div>

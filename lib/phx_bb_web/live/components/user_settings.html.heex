@@ -2,11 +2,13 @@
   <%= if !@active_user.confirmed_at do %>
     <div class={confirmation_reminder_style(@active_user)}>
       <%= if @confirmation_resent do %>
-        <p class="alert alert-info"
-           id="confirmation-resent-ok"
-           phx-click="clear_flash"
-           phx-value-flash="confirmation_resent"
-           phx-target={@myself}>
+        <p
+          class="alert alert-info"
+          id="confirmation-resent-ok"
+          phx-click="clear_flash"
+          phx-value-flash="confirmation_resent"
+          phx-target={@myself}
+        >
           Confirmation instructions re-sent.
         </p>
       <% end %>
@@ -14,181 +16,215 @@
         Please confirm your account by clicking the link in your email.
         Be sure to check the "Promotions" folder if you use gmail.
       </div>
-      <div>Current Email: <%= @active_user.email %></div>
-      <button phx-click="resend_confirmation"
-              phx-target={@myself}
-              class={button_style(@active_user)}
-              id="resend-verification-button">
+      <div>Current Email: {@active_user.email}</div>
+      <button
+        phx-click="resend_confirmation"
+        phx-target={@myself}
+        class={button_style(@active_user)}
+        id="resend-verification-button"
+      >
         Re-send confirmation link
       </button>
     </div>
   <% end %>
-
-  <!-- Change Timezone -->
+  
+<!-- Change Timezone -->
   <div class="text-2xl py-4 md:pl-8">Change timezone</div>
   <div class={settings_block(@active_user)}>
-    <.form let={f} for={@tz_changeset} id="change-user-timezone-form"
-              phx_submit="change_timezone"
-              phx_target={@myself}>
+    <.form
+      let={f}
+      for={@tz_changeset}
+      id="change-user-timezone-form"
+      phx_submit="change_timezone"
+      phx_target={@myself}
+    >
       <%= if @tz_changeset.action do %>
         <div class="alert alert-danger">
           <p>Oops, something went wrong! Please check the errors below.</p>
         </div>
       <% end %>
       <%= if @timezone_updated do %>
-        <p class="alert alert-info"
-           id="timezone-updated-ok"
-           phx-click="clear_flash"
-           phx-value-flash="timezone_updated"
-           phx-target={@myself}>
+        <p
+          class="alert alert-info"
+          id="timezone-updated-ok"
+          phx-click="clear_flash"
+          phx-value-flash="timezone_updated"
+          phx-target={@myself}
+        >
           Timezone updated successfully.
         </p>
       <% end %>
 
-      <%= label f, :timezone, class: StyleHelpers.user_form_label(@active_user) %>
-      <%= select f, :timezone, Tzdata.zone_list(), class: StyleHelpers.user_form(@active_user) %>
-      <%= error_tag f, :timezone %>
+      {label(f, :timezone, class: StyleHelpers.user_form_label(@active_user))}
+      {select(f, :timezone, Tzdata.zone_list(), class: StyleHelpers.user_form(@active_user))}
+      {error_tag(f, :timezone)}
 
-      <%= submit "Change timezone",
-            phx_disable_with: "Changing...",
-            class: button_style(@active_user) %>
+      {submit("Change timezone",
+        phx_disable_with: "Changing...",
+        class: button_style(@active_user)
+      )}
     </.form>
   </div>
-
-  <!-- Change user title -->
+  
+<!-- Change user title -->
   <div class="text-2xl py-4 md:pl-8">Change user title</div>
   <div class={settings_block(@active_user)}>
-    <.form let={f} for={@title_changeset} id="change-user-title-form"
-              phx_submit="change_user_title"
-              phx_target={@myself}>
+    <.form
+      let={f}
+      for={@title_changeset}
+      id="change-user-title-form"
+      phx_submit="change_user_title"
+      phx_target={@myself}
+    >
       <%= if @title_changeset.action do %>
         <div class="alert alert-danger" id="title-update-failed">
           <p>Oops, something went wrong! Please check the errors below.</p>
         </div>
       <% end %>
       <%= if @title_updated do %>
-        <p class="alert alert-info"
-           id="title-updated-ok"
-           phx-click="clear_flash"
-           phx-value-flash="title_updated"
-           phx-target={@myself}>
+        <p
+          class="alert alert-info"
+          id="title-updated-ok"
+          phx-click="clear_flash"
+          phx-value-flash="title_updated"
+          phx-target={@myself}
+        >
           User title updated successfully.
         </p>
       <% end %>
 
-      <%= label f, :title, class: StyleHelpers.user_form_label(@active_user) %>
-      <%= text_input f, :title, class: StyleHelpers.user_form(@active_user) %>
-      <%= error_tag f, :title %>
+      {label(f, :title, class: StyleHelpers.user_form_label(@active_user))}
+      {text_input(f, :title, class: StyleHelpers.user_form(@active_user))}
+      {error_tag(f, :title)}
 
-      <%= submit "Change user title",
-            phx_disable_with: "Changing...",
-            class: button_style(@active_user) %>
+      {submit("Change user title",
+        phx_disable_with: "Changing...",
+        class: button_style(@active_user)
+      )}
     </.form>
   </div>
-
-  <!-- Change theme -->
+  
+<!-- Change theme -->
   <div class="text-2xl py-4 md:pl-8">Change theme</div>
   <div class={settings_block(@active_user)}>
-    <.form let={f} for={@theme_changeset} id="change-user-theme-form"
-           phx_submit="change_user_theme"
-           phx_target={@myself}>
+    <.form
+      let={f}
+      for={@theme_changeset}
+      id="change-user-theme-form"
+      phx_submit="change_user_theme"
+      phx_target={@myself}
+    >
       <%= if @theme_changeset.action do %>
         <div class="alert alert-danger" id="theme-change-failed">
           <p>Oops, something went wrong! Please check the errors below.</p>
         </div>
       <% end %>
       <%= if @theme_updated do %>
-        <p class="alert alert-info"
-           id="theme-changed-ok"
-           phx-click="clear_flash"
-           phx-value-flash="theme_updated"
-           phx-target={@myself}>
+        <p
+          class="alert alert-info"
+          id="theme-changed-ok"
+          phx-click="clear_flash"
+          phx-value-flash="theme_updated"
+          phx-target={@myself}
+        >
           Theme updated successfully.
         </p>
       <% end %>
 
-      <%= label f, :theme, class: StyleHelpers.user_form_label(@active_user) %>
-      <%= select f, :theme, StyleHelpers.theme_list(),
-                 class: StyleHelpers.user_form(@active_user) %>
-      <%= error_tag f, :theme %>
+      {label(f, :theme, class: StyleHelpers.user_form_label(@active_user))}
+      {select(f, :theme, StyleHelpers.theme_list(), class: StyleHelpers.user_form(@active_user))}
+      {error_tag(f, :theme)}
 
-      <%= submit "Change theme",
-            phx_disable_with: "Changing...",
-            class: button_style(@active_user) %>
+      {submit("Change theme",
+        phx_disable_with: "Changing...",
+        class: button_style(@active_user)
+      )}
     </.form>
   </div>
-
-  <!-- Change avatar -->
+  
+<!-- Change avatar -->
   <div class="text-2xl py-4 md:pl-8">Change avatar</div>
   <div class={settings_block(@active_user)}>
     <%= if @avatar_updated do %>
-      <p class="alert alert-info"
-         id="avatar-updated-ok"
-         phx-click="clear_flash"
-         phx-value-flash="avatar_updated"
-         phx-target={@myself}>
+      <p
+        class="alert alert-info"
+        id="avatar-updated-ok"
+        phx-click="clear_flash"
+        phx-value-flash="avatar_updated"
+        phx-target={@myself}
+      >
         User avatar updated successfully.
       </p>
     <% end %>
     <%= if @avatar_removed do %>
-      <p class="alert alert-info"
-         id="avatar-removed-ok"
-         phx-click="clear_flash"
-         phx-value-flash="avatar_removed"
-         phx-target={@myself}>
+      <p
+        class="alert alert-info"
+        id="avatar-removed-ok"
+        phx-click="clear_flash"
+        phx-value-flash="avatar_removed"
+        phx-target={@myself}
+      >
         User avatar removed successfully.
       </p>
     <% end %>
-
-    <!-- Current avatar display -->
+    
+<!-- Current avatar display -->
     <div class="w-32">
-      <img src={@active_user.avatar} class="max-h-40 w-full object-fill pb-4">
+      <img src={@active_user.avatar} class="max-h-40 w-full object-fill pb-4" />
     </div>
     <%= if @active_user.avatar do %>
-      <button id="remove-avatar-link"
-              phx-target={@myself}
-              phx-click="remove_avatar"
-              class={[StyleHelpers.link_style(@active_user), " pb-4"]}>
+      <button
+        id="remove-avatar-link"
+        phx-target={@myself}
+        phx-click="remove_avatar"
+        class={[StyleHelpers.link_style(@active_user), " pb-4"]}
+      >
         Remove current avatar
       </button>
     <% end %>
 
-    <.form for={@avatar_changeset} id="change-user-avatar-form"
-           phx_submit="upload_avatar" phx_target={@myself}
-           phx_change="validate_avatar">
-
+    <.form
+      for={@avatar_changeset}
+      id="change-user-avatar-form"
+      phx_submit="upload_avatar"
+      phx_target={@myself}
+      phx_change="validate_avatar"
+    >
       <div class="border-2 p-2 md:w-1/4" phx-drop-target={@uploads.avatar.ref}>
-        <%= live_file_input @uploads.avatar %>
+        {live_file_input(@uploads.avatar)}
       </div>
       <div id="hint">
-        (max <%= trunc(@uploads.avatar.max_file_size / 1_000) %> KB)
+        (max {trunc(@uploads.avatar.max_file_size / 1_000)} KB)
       </div>
 
       <%= for {_ref, err} <- @uploads.avatar.errors do %>
         <div class="error text-red-500">
-          <%= humanize(err) %>
+          {humanize(err)}
         </div>
       <% end %>
 
       <%= for entry <- @uploads.avatar.entries do %>
         <div class="entry" id="avatar-preview">
           <div class="w-32">
-            <%= live_img_preview entry, class: "max-h-40 w-full object-fill" %>
+            {live_img_preview(entry, class: "max-h-40 w-full object-fill")}
           </div>
 
           <div id="progress">
             <div id="progress-value">
-              <%= entry.progress %>%
+              {entry.progress}%
             </div>
             <div id="progress-bar">
               <span style={"w-#{entry.progress}%"}></span>
             </div>
           </div>
 
-          <a href="#" phx-click="cancel_upload"
-             phx-value-ref={entry.ref}
-             phx-target={@myself}
-             id="cancel-upload">
+          <a
+            href="#"
+            phx-click="cancel_upload"
+            phx-value-ref={entry.ref}
+            phx-target={@myself}
+            id="cancel-upload"
+          >
             &times;
           </a>
         </div>
@@ -196,95 +232,123 @@
 
       <%= for error <- @avatar_changeset.errors do %>
         <div class="text-red-500 pt-2" id="avatar-submit-error">
-          <%= display_avatar_error(error) %>
+          {display_avatar_error(error)}
         </div>
       <% end %>
 
-      <%= submit "Upload avatar",
-            phx_disable_with: "Uploading...",
-            class: button_style(@active_user),
-            id: "submit-user-avatar-upload" %>
+      {submit("Upload avatar",
+        phx_disable_with: "Uploading...",
+        class: button_style(@active_user),
+        id: "submit-user-avatar-upload"
+      )}
     </.form>
   </div>
-
-  <!-- Change Email -->
+  
+<!-- Change Email -->
   <div class="text-2xl py-4 md:pl-8">Change email</div>
   <div class={settings_block(@active_user)}>
-    <.form let={f} for={@email_changeset} id="update-user-email-form"
-           phx_submit="update_email"
-           phx_target={@myself}>
+    <.form
+      let={f}
+      for={@email_changeset}
+      id="update-user-email-form"
+      phx_submit="update_email"
+      phx_target={@myself}
+    >
       <%= if @email_changeset.action do %>
         <div class="alert alert-danger">
           <p>Oops, something went wrong! Please check the errors below.</p>
         </div>
       <% end %>
       <%= if @email_updated do %>
-        <p class="alert alert-info"
-           id="email-updated-ok"
-           phx-click="clear_flash"
-           phx-value-flash="email_updated"
-           phx-target={@myself}>
+        <p
+          class="alert alert-info"
+          id="email-updated-ok"
+          phx-click="clear_flash"
+          phx-value-flash="email_updated"
+          phx-target={@myself}
+        >
           A link to confirm your email change has been sent to the new address.
         </p>
       <% end %>
 
-      <%= hidden_input f, :action, name: "action", value: "update_email" %>
+      {hidden_input(f, :action, name: "action", value: "update_email")}
 
-      <%= label f, :email, class: StyleHelpers.user_form_label(@active_user) %>
-      <%= email_input f, :email, required: true,
-                      class: StyleHelpers.user_form(@active_user) %>
-      <%= error_tag f, :email %>
+      {label(f, :email, class: StyleHelpers.user_form_label(@active_user))}
+      {email_input(f, :email,
+        required: true,
+        class: StyleHelpers.user_form(@active_user)
+      )}
+      {error_tag(f, :email)}
 
-      <%= label f, :current_password, for: "current_password_for_email",
-                class: StyleHelpers.user_form_label(@active_user) %>
-      <%= password_input f, :current_password, required: true,
-                         name: "current_password", id: "current_password_for_email",
-                         class: StyleHelpers.user_form(@active_user) %>
-      <%= error_tag f, :current_password %>
+      {label(f, :current_password,
+        for: "current_password_for_email",
+        class: StyleHelpers.user_form_label(@active_user)
+      )}
+      {password_input(f, :current_password,
+        required: true,
+        name: "current_password",
+        id: "current_password_for_email",
+        class: StyleHelpers.user_form(@active_user)
+      )}
+      {error_tag(f, :current_password)}
 
-      <%= submit "Change email",
-            phx_disable_with: "Changing...",
-            class: button_style(@active_user) %>
+      {submit("Change email",
+        phx_disable_with: "Changing...",
+        class: button_style(@active_user)
+      )}
     </.form>
-
   </div>
-
-  <!-- Change password -->
+  
+<!-- Change password -->
   <div class="text-2xl py-4 md:pl-8">Change password</div>
   <div class={settings_block(@active_user)}>
-    <.form let={f} for={@password_changeset} id="change-user-password-form"
-           phx_submit="change_password"
-           phx_target={@myself}>
+    <.form
+      let={f}
+      for={@password_changeset}
+      id="change-user-password-form"
+      phx_submit="change_password"
+      phx_target={@myself}
+    >
       <%= if @password_changeset.action do %>
         <div class="alert alert-danger">
           <p>Oops, something went wrong! Please check the errors below.</p>
         </div>
       <% end %>
 
-      <%= hidden_input f, :action, name: "action", value: "update_password" %>
+      {hidden_input(f, :action, name: "action", value: "update_password")}
 
-      <%= label f, :password, "New password",
-                class: StyleHelpers.user_form_label(@active_user) %>
-      <%= password_input f, :password, required: true,
-                         class: StyleHelpers.user_form(@active_user) %>
-      <%= error_tag f, :password %>
+      {label(f, :password, "New password", class: StyleHelpers.user_form_label(@active_user))}
+      {password_input(f, :password,
+        required: true,
+        class: StyleHelpers.user_form(@active_user)
+      )}
+      {error_tag(f, :password)}
 
-      <%= label f, :password_confirmation, "Confirm new password",
-                class: StyleHelpers.user_form_label(@active_user) %>
-      <%= password_input f, :password_confirmation, required: true,
-                         class: StyleHelpers.user_form(@active_user) %>
-      <%= error_tag f, :password_confirmation %>
+      {label(f, :password_confirmation, "Confirm new password",
+        class: StyleHelpers.user_form_label(@active_user)
+      )}
+      {password_input(f, :password_confirmation,
+        required: true,
+        class: StyleHelpers.user_form(@active_user)
+      )}
+      {error_tag(f, :password_confirmation)}
 
-      <%= label f, :current_password, for: "current_password_for_password",
-                class: StyleHelpers.user_form_label(@active_user) %>
-      <%= password_input f, :current_password, required: true,
-                         name: "current_password", id: "current_password_for_password",
-                         class: StyleHelpers.user_form(@active_user) %>
-      <%= error_tag f, :current_password %>
+      {label(f, :current_password,
+        for: "current_password_for_password",
+        class: StyleHelpers.user_form_label(@active_user)
+      )}
+      {password_input(f, :current_password,
+        required: true,
+        name: "current_password",
+        id: "current_password_for_password",
+        class: StyleHelpers.user_form(@active_user)
+      )}
+      {error_tag(f, :current_password)}
 
-      <%= submit "Change password",
-            phx_disable_with: "Changing...",
-            class: button_style(@active_user) %>
+      {submit("Change password",
+        phx_disable_with: "Changing...",
+        class: button_style(@active_user)
+      )}
     </.form>
   </div>
 </div>

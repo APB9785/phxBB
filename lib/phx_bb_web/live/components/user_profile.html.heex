@@ -1,18 +1,18 @@
 <div>
   <div class="text-2xl pb-0 md:pl-8 md:pt-4 font-bold" id="user-profile-header">
-    <%= @view_user.username %>
+    {@view_user.username}
   </div>
 
   <div class="pb-4 md:pl-8" id="user-profile-title">
-    <%= @view_user.title %>
+    {@view_user.title}
   </div>
 
   <div class="pb-4 md:pl-8" id="user-profile-title">
-    Joined <%= Timestamps.format_date(@view_user.inserted_at, @active_user) %>
+    Joined {Timestamps.format_date(@view_user.inserted_at, @active_user)}
   </div>
 
   <div class="w-32 md:ml-8">
-    <%= img_tag @view_user.avatar, class: "max-h-40 w-full object-fill pb-4" %>
+    {img_tag(@view_user.avatar, class: "max-h-40 w-full object-fill pb-4")}
   </div>
 
   <div class="text-2xl md:pl-8 md:pb-2">
@@ -21,14 +21,14 @@
 
   <%= for post <- @post_history do %>
     <div class="text-sm md:pl-10 pt-2">
-      in <%= link_to_topic(post, @active_user) %>:
+      in {link_to_topic(post, @active_user)}:
     </div>
     <div class={user_history_bubble_style(@active_user)}>
       <div class={user_history_timestamp_style(@active_user)}>
-        <%= Timestamps.format_time(post.inserted_at, @active_user) %>
+        {Timestamps.format_time(post.inserted_at, @active_user)}
       </div>
       <p class="pl-2 w-max">
-        <%= Parsers.parse_post_body(post.body) %>
+        {Parsers.parse_post_body(post.body)}
       </p>
     </div>
   <% end %>

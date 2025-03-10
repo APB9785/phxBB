@@ -1,26 +1,29 @@
 <div class="md:w-10/12 pt-2 block pl-4">
   <div class="flex">
-
     <div class={post_timestamp_style(@active_user)}>
-      <%= Timestamps.format_time(@active_post.inserted_at, @active_user) %>
+      {Timestamps.format_time(@active_post.inserted_at, @active_user)}
     </div>
 
     <%= if may_edit?(@active_user, @active_post) do %>
       <div class={post_timestamp_style(@active_user)}>&nbsp-&nbsp</div>
-      <button phx-click="edit_post"
-              phx-target={@myself}
-              class={post_edit_link_style(@active_user)}
-              id={"edit-post-#{@active_post.id}-link"}>
+      <button
+        phx-click="edit_post"
+        phx-target={@myself}
+        class={post_edit_link_style(@active_user)}
+        id={"edit-post-#{@active_post.id}-link"}
+      >
         Edit Post
       </button>
       <div class={post_timestamp_style(@active_user)}>&nbsp-&nbsp</div>
 
-      <button phx-click="delete_post"
-              data-confirm="Are you sure?"
-              phx-value-id={@active_post.id}
-              phx-target={@myself}
-              class={post_edit_link_style(@active_user)}
-              id={"delete-post-#{@active_post.id}"}>
+      <button
+        phx-click="delete_post"
+        data-confirm="Are you sure?"
+        phx-value-id={@active_post.id}
+        phx-target={@myself}
+        class={post_edit_link_style(@active_user)}
+        id={"delete-post-#{@active_post.id}"}
+      >
         Delete Post
       </button>
     <% end %>
@@ -28,37 +31,44 @@
 
   <div class="py-4 pr-4">
     <%= if @edit do %>
-      <.form let={f} for={@changeset}
-             phx_submit="save_edit"
-             phx_change="validate"
-             phx_target={@myself}
-             id={"edit-post-#{@active_post.id}-form"}>
+      <.form
+        let={f}
+        for={@changeset}
+        phx_submit="save_edit"
+        phx_change="validate"
+        phx_target={@myself}
+        id={"edit-post-#{@active_post.id}-form"}
+      >
+        {textarea(f, :body,
+          value: edit_post_form_value(@changeset),
+          phx_debounce: "blur",
+          autocomplete: "off",
+          class: post_form_style(@active_user)
+        )}
 
-        <%= textarea f, :body,
-              value: edit_post_form_value(@changeset),
-              phx_debounce: "blur",
-              autocomplete: "off",
-              class: post_form_style(@active_user) %>
+        <div class="ml-2 mt-2">{error_tag(f, :body)}</div>
 
-        <div class="ml-2 mt-2"><%= error_tag f, :body %></div>
+        {submit("Save Reply",
+          phx_disable_with: "Saving...",
+          class: small_button_style(@active_user)
+        )}
 
-        <%= submit "Save Reply",
-              phx_disable_with: "Saving...",
-              class: small_button_style(@active_user) %>
-
-        <button phx-click="cancel_edit"
-                type="button"
-                phx-target={@myself}
-                class={post_edit_link_style(@active_user)}
-                id={"cancel-post-#{@active_post.id}-edit"}>
+        <button
+          phx-click="cancel_edit"
+          type="button"
+          phx-target={@myself}
+          class={post_edit_link_style(@active_user)}
+          id={"cancel-post-#{@active_post.id}-edit"}
+        >
           Cancel
         </button>
       </.form>
     <% else %>
-      <%= live_component PhxBbWeb.PostContentBody,
-            active_post: @active_post,
-            active_user: @active_user,
-            id: "#{@active_post.id}" %>
+      {live_component(PhxBbWeb.PostContentBody,
+        active_post: @active_post,
+        active_user: @active_user,
+        id: "#{@active_post.id}"
+      )}
     <% end %>
   </div>
 </div>

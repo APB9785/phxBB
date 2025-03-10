@@ -1,38 +1,36 @@
 <%= case @active_user do %>
-
-<% nil -> %>
-  <div class={user_menu(nil)} id="logged-out-menu">
-    <div class="flex justify-center">
-      <div><%= register_link() %></div>
-      &nbsp;&nbsp;&nbsp;&nbsp;
-      <div><%= login_link() %></div>
-    </div>
-  </div>
-
-<% user -> %>
-  <div class={user_menu(user)} id="logged-in-menu">
-    <div class="text-center">
-      Logged in as <%= user_profile_link(user) %>
-      <br>
-    </div>
-    <div class="flex justify-center flex-wrap">
-      <%= if user.admin do %>
-        <div><%= admin_panel_link(user) %></div>
+  <% nil -> %>
+    <div class={user_menu(nil)} id="logged-out-menu">
+      <div class="flex justify-center">
+        <div>{register_link()}</div>
         &nbsp;&nbsp;&nbsp;&nbsp;
-      <% end %>
-      <div><%= settings_link(user) %></div>
-      &nbsp;&nbsp;&nbsp;&nbsp;
-      <div><%= logout_link(user) %></div>
-    </div>
-    <div class="flex justify-center">
-      <div>
-        <%= messages_link(user) %>
+        <div>{login_link()}</div>
       </div>
-      <%= if @unread_messages > 0 do %>
-        <div id="unread-message-notification">
-          &nbsp;(<%= @unread_messages %>)
-        </div>
-      <% end %>
     </div>
-  </div>
+  <% user -> %>
+    <div class={user_menu(user)} id="logged-in-menu">
+      <div class="text-center">
+        Logged in as {user_profile_link(user)}
+        <br />
+      </div>
+      <div class="flex justify-center flex-wrap">
+        <%= if user.admin do %>
+          <div>{admin_panel_link(user)}</div>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+        <% end %>
+        <div>{settings_link(user)}</div>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <div>{logout_link(user)}</div>
+      </div>
+      <div class="flex justify-center">
+        <div>
+          {messages_link(user)}
+        </div>
+        <%= if @unread_messages > 0 do %>
+          <div id="unread-message-notification">
+            &nbsp;({@unread_messages})
+          </div>
+        <% end %>
+      </div>
+    </div>
 <% end %>

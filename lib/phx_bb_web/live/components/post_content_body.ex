@@ -12,12 +12,15 @@ defmodule PhxBbWeb.PostContentBody do
   def render(assigns) do
     ~H"""
     <div id={"post-#{@active_post.id}-body"}>
-      <%= parse_post_body(@active_post.body) %>
+      {parse_post_body(@active_post.body)}
 
       <%= if @active_post.edited_by do %>
-        <br>
+        <br />
         <div class="italic text-sm">
-          Edited by <%= @active_post.edited_by.username %> on <%= Timestamps.format_time(@active_post.updated_at, @active_user) %>
+          Edited by {@active_post.edited_by.username} on {Timestamps.format_time(
+            @active_post.updated_at,
+            @active_user
+          )}
         </div>
       <% end %>
     </div>

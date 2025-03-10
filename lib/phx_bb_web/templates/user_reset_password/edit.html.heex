@@ -1,7 +1,10 @@
 <div class="px-6 mt-8 mx-auto w-full max-w-md">
-
-  <.form let={f} for={@changeset} action={Routes.user_reset_password_path(@conn, :update, @token)}
-         class="bg-gray-200 px-10 py-6 mb-6 shadow rounded-lg">
+  <.form
+    let={f}
+    for={@changeset}
+    action={Routes.user_reset_password_path(@conn, :update, @token)}
+    class="bg-gray-200 px-10 py-6 mb-6 shadow rounded-lg"
+  >
     <h1 class="text-xl pb-2">Reset password</h1>
 
     <%= if @changeset.action do %>
@@ -10,23 +13,26 @@
       </div>
     <% end %>
 
-    <%= label f, :password, "New password", class: StyleHelpers.user_form_label(nil) %>
-    <%= password_input f, :password, required: true, class: StyleHelpers.user_form(nil) %>
-    <%= error_tag f, :password %>
+    {label(f, :password, "New password", class: StyleHelpers.user_form_label(nil))}
+    {password_input(f, :password, required: true, class: StyleHelpers.user_form(nil))}
+    {error_tag(f, :password)}
 
-    <%= label f, :password_confirmation, "Confirm new password", class: StyleHelpers.user_form_label(nil) %>
-    <%= password_input f, :password_confirmation, required: true, class: StyleHelpers.user_form(nil) %>
-    <%= error_tag f, :password_confirmation %>
+    {label(f, :password_confirmation, "Confirm new password",
+      class: StyleHelpers.user_form_label(nil)
+    )}
+    {password_input(f, :password_confirmation, required: true, class: StyleHelpers.user_form(nil))}
+    {error_tag(f, :password_confirmation)}
 
     <div>
-      <%= submit "Reset password",
-            class: "mt-6 justify-center rounded-md bg-gray-900 text-gray-100 w-full h-8" %>
+      {submit("Reset password",
+        class: "mt-6 justify-center rounded-md bg-gray-900 text-gray-100 w-full h-8"
+      )}
     </div>
 
     <p class="mt-6">
-      <%= link "Register", to: Routes.live_path(@conn, ForumLive, register: 1) %> |
-      <%= link "Log in", to: Routes.user_session_path(@conn, :new) %>
+      {link("Register", to: Routes.live_path(@conn, ForumLive, register: 1))} | {link("Log in",
+        to: Routes.user_session_path(@conn, :new)
+      )}
     </p>
   </.form>
-
 </div>
