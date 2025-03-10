@@ -1,39 +1,11 @@
 <div>
-  <%= if !@active_user.confirmed_at do %>
-    <div class={confirmation_reminder_style(@active_user)}>
-      <%= if @confirmation_resent do %>
-        <p
-          class="alert alert-info"
-          id="confirmation-resent-ok"
-          phx-click="clear_flash"
-          phx-value-flash="confirmation_resent"
-          phx-target={@myself}
-        >
-          Confirmation instructions re-sent.
-        </p>
-      <% end %>
-      <div class="pb-4">
-        Please confirm your account by clicking the link in your email.
-        Be sure to check the "Promotions" folder if you use gmail.
-      </div>
-      <div>Current Email: {@active_user.email}</div>
-      <button
-        phx-click="resend_confirmation"
-        phx-target={@myself}
-        class={button_style(@active_user)}
-        id="resend-verification-button"
-      >
-        Re-send confirmation link
-      </button>
-    </div>
-  <% end %>
   
-<!-- Change Timezone -->
+<%!-- <!-- Change Timezone -->
   <div class="text-2xl py-4 md:pl-8">Change timezone</div>
   <div class={settings_block(@active_user)}>
     <.form
-      let={f}
-      for={@tz_changeset}
+      :let={f}
+      for={to_form(@tz_changeset)}
       id="change-user-timezone-form"
       phx_submit="change_timezone"
       phx_target={@myself}
@@ -70,8 +42,8 @@
   <div class="text-2xl py-4 md:pl-8">Change user title</div>
   <div class={settings_block(@active_user)}>
     <.form
-      let={f}
-      for={@title_changeset}
+      :let={f}
+      for={to_form(@title_changeset)}
       id="change-user-title-form"
       phx_submit="change_user_title"
       phx_target={@myself}
@@ -108,8 +80,8 @@
   <div class="text-2xl py-4 md:pl-8">Change theme</div>
   <div class={settings_block(@active_user)}>
     <.form
-      let={f}
-      for={@theme_changeset}
+      :let={f}
+      for={to_form(@theme_changeset)}
       id="change-user-theme-form"
       phx_submit="change_user_theme"
       phx_target={@myself}
@@ -184,7 +156,7 @@
     <% end %>
 
     <.form
-      for={@avatar_changeset}
+      for={to_form(@avatar_changeset)}
       id="change-user-avatar-form"
       phx_submit="upload_avatar"
       phx_target={@myself}
@@ -248,8 +220,8 @@
   <div class="text-2xl py-4 md:pl-8">Change email</div>
   <div class={settings_block(@active_user)}>
     <.form
-      let={f}
-      for={@email_changeset}
+      :let={f}
+      for={to_form(@email_changeset)}
       id="update-user-email-form"
       phx_submit="update_email"
       phx_target={@myself}
@@ -303,8 +275,8 @@
   <div class="text-2xl py-4 md:pl-8">Change password</div>
   <div class={settings_block(@active_user)}>
     <.form
-      let={f}
-      for={@password_changeset}
+      :let={f}
+      for={to_form(@password_changeset)}
       id="change-user-password-form"
       phx_submit="change_password"
       phx_target={@myself}
@@ -350,5 +322,5 @@
         class: button_style(@active_user)
       )}
     </.form>
-  </div>
+  </div> --%>
 </div>

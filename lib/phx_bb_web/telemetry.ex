@@ -88,7 +88,7 @@ defmodule PhxBbWeb.Telemetry do
     [
       # A module, function and arguments to be invoked periodically.
       # This function must call :telemetry.execute/3 and a metric must be added above.
-      # {PhxNew1720Web, :count_users, []}
+      # {PhxBbWeb, :count_users, []}
     ]
   end
 end

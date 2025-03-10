@@ -32,8 +32,8 @@
   <div class="py-4 pr-4">
     <%= if @edit do %>
       <.form
-        let={f}
-        for={@changeset}
+        :let={f}
+        for={to_form(@changeset)}
         phx_submit="save_edit"
         phx_change="validate"
         phx_target={@myself}
@@ -64,11 +64,11 @@
         </button>
       </.form>
     <% else %>
-      {live_component(PhxBbWeb.PostContentBody,
-        active_post: @active_post,
-        active_user: @active_user,
-        id: "#{@active_post.id}"
-      )}
+      <.live_component module={PhxBbWeb.PostContentBody}
+        active_post={@active_post}
+        active_user={@active_user}
+        id={"#{@active_post.id}"}
+      />
     <% end %>
   </div>
 </div>

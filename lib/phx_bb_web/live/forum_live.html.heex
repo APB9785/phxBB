@@ -1,8 +1,9 @@
 <!--   User Menu   -->
-{live_component(PhxBbWeb.UserMenu,
-  active_user: @active_user,
-  unread_messages: @unread_messages
-)}
+<.live_component
+  module={PhxBbWeb.UserMenu}
+  active_user={@active_user}
+  unread_messages={@unread_messages}
+/>
 
 <!-- JS Hook for changing background color -->
 <div id="bg-color-setter" phx-hook="BackgroundColorChange" data-value={@bg_color}></div>
@@ -14,12 +15,13 @@
         Welcome to the Forum!
       </div>
 
-      {live_component(PhxBbWeb.MainIndex, active_user: @active_user)}
+      <.live_component module={PhxBbWeb.MainIndex} active_user={@active_user} />
 
-      {live_component(PhxBbWeb.UsersOnline,
-        active_user: @active_user,
-        users_online: @users_online
-      )}
+      <.live_component
+        module={PhxBbWeb.UsersOnline}
+        active_user={@active_user}
+        users_online={@users_online}
+      />
     <% :board -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
         > {link_to_index(@active_user)}
@@ -39,20 +41,19 @@
       <div id="topic-header" class="text-2xl pb-4 md:pl-8">
         {@active_topic.title}
       </div>
-      {live_component(PhxBbWeb.Topic,
-        active_user: @active_user,
-        active_topic: @active_topic,
-        post_list: @post_list,
-        id: "topic-component"
-      )}
+      <.live_component module={PhxBbWeb.Topic}
+        active_user={@active_user}
+        active_topic={@active_topic}
+        post_list={@post_list}
+        id="topic-component"
+      />
       <!-- New Post form -->
-      <%= if @active_user do %>
-        {live_component(PhxBbWeb.CreatePost,
-          active_user: @active_user,
-          active_topic: @active_topic,
-          id: "new-post-component"
-        )}
-      <% end %>
+        <.live_component module={PhxBbWeb.CreatePost}
+        :if={@active_user}
+          active_user={@active_user}
+          active_topic={@active_topic}
+          id="new-post-component"
+        />
     <% :create_topic -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
         > {link_to_index(@active_user)} > {link_to_board(@active_board, @active_user)}
@@ -60,35 +61,35 @@
       <div class="text-2xl pb-4 md:pl-8" id="create-topic-header">
         Create New Topic
       </div>
-      {live_component(PhxBbWeb.CreateTopic,
-        active_user: @active_user,
-        active_board: @active_board,
-        id: "create-topic-component"
-      )}
+      <.live_component module={PhxBbWeb.CreateTopic}
+        active_user={@active_user}
+        active_board={@active_board}
+        id="create-topic-component"
+      />
     <% :user_profile -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
         > {link_to_index(@active_user)}
       </div>
-      {live_component(PhxBbWeb.UserProfile,
-        active_user: @active_user,
-        view_user: @view_user
-      )}
+      <.live_component module={PhxBbWeb.UserProfile}
+        active_user={@active_user}
+        view_user={@view_user}
+      />
     <% :settings -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
         > {link_to_index(@active_user)}
       </div>
-      {live_component(PhxBbWeb.UserSettings,
-        active_user: @active_user,
-        id: "user-settings-component"
-      )}
+      <.live_component module={PhxBbWeb.UserSettings}
+        active_user={@active_user}
+        id="user-settings-component"
+      />
     <% :admin -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
         > {link_to_index(@active_user)}
       </div>
-      {live_component(PhxBbWeb.AdminPanel,
-        active_user: @active_user,
-        id: "admin-panel-component"
-      )}
+      <.live_component module={PhxBbWeb.AdminPanel}
+        active_user={@active_user}
+        id="admin-panel-component"
+      />
     <% :register -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
         > {link_to_index(@active_user)}
@@ -96,10 +97,10 @@
       <div class="text-2xl p-4 md:pl-8" id="register-header">
         Register
       </div>
-      {live_component(PhxBbWeb.UserRegistration,
-        active_user: @active_user,
-        id: "user-registration-component"
-      )}
+      <.live_component module={PhxBbWeb.UserRegistration}
+        active_user={@active_user}
+        id="user-registration-component"
+      />
     <% :inbox -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
         > {link_to_index(@active_user)}
@@ -107,10 +108,10 @@
       <div class="text-2xl p-4 md:pl-8" id="inbox-header">
         Inbox
       </div>
-      {live_component(PhxBbWeb.Inbox,
-        active_user: @active_user,
-        id: "inbox-component"
-      )}
+      <.live_component module={PhxBbWeb.Inbox}
+        active_user={@active_user}
+        id="inbox-component"
+      />
     <% :new_message -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
         > {link_to_index(@active_user)} > {link_to_inbox(@active_user)}
@@ -118,10 +119,10 @@
       <div class="text-2xl p-4 md:pl-8" id="new-message-header">
         New Message
       </div>
-      {live_component(PhxBbWeb.NewMessage,
-        active_user: @active_user,
-        id: "new-message-component"
-      )}
+      <.live_component module={PhxBbWeb.NewMessage}
+        active_user={@active_user}
+        id="new-message-component"
+      />
     <% :invalid -> %>
       <div class="text-2xl p-8 text-center" id="page-not-found-live">
         404 Page Not Found

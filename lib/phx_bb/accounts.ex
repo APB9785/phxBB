@@ -2,10 +2,11 @@ defmodule PhxBb.Accounts do
   @moduledoc """
   The Accounts context.
   """
-
   import Ecto.Query, warn: false
 
-  alias PhxBb.Accounts.{User, UserNotifier, UserToken}
+  alias PhxBb.Accounts.User
+  alias PhxBb.Accounts.UserNotifier
+  alias PhxBb.Accounts.UserToken
   alias PhxBb.Posts.Post
   alias PhxBb.Repo
 
@@ -141,7 +142,7 @@ defmodule PhxBb.Accounts do
 
   """
   def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, hash_password: false)
+    User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
   end
 
   ## Settings
@@ -156,7 +157,7 @@ defmodule PhxBb.Accounts do
 
   """
   def change_user_email(user, attrs \\ %{}) do
-    User.email_changeset(user, attrs)
+    User.email_changeset(user, attrs, validate_email: false)
   end
 
   def change_user_timezone(user, attrs \\ %{}) do
@@ -216,11 +217,14 @@ defmodule PhxBb.Accounts do
   end
 
   defp user_email_multi(user, email, context) do
-    changeset = user |> User.email_changeset(%{email: email}) |> User.confirm_changeset()
+    changeset =
+      user
+      |> User.email_changeset(%{email: email})
+      |> User.confirm_changeset()
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, [context]))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, [context]))
   end
 
   @doc """
@@ -273,7 +277,7 @@ defmodule PhxBb.Accounts do
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
@@ -436,7 +440,7 @@ defmodule PhxBb.Accounts do
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}

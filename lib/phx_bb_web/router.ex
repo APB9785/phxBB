@@ -26,12 +26,12 @@ defmodule PhxBbWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", PhxNew1720Web do
+  # scope "/api", PhxBbWeb do
   #   pipe_through :api
   # end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
-  if Application.compile_env(:phx_new_1_7_20, :dev_routes) do
+  if Application.compile_env(:phx_bb, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
     # it behind authentication and allow only admins to access it.
     # If your application does not have an admins-only section yet,
@@ -42,7 +42,7 @@ defmodule PhxBbWeb.Router do
     scope "/dev" do
       pipe_through :browser
 
-      live_dashboard "/dashboard", metrics: PhxNew1720Web.Telemetry
+      live_dashboard "/dashboard", metrics: PhxBbWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
@@ -52,17 +52,36 @@ defmodule PhxBbWeb.Router do
   scope "/", PhxBbWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
-    get "/users/log_in", UserSessionController, :new
+    live_session :redirect_if_user_is_authenticated,
+      on_mount: [{PhxBbWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      live "/users/register", UserRegistrationLive, :new
+      live "/users/log_in", UserLoginLive, :new
+      live "/users/reset_password", UserForgotPasswordLive, :new
+      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+    end
+
     post "/users/log_in", UserSessionController, :create
-    get "/users/reset_password", UserResetPasswordController, :new
-    post "/users/reset_password", UserResetPasswordController, :create
-    get "/users/reset_password/:token", UserResetPasswordController, :edit
-    put "/users/reset_password/:token", UserResetPasswordController, :update
+  end
+
+  scope "/", PhxBbWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{PhxBbWeb.UserAuth, :ensure_authenticated}] do
+      live "/users/settings", UserSettingsLive, :edit
+      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+    end
   end
 
   scope "/", PhxBbWeb do
     pipe_through [:browser]
 
     delete "/users/log_out", UserSessionController, :delete
+
+    live_session :current_user,
+      on_mount: [{PhxBbWeb.UserAuth, :mount_current_user}] do
+      live "/users/confirm/:token", UserConfirmationLive, :edit
+      live "/users/confirm", UserConfirmationInstructionsLive, :new
+    end
   end
 end

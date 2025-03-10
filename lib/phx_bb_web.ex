@@ -87,7 +87,8 @@ defmodule PhxBbWeb do
 
       # HTML escaping functionality
       import Phoenix.HTML
-      # Core UI components
+      # UI components
+      import PhxBbWeb.AppComponents
       import PhxBbWeb.CoreComponents
 
       # Shortcut for generating JS commands
