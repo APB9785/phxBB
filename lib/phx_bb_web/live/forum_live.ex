@@ -28,7 +28,7 @@ defmodule PhxBbWeb.ForumLive do
 
           socket
           |> assign(unread_messages: nil)
-          |> assign(active_user: nil)
+          |> assign(current_user: nil)
           |> assign(bg_color: StyleHelpers.get_default_background())
           |> assign_defaults()
 
@@ -42,7 +42,7 @@ defmodule PhxBbWeb.ForumLive do
 
           socket
           |> assign(unread_messages: Messages.unread_for_user(user.id))
-          |> assign(active_user: user)
+          |> assign(current_user: user)
           |> assign(bg_color: StyleHelpers.get_theme_background(user))
           |> assign_defaults()
       end
@@ -51,7 +51,7 @@ defmodule PhxBbWeb.ForumLive do
   end
 
   def handle_params(%{"create_topic" => "1", "board" => _}, _url, socket)
-      when is_nil(socket.assigns.active_user) do
+      when is_nil(socket.assigns.current_user) do
     {:noreply, push_redirect(socket, to: "/users/log_in")}
   end
 
@@ -77,7 +77,7 @@ defmodule PhxBbWeb.ForumLive do
         {:noreply, assign_invalid(socket)}
 
       %Topic{} = topic ->
-        user = socket.assigns.active_user
+        user = socket.assigns.current_user
         user_id = if user, do: user.id, else: nil
         SeenTopics.seen_now(user_id, topic.id)
         Topics.increment_view_count(topic.id)
@@ -123,7 +123,7 @@ defmodule PhxBbWeb.ForumLive do
   end
 
   def handle_params(%{"settings" => "1"}, _url, socket) do
-    case socket.assigns.active_user do
+    case socket.assigns.current_user do
       nil ->
         {:noreply, push_redirect(socket, to: "/users/log_in")}
 
@@ -133,7 +133,7 @@ defmodule PhxBbWeb.ForumLive do
   end
 
   def handle_params(%{"admin" => "1"}, _url, socket) do
-    if is_admin?(socket.assigns.active_user) do
+    if is_admin?(socket.assigns.current_user) do
       {:noreply, assign(socket, nav: :admin, page_title: "Admin Panel", child_pid: nil)}
     else
       {:noreply, assign_invalid(socket)}
@@ -141,7 +141,7 @@ defmodule PhxBbWeb.ForumLive do
   end
 
   def handle_params(%{"register" => "1"}, _url, socket) do
-    if is_nil(socket.assigns.active_user) do
+    if is_nil(socket.assigns.current_user) do
       {:noreply, assign(socket, nav: :register, page_title: "Register", child_pid: nil)}
     else
       {:noreply,
@@ -152,7 +152,7 @@ defmodule PhxBbWeb.ForumLive do
   end
 
   def handle_params(%{"messages" => "inbox"}, _url, socket) do
-    case socket.assigns.active_user do
+    case socket.assigns.current_user do
       nil ->
         {:noreply, push_redirect(socket, to: "/users/log_in")}
 
@@ -162,7 +162,7 @@ defmodule PhxBbWeb.ForumLive do
   end
 
   def handle_params(%{"messages" => "new"}, _url, socket) do
-    case socket.assigns.active_user do
+    case socket.assigns.current_user do
       nil ->
         {:noreply, push_redirect(socket, to: "/users/log_in")}
 
@@ -187,7 +187,7 @@ defmodule PhxBbWeb.ForumLive do
   end
 
   def handle_params(%{"confirm_email" => token}, _url, socket) do
-    case Accounts.update_user_email(socket.assigns.active_user, token) do
+    case Accounts.update_user_email(socket.assigns.current_user, token) do
       :ok ->
         {:noreply,
          socket
@@ -234,12 +234,12 @@ defmodule PhxBbWeb.ForumLive do
   def handle_info({:updated_user, user}, %{assigns: %{child_pid: c_pid}} = socket) do
     if c_pid, do: send(c_pid, {:updated_user, user})
 
-    {:noreply, assign(socket, active_user: user)}
+    {:noreply, assign(socket, current_user: user)}
   end
 
   def handle_info({:updated_theme, user}, socket) do
     bg_color = StyleHelpers.get_theme_background(user)
-    {:noreply, assign(socket, active_user: user, bg_color: bg_color)}
+    {:noreply, assign(socket, current_user: user, bg_color: bg_color)}
   end
 
   def assign_invalid(socket) do
@@ -281,7 +281,7 @@ defmodule PhxBbWeb.ForumLive do
 
   def user_confirm_error_redirect(socket) do
     case socket.assigns do
-      %{active_user: %{confirmed_at: confirmed_at}} when not is_nil(confirmed_at) ->
+      %{current_user: %{confirmed_at: confirmed_at}} when not is_nil(confirmed_at) ->
         # If there is a current user and the account was already confirmed,
         # then odds are that the confirmation link was already visited, either
         # by some automation or by the user themselves, so we redirect without
@@ -303,27 +303,27 @@ defmodule PhxBbWeb.ForumLive do
 
   ## Function Components
 
-  def link_to_index(active_user) do
+  def link_to_index(current_user) do
     live_patch("Board Index",
       to: Routes.live_path(Endpoint, __MODULE__),
-      class: StyleHelpers.link_style(active_user),
+      class: StyleHelpers.link_style(current_user),
       id: "crumb-index-link"
     )
   end
 
-  def link_to_board(board, active_user) do
+  def link_to_board(board, current_user) do
     live_patch(board.name,
       to: Routes.live_path(Endpoint, __MODULE__, board: board.id),
-      class: StyleHelpers.link_style(active_user),
+      class: StyleHelpers.link_style(current_user),
       id: "crumb-board-link"
     )
   end
 
-  def link_to_inbox(active_user) do
+  def link_to_inbox(current_user) do
     live_patch("Inbox",
       to: Routes.live_path(Endpoint, __MODULE__, messages: "inbox"),
       id: "crumb-inbox-link",
-      class: StyleHelpers.link_style(active_user)
+      class: StyleHelpers.link_style(current_user)
     )
   end
 end

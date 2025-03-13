@@ -2,7 +2,6 @@ defmodule PhxBbWeb.BoardLive do
   @moduledoc """
   LiveView to display a board and its topics.
   """
-
   use PhxBbWeb, :live_view
 
   alias PhxBb.Accounts.User
@@ -14,7 +13,7 @@ defmodule PhxBbWeb.BoardLive do
     if connected?(socket), do: send(socket.parent_pid, {:child_pid, self()})
 
     board = session["active_board"]
-    user = session["active_user"]
+    user = session["current_user"]
     page = 1
     topics = PhxBb.Topics.list_topics(board.id, page, user)
 
@@ -27,7 +26,7 @@ defmodule PhxBbWeb.BoardLive do
         topic_list: topics,
         topic_queue: [],
         active_board: board,
-        active_user: user
+        current_user: user
       )
 
     {:ok, socket, temporary_assigns: [topic_list: []]}
@@ -36,7 +35,7 @@ defmodule PhxBbWeb.BoardLive do
   def handle_event("load_more", _params, socket) do
     new_page = socket.assigns.page + 1
     board = socket.assigns.active_board
-    user = socket.assigns.active_user
+    user = socket.assigns.current_user
     topics = Topics.list_topics(board.id, new_page, user)
 
     {:noreply, assign(socket, update_toggle: "append", page: new_page, topic_list: topics)}
@@ -46,7 +45,7 @@ defmodule PhxBbWeb.BoardLive do
     {:noreply, assign(socket, update_toggle: "prepend", topic_list: queue, topic_queue: [])}
   end
 
-  def handle_info({:new_topic, topic}, %{assigns: %{active_user: user}} = socket) do
+  def handle_info({:new_topic, topic}, %{assigns: %{current_user: user}} = socket) do
     if is_nil(user) or user.id == topic.author.id do
       {:noreply, socket}
     else
@@ -56,31 +55,31 @@ defmodule PhxBbWeb.BoardLive do
   end
 
   def handle_info({:updated_user, user}, socket) do
-    {:noreply, assign(socket, active_user: user)}
+    {:noreply, assign(socket, current_user: user)}
   end
 
-  def link_to_topic(%Topic{title: title, id: id} = topic, active_user) do
+  def link_to_topic(%Topic{title: title, id: id} = topic, current_user) do
     live_patch(title,
       to: Routes.live_path(Endpoint, ForumLive, topic: id),
-      class: topic_link_style(active_user, topic),
+      class: topic_link_style(current_user, topic),
       phx_hook: "ScrollToTop",
       id: "topic-listing-link-#{id}"
     )
   end
 
-  def link_to_author(%Topic{author: author, id: id}, active_user) do
+  def link_to_author(%Topic{author: author, id: id}, current_user) do
     live_patch(author.username,
       to: Routes.live_path(Endpoint, ForumLive, user: author),
-      class: StyleHelpers.link_style(active_user),
+      class: StyleHelpers.link_style(current_user),
       phx_hook: "ScrollToTop",
       id: "topic-author-link-#{id}"
     )
   end
 
-  def link_to_recent_user(%Topic{recent_user: recent_user, id: id}, active_user) do
+  def link_to_recent_user(%Topic{recent_user: recent_user, id: id}, current_user) do
     live_patch(recent_user.username,
       to: Routes.live_path(Endpoint, ForumLive, user: recent_user),
-      class: StyleHelpers.link_style(active_user),
+      class: StyleHelpers.link_style(current_user),
       phx_hook: "ScrollToTop",
       id: "topic-recent-user-link-#{id}"
     )

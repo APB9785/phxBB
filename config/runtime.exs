@@ -68,8 +68,8 @@ if config_env() == :prod do
   # Configures Swoosh API Client
   config :swoosh,
     adapter: Swoosh.Adapters.Mailjet,
-    api_key: System.get_env("MAILJET_API_KEY"}),
-    secret: System.get_env("MAILJET_SECRET_KEY"})
+    api_key: System.get_env("MAILJET_API_KEY"),
+    secret: System.get_env("MAILJET_SECRET_KEY")
 
   # ## SSL Support
   #

@@ -8,7 +8,6 @@ defmodule PhxBb.Application do
   @impl true
   def start(_type, _args) do
     children = [
-
       PhxBbWeb.Telemetry,
       PhxBb.Repo,
       {DNSCluster, query: Application.get_env(:phx_bb, :dns_cluster_query) || :ignore},

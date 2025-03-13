@@ -22,7 +22,14 @@ defmodule PhxBbWeb.Router do
   scope "/", PhxBbWeb do
     pipe_through :browser
 
-    live "/forum", ForumLive
+    live "/", MainIndex
+    live "/messages", Inbox
+    live "/messages/new", NewMessage
+    live "/topics/new", NewTopic
+    live "/topics/:topic_id", Topic
+    live "/boards/:board_id", Board
+    live "/users/:user_id", UserProfile
+    live "/users/settings", UserSettings
   end
 
   # Other scopes may use custom stacks.

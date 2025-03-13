@@ -14,13 +14,13 @@ defmodule PhxBbWeb.CreatePost do
     {:ok, assign(socket, changeset: Posts.change_post(%Post{}))}
   end
 
-  def handle_event("new_post", _, %{assigns: %{active_user: %User{disabled_at: d}}} = socket)
+  def handle_event("new_post", _, %{assigns: %{current_user: %User{disabled_at: d}}} = socket)
       when not is_nil(d) do
     {:noreply, socket}
   end
 
   def handle_event("new_post", %{"post" => params}, socket) do
-    u_id = socket.assigns.active_user.id
+    u_id = socket.assigns.current_user.id
     t_id = socket.assigns.active_topic.id
     b_id = socket.assigns.active_topic.board_id
     attrs = %{body: params["body"], author_id: u_id, topic_id: t_id, board_id: b_id}

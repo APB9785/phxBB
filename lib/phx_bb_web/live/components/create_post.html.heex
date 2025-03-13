@@ -12,17 +12,17 @@
       placeholder: "You may use Markdown to format your post",
       phx_debounce: "blur",
       autocomplete: "off",
-      class: post_form_style(@active_user)
+      class: post_form_style(@current_user)
     )}
 
     <div class="text-center mt-4">{error_tag(f, :body)}</div>
 
-    <%= if @active_user.disabled_at do %>
+    <%= if @current_user.disabled_at do %>
       <p class="text-center text-sm">
         Your posting privileges have been revoked by the forum administrator.
       </p>
     <% else %>
-      {submit("Post reply", class: new_post_button_style(@active_user))}
+      {submit("Post reply", class: new_post_button_style(@current_user))}
     <% end %>
   </.form>
 </div>

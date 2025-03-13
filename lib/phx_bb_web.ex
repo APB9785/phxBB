@@ -39,8 +39,8 @@ defmodule PhxBbWeb do
   def controller do
     quote do
       use Phoenix.Controller,
-      formats: [:html, :json],
-      layouts: [html: PhxBbWeb.Layouts]
+        formats: [:html, :json],
+        layouts: [html: PhxBbWeb.Layouts]
 
       use Gettext, backend: PhxBbWeb.Gettext
 

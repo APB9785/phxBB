@@ -4,9 +4,9 @@
       {@active_board.name}
     </div>
 
-    <%= if may_create_topic?(@active_user) do %>
+    <%= if may_create_topic?(@current_user) do %>
       <div class="pl-2 md:pr-8 flex items-center">
-        {new_topic_button(@active_board.id, @active_user)}
+        {new_topic_button(@active_board.id, @current_user)}
       </div>
     <% else %>
       <div class="md:pr-8 flex items-center">
@@ -27,15 +27,15 @@
   <% end %>
   
 <!-- Topic listing -->
-  <div id="topic-listing" class={post_dividers(@active_user)} phx-update={@update_toggle}>
+  <div id="topic-listing" class={post_dividers(@current_user)} phx-update={@update_toggle}>
     <%= for topic <- @topic_list do %>
-      <div id={"topic-#{topic.id}"} class={topic_bubble_style(@active_user)}>
+      <div id={"topic-#{topic.id}"} class={topic_bubble_style(@current_user)}>
         <div class="px-4 md:w-7/12">
-          {link_to_topic(topic, @active_user)}
+          {link_to_topic(topic, @current_user)}
           <p class="text-sm hidden md:block">
-            by {link_to_author(topic, @active_user)} at {Timestamps.format_time(
+            by {link_to_author(topic, @current_user)} at {Timestamps.format_time(
               topic.inserted_at,
-              @active_user
+              @current_user
             )}
           </p>
         </div>
@@ -48,10 +48,10 @@
 
         <div id={"post-#{topic.id}-latest-info"} class="px-4 flex md:block md:w-3/12">
           <p class="text-sm md:text-base">
-            Last post by {link_to_recent_user(topic, @active_user)}
+            Last post by {link_to_recent_user(topic, @current_user)}
           </p>
           <p class="px-1 text-sm md:hidden">at</p>
-          <p class="text-sm">{Timestamps.format_time(topic.last_post_at, @active_user)}</p>
+          <p class="text-sm">{Timestamps.format_time(topic.last_post_at, @current_user)}</p>
         </div>
       </div>
     <% end %>

@@ -34,7 +34,13 @@ defmodule PhxBbWeb.UserRegistrationLive do
         <.input field={@form[:email]} type="email" label="Email" required />
         <.input field={@form[:username]} type="text" label="Username" required />
         <.input field={@form[:password]} type="password" label="Password" required />
-        <.input field={@form[:timezone]} type="select" label="Timezone" options={Tzdata.zone_list()} required />
+        <.input
+          field={@form[:timezone]}
+          type="select"
+          label="Timezone"
+          options={Tzdata.zone_list()}
+          required
+        />
 
         <:actions>
           <.button phx-disable-with="Creating account..." class="w-full">Create an account</.button>

@@ -2,25 +2,23 @@ defmodule PhxBbWeb.CreateTopic do
   @moduledoc """
   New topic form.
   """
+  use PhxBbWeb, :live_view
 
-  use PhxBbWeb, :live_component
-
-  alias PhxBb.Accounts.User
   alias PhxBb.Topics
   alias PhxBb.Topics.NewTopic
-  alias PhxBbWeb.{ForumLive, StyleHelpers}
+  alias PhxBbWeb.StyleHelpers
 
   def mount(socket) do
     {:ok, assign(socket, changeset: Topics.new_topic_changeset(%NewTopic{}))}
   end
 
-  def handle_event("new_topic", _, %{assigns: %{active_user: %User{disabled_at: d}}} = socket)
+  def handle_event("new_topic", _, %{assigns: %{current_user: %{disabled_at: d}}} = socket)
       when not is_nil(d) do
     {:noreply, socket}
   end
 
   def handle_event("new_topic", %{"new_topic" => params}, socket) do
-    u_id = socket.assigns.active_user.id
+    u_id = socket.assigns.current_user.id
     b_id = socket.assigns.active_board.id
 
     attrs = %{
@@ -47,6 +45,52 @@ defmodule PhxBbWeb.CreateTopic do
       |> Map.put(:action, :insert)
 
     {:noreply, assign(socket, changeset: changeset)}
+  end
+
+  def render(assigns) do
+    ~H"""
+    <div class="flex w-full md:ml-8">
+      <.form
+        let={f}
+        for={@changeset}
+        id="new-topic-form"
+        class="grid w-full"
+        phx_submit="new_topic"
+        phx_change="validate"
+      >
+        {text_input(f, :title,
+          placeholder: "Subject",
+          phx_debounce: "blur",
+          autocomplete: "off",
+          class: topic_title_form_style(@current_user)
+        )}
+        <div class="pl-6 pt-4">
+          {error_tag(f, :title)}
+        </div>
+
+        {textarea(f, :body,
+          placeholder: "You may user Markdown to format your post",
+          phx_debounce: "blur",
+          autocomplete: "off",
+          class: topic_body_form_style(@current_user)
+        )}
+        <div class="pl-6 pt-4">
+          {error_tag(f, :body)}
+        </div>
+
+        <%= if @current_user.disabled_at do %>
+          <p>Your posting privileges have been revoked by the forum administrator.</p>
+        <% else %>
+          <div>
+            {submit("Create Post",
+              phx_disable_with: "Posting...",
+              class: button_style(@current_user)
+            )}
+          </div>
+        <% end %>
+      </.form>
+    </div>
+    """
   end
 
   ## Tailwind Styles
