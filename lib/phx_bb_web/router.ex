@@ -26,10 +26,11 @@ defmodule PhxBbWeb.Router do
     live "/messages", Inbox
     live "/messages/new", NewMessage
     live "/topics/new", NewTopic
-    live "/topics/:topic_id", Topic
+    live "/topics/:topic_id", CreateTopic
     live "/boards/:board_id", Board
     live "/users/:user_id", UserProfile
     live "/users/settings", UserSettings
+    live "/admin", AdminPanel
   end
 
   # Other scopes may use custom stacks.
