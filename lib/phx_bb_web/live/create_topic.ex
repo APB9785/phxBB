@@ -51,8 +51,8 @@ defmodule PhxBbWeb.CreateTopic do
     ~H"""
     <div class="flex w-full md:ml-8">
       <.form
-        let={f}
-        for={@changeset}
+        :let={f}
+        for={to_form(@changeset)}
         id="new-topic-form"
         class="grid w-full"
         phx_submit="new_topic"

@@ -8,7 +8,7 @@ defmodule PhxBbWeb.AdminPanel do
   alias PhxBbWeb.StyleHelpers
 
   def mount(socket) do
-    auid = assigns.current_user.id
+    auid = socket.assigns.current_user.id
     users = auid |> Accounts.list_other_users() |> Enum.map(&{&1.name, &1.id})
     disabled_users = auid |> Accounts.list_disabled_users() |> Enum.map(&{&1.name, &1.id})
 
@@ -91,13 +91,13 @@ defmodule PhxBbWeb.AdminPanel do
     ~H"""
     <div>
       <div class="text-2xl font-bold md:pl-8">Admin Panel</div>
-      
+
     <!-- Disable user account -->
       <div class="text-2xl py-4 md:pl-8">Disable user account</div>
       <div class={settings_block(@current_user)}>
         <%= if @select_disable do %>
           <.form
-            let={f}
+            :let={f}
             for={:disable_user}
             id="admin-disable-user-form"
             phx_submit="disable_user"
@@ -133,13 +133,13 @@ defmodule PhxBbWeb.AdminPanel do
           <p class="font-bold">There are no other users to disable!</p>
         <% end %>
       </div>
-      
+
     <!-- Enable user account -->
       <div class="text-2xl py-4 md:pl-8">Re-enable user account</div>
       <div class={settings_block(@current_user)}>
         <%= if @select_enable do %>
           <.form
-            let={f}
+            :let={f}
             for={:enable_user}
             id="admin-enable-user-form"
             phx_submit="enable_user"

@@ -197,9 +197,9 @@ defmodule PhxBbWeb.AppComponents do
     "shadow-inner px-4 md:px-8 flex flex-wrap mx-1 md:mx-4 rounded-lg md:rounded-md py-4"
   end
 
-  defp users_online_theme(nil), do: users_online_theme(%User{theme: StyleHelpers.default()})
-  defp users_online_theme(%User{theme: "elixir"}), do: "bg-purple-700"
-  defp users_online_theme(%User{theme: "dark"}), do: "bg-gray-800"
+  defp users_online_theme(nil), do: users_online_theme(%{theme: StyleHelpers.default()})
+  defp users_online_theme(%{theme: "elixir"}), do: "bg-purple-700"
+  defp users_online_theme(%{theme: "dark"}), do: "bg-gray-800"
 
   def online_user_bubble_style(user) do
     [online_user_bubble_base(), " ", online_user_bubble_theme(user)]
@@ -210,10 +210,10 @@ defmodule PhxBbWeb.AppComponents do
   end
 
   defp online_user_bubble_theme(nil),
-    do: online_user_bubble_theme(%User{theme: StyleHelpers.default()})
+    do: online_user_bubble_theme(%{theme: StyleHelpers.default()})
 
-  defp online_user_bubble_theme(%User{theme: "elixir"}), do: "bg-gray-200"
-  defp online_user_bubble_theme(%User{theme: "dark"}), do: "bg-gray-300"
+  defp online_user_bubble_theme(%{theme: "elixir"}), do: "bg-gray-200"
+  defp online_user_bubble_theme(%{theme: "dark"}), do: "bg-gray-300"
 
   attr :active_post, :map
   attr :current_user, :map
