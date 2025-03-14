@@ -25,7 +25,7 @@ defmodule PhxBb.Accounts.UserNotifier do
   Deliver instructions to confirm account.
   """
   def deliver_confirmation_instructions(user, url) do
-    deliver(user.email, "Please confirm your phxBB acount", """
+    deliver(user.email, "Please confirm your phxBB account", """
 
     ==============================
 
@@ -45,7 +45,7 @@ defmodule PhxBb.Accounts.UserNotifier do
   Deliver instructions to reset a user password.
   """
   def deliver_reset_password_instructions(user, url) do
-    deliver(user.email, "Reset password for your phxBB acount", """
+    deliver(user.email, "Reset password for your phxBB account", """
 
     ==============================
 
@@ -65,7 +65,7 @@ defmodule PhxBb.Accounts.UserNotifier do
   Deliver instructions to update a user email.
   """
   def deliver_update_email_instructions(user, url) do
-    deliver(user.email, "Change the email for your phxBB acount", """
+    deliver(user.email, "Change the email for your phxBB account", """
 
     ==============================
 
