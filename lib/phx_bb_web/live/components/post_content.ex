@@ -13,11 +13,11 @@ defmodule PhxBbWeb.PostContent do
     {:ok, assign(socket, edit: false)}
   end
 
-  def update(%{active_post: active_post, active_user: active_user}, socket) do
+  def update(%{active_post: active_post, current_user: current_user}, socket) do
     changeset = Posts.change_post(active_post)
 
     {:ok,
-     assign(socket, changeset: changeset, active_post: active_post, active_user: active_user)}
+     assign(socket, changeset: changeset, active_post: active_post, current_user: current_user)}
   end
 
   def handle_event("edit_post", _params, socket) do
@@ -25,7 +25,7 @@ defmodule PhxBbWeb.PostContent do
   end
 
   def handle_event("save_edit", %{"post" => params}, socket) do
-    params = %{edited_by_id: socket.assigns.active_user.id, body: params["body"]}
+    params = %{edited_by_id: socket.assigns.current_user.id, body: params["body"]}
 
     case Posts.update_post(socket.assigns.active_post, params) do
       {:ok, _post} ->
@@ -52,7 +52,7 @@ defmodule PhxBbWeb.PostContent do
   end
 
   def handle_event("delete_post", %{"id" => _post_id}, socket) do
-    params = %{body: "_Post deleted._", edited_by_id: socket.assigns.active_user.id}
+    params = %{body: "_Post deleted._", edited_by_id: socket.assigns.current_user.id}
     {:ok, _post} = Posts.update_post(socket.assigns.active_post, params)
 
     {:noreply, socket}

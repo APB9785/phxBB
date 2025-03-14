@@ -8,13 +8,17 @@
 import Config
 
 config :phx_bb,
-  ecto_repos: [PhxBb.Repo]
+  ecto_repos: [PhxBb.Repo],
+  generators: [timestamp_type: :utc_datetime, binary_id: true]
 
 # Configures the endpoint
 config :phx_bb, PhxBbWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "Ya0iLhgtj+Al3D5TOEsEkBPGm0Bl504/O38L6afKOK4LxGY6agZEU5nB7o9KQQHN",
-  render_errors: [view: PhxBbWeb.ErrorView, accepts: ~w(html json), layout: false],
+  adapter: Bandit.PhoenixAdapter,
+  render_errors: [
+    formats: [html: PhxBbWeb.ErrorHTML, json: PhxBbWeb.ErrorJSON],
+    layout: false
+  ],
   pubsub_server: PhxBb.PubSub,
   live_view: [signing_salt: "3zoTdm5d"]
 
@@ -25,18 +29,28 @@ config :phx_bb, PhxBbWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :phx_bb, PhxBb.Mailer,
-  adapter: Swoosh.Adapters.Mailjet,
-  api_key: {:system, "MAILJET_API_KEY"},
-  secret: {:system, "MAILJET_SECRET_KEY"}
+config :phx_bb, PhxBb.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
-  version: "0.14.0",
-  default: [
-    args: ~w(js/app.js --bundle --target=es2016 --outdir=../priv/static/assets),
+  version: "0.17.11",
+  phx_bb: [
+    args:
+      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
+
+# Configure tailwind (the version is required)
+config :tailwind,
+  version: "3.4.3",
+  phx_new_1_7_20: [
+    args: ~w(
+      --config=tailwind.config.js
+      --input=css/app.css
+      --output=../priv/static/assets/app.css
+    ),
+    cd: Path.expand("../assets", __DIR__)
   ]
 
 # Configures Elixir's Logger

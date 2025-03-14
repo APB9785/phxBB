@@ -1,6 +1,6 @@
 defmodule PhxBbWeb.Presence do
   @moduledoc """
-  Tracks active users for display in PhxBbWeb.UsersOnline
+  Tracks active users for display in `.users_online` component
   """
 
   use Phoenix.Presence,

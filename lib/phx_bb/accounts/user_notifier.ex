@@ -2,7 +2,6 @@ defmodule PhxBb.Accounts.UserNotifier do
   @moduledoc """
   This module contains the functions and templates for sending emails.
   """
-
   import Swoosh.Email
 
   alias PhxBb.Mailer
