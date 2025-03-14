@@ -6,6 +6,7 @@ defmodule PhxBbWeb.UserSettingsLive do
 
   alias PhxBb.Accounts
   alias PhxBb.Accounts.User
+  alias PhxBbWeb.StyleHelpers
 
   @s3_bucket "phxbb-demo-uploads"
   @region "us-east-2"
@@ -326,8 +327,6 @@ defmodule PhxBbWeb.UserSettingsLive do
     ExAws.S3.delete_object(@s3_bucket, filename)
     |> ExAws.request!()
   end
-
-  defp display_avatar_error({:avatar, {error, _}}), do: error
 
   defp filename(entry) do
     [ext | _] = MIME.extensions(entry.client_type)

@@ -15,7 +15,10 @@
       <.users_online current_user={@current_user} users_online={@users_online} />
     <% :board -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-        > {link_to_index(@current_user)}
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
       </div>
 
       {live_render(@socket, PhxBbWeb.BoardLive,
@@ -27,7 +30,18 @@
       )}
     <% :topic -> %>
       <div id="breadcrumb" class="pt-4 pb-4 md:pl-8 md:pt-8">
-        > {link_to_index(@current_user)} > {link_to_board(@active_topic.board, @current_user)}
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+        >
+        <.link
+          patch={~p"/boards/#{@active_topic.board.id}"}
+          id="crumb-board-link"
+          class={StyleHelpers.link_style(@current_user)}
+        >
+          {@active_topic.board.name}
+        </.link>
       </div>
       <div id="topic-header" class="text-2xl pb-4 md:pl-8">
         {@active_topic.title}
@@ -49,7 +63,18 @@
       />
     <% :create_topic -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-        > {link_to_index(@current_user)} > {link_to_board(@active_board, @current_user)}
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+        >
+        <.link
+          patch={~p"/boards/#{@active_board.id}"}
+          id="crumb-board-link"
+          class={StyleHelpers.link_style(@current_user)}
+        >
+          {@active_board.name}
+        </.link>
       </div>
       <div class="text-2xl pb-4 md:pl-8" id="create-topic-header">
         Create New Topic
@@ -62,7 +87,10 @@
       />
     <% :user_profile -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-        > {link_to_index(@current_user)}
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
       </div>
       <.live_component
         module={PhxBbWeb.UserProfile}
@@ -71,7 +99,10 @@
       />
     <% :settings -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-        > {link_to_index(@current_user)}
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
       </div>
       <.live_component
         module={PhxBbWeb.UserSettings}
@@ -80,7 +111,10 @@
       />
     <% :admin -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-        > {link_to_index(@current_user)}
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
       </div>
       <.live_component
         module={PhxBbWeb.AdminPanel}
@@ -89,7 +123,10 @@
       />
     <% :register -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-        > {link_to_index(@current_user)}
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
       </div>
       <div class="text-2xl p-4 md:pl-8" id="register-header">
         Register
@@ -101,7 +138,10 @@
       />
     <% :inbox -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-        > {link_to_index(@current_user)}
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
       </div>
       <div class="text-2xl p-4 md:pl-8" id="inbox-header">
         Inbox
@@ -109,7 +149,18 @@
       <.live_component module={PhxBbWeb.Inbox} current_user={@current_user} id="inbox-component" />
     <% :new_message -> %>
       <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-        > {link_to_index(@current_user)} > {link_to_inbox(@current_user)}
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+        >
+        <.link
+          patch={~p"/messages"}
+          id="crumb-inbox-link"
+          class={StyleHelpers.link_style(@current_user)}
+        >
+          Inbox
+        </.link>
       </div>
       <div class="text-2xl p-4 md:pl-8" id="new-message-header">
         New Message
@@ -124,11 +175,13 @@
         404 Page Not Found
       </div>
       <div class="text-center pb-8">
-        {live_patch("Return to Main Index",
-          to: Routes.live_path(@socket, __MODULE__),
-          class: StyleHelpers.link_style(@current_user),
-          id: "return-from-invalid"
-        )}
+        <.link
+          patch={~p"/"}
+          id="return-from-invalid"
+          class={StyleHelpers.link_style(@current_user)}
+        >
+          Return to Main Index
+        </.link>
       </div>
   <% end %>
 </div>

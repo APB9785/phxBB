@@ -47,7 +47,7 @@ defmodule PhxBbWeb.UserProfile do
       <%= for post <- @post_history do %>
         <div class="text-sm md:pl-10 pt-2">
           in <.link
-            patch={~p"/topic/#{post.topic.id}"}
+            patch={~p"/topics/#{post.topic.id}"}
             class={StyleHelpers.link_style(@current_user)}
             id={"post-#{post.id}-link"}
           >{Parsers.shortener(post.topic.title)}</.link>:

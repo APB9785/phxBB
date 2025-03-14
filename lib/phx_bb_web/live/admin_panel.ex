@@ -100,9 +100,9 @@ defmodule PhxBbWeb.AdminPanel do
             :let={f}
             for={:disable_user}
             id="admin-disable-user-form"
-            phx_submit="disable_user"
-            phx_change="validate"
-            phx_target={@myself}
+            phx-submit="disable_user"
+            phx-change="validate"
+            phx-target={@myself}
           >
             <p
               :if={@user_disabled_success}
@@ -147,9 +147,9 @@ defmodule PhxBbWeb.AdminPanel do
             :let={f}
             for={:enable_user}
             id="admin-enable-user-form"
-            phx_submit="enable_user"
-            phx_change="validate"
-            phx_target={@myself}
+            phx-submit="enable_user"
+            phx-change="validate"
+            phx-target={@myself}
           >
             <p
               :if={@user_enabled_success}

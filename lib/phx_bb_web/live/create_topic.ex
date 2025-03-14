@@ -31,7 +31,7 @@ defmodule PhxBbWeb.CreateTopic do
 
     case Topics.create_topic(attrs) do
       {:ok, _topic} ->
-        {:noreply, push_patch(socket, to: Routes.live_path(socket, ForumLive, board: b_id))}
+        {:noreply, push_patch(socket, to: ~p"/boards/#{b_id}")}
 
       _ ->
         {:noreply, socket}
@@ -55,8 +55,8 @@ defmodule PhxBbWeb.CreateTopic do
         for={to_form(@changeset)}
         id="new-topic-form"
         class="grid w-full"
-        phx_submit="new_topic"
-        phx_change="validate"
+        phx-submit="new_topic"
+        phx-change="validate"
       >
         <.input
           type="text"

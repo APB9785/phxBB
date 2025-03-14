@@ -26,7 +26,7 @@ defmodule PhxBbWeb.UserSettings do
         {:noreply,
          socket
          |> put_flash(:info, "Password updated successfully.  Please log in again.")
-         |> redirect(to: Routes.user_session_path(socket, :new))}
+         |> redirect(to: ~p"/users/login")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, password_changeset: changeset)}
@@ -78,7 +78,7 @@ defmodule PhxBbWeb.UserSettings do
           :let={f}
           for={to_form(@tz_changeset)}
           id="change-user-timezone-form"
-          phx_submit="change_timezone"
+          phx-submit="change_timezone"
         >
           <div :if={@tz_changeset.action} class="alert alert-danger">
             <p>Oops, something went wrong! Please check the errors below.</p>
@@ -107,7 +107,7 @@ defmodule PhxBbWeb.UserSettings do
           </.button>
         </.form>
       </div>
-      
+
     <!-- Change user title -->
       <div class="text-2xl py-4 md:pl-8">Change user title</div>
       <div class={settings_block(@current_user)}>
@@ -115,8 +115,8 @@ defmodule PhxBbWeb.UserSettings do
           :let={f}
           for={to_form(@title_changeset)}
           id="change-user-title-form"
-          phx_submit="change_user_title"
-          phx_target={@myself}
+          phx-submit="change_user_title"
+          phx-target={@myself}
         >
           <div :if={@title_changeset.action} class="alert alert-danger" id="title-update-failed">
             <p>Oops, something went wrong! Please check the errors below.</p>
@@ -140,7 +140,7 @@ defmodule PhxBbWeb.UserSettings do
           </.button>
         </.form>
       </div>
-      
+
     <!-- Change theme -->
       <div class="text-2xl py-4 md:pl-8">Change theme</div>
       <div class={settings_block(@current_user)}>
@@ -148,7 +148,7 @@ defmodule PhxBbWeb.UserSettings do
           :let={f}
           for={to_form(@theme_changeset)}
           id="change-user-theme-form"
-          phx_submit="change_user_theme"
+          phx-submit="change_user_theme"
         >
           <div :if={@theme_changeset.action} class="alert alert-danger" id="theme-change-failed">
             <p>Oops, something went wrong! Please check the errors below.</p>
@@ -177,7 +177,7 @@ defmodule PhxBbWeb.UserSettings do
           </.button>
         </.form>
       </div>
-      
+
     <!-- Change avatar -->
       <div class="text-2xl py-4 md:pl-8">Change avatar</div>
       <div class={settings_block(@current_user)}>
@@ -199,7 +199,7 @@ defmodule PhxBbWeb.UserSettings do
         >
           User avatar removed successfully.
         </p>
-        
+
     <!-- Current avatar display -->
         <div class="w-32">
           <img src={@current_user.avatar} class="max-h-40 w-full object-fill pb-4" />
@@ -216,8 +216,8 @@ defmodule PhxBbWeb.UserSettings do
         <.form
           for={to_form(@avatar_changeset)}
           id="change-user-avatar-form"
-          phx_submit="upload_avatar"
-          phx_change="validate_avatar"
+          phx-submit="upload_avatar"
+          phx-change="validate_avatar"
         >
           <div class="border-2 p-2 md:w-1/4" phx-drop-target={@uploads.avatar.ref}>
             {live_file_input(@uploads.avatar)}
@@ -226,15 +226,13 @@ defmodule PhxBbWeb.UserSettings do
             (max {trunc(@uploads.avatar.max_file_size / 1_000)} KB)
           </div>
 
-          <%= for {_ref, err} <- @uploads.avatar.errors do %>
-            <div class="error text-red-500">
-              {humanize(err)}
-            </div>
-          <% end %>
+          <div :for={err <- upload_errors(@uploads.avatar)} class="error text-red-500">
+            {to_string(err)}
+          </div>
 
           <div :for={entry <- @uploads.avatar.entries} class="entry" id="avatar-preview">
             <div class="w-32">
-              {live_img_preview(entry, class: "max-h-40 w-full object-fill")}
+              <.live_img_preview entry={entry} class="max-h-40 w-full object-fill" />
             </div>
 
             <div id="progress">
@@ -269,7 +267,7 @@ defmodule PhxBbWeb.UserSettings do
           </.button>
         </.form>
       </div>
-      
+
     <!-- Change Email -->
       <div class="text-2xl py-4 md:pl-8">Change email</div>
       <div class={settings_block(@current_user)}>
@@ -277,7 +275,7 @@ defmodule PhxBbWeb.UserSettings do
           :let={f}
           for={to_form(@email_changeset)}
           id="update-user-email-form"
-          phx_submit="update_email"
+          phx-submit="update_email"
         >
           <div :if={@email_changeset.action} class="alert alert-danger">
             <p>Oops, something went wrong! Please check the errors below.</p>
@@ -321,7 +319,7 @@ defmodule PhxBbWeb.UserSettings do
           </.button>
         </.form>
       </div>
-      
+
     <!-- Change password -->
       <div class="text-2xl py-4 md:pl-8">Change password</div>
       <div class={settings_block(@current_user)}>
@@ -329,7 +327,7 @@ defmodule PhxBbWeb.UserSettings do
           :let={f}
           for={to_form(@password_changeset)}
           id="change-user-password-form"
-          phx_submit="change_password"
+          phx-submit="change_password"
         >
           <div :if={@password_changeset.action} class="alert alert-danger">
             <p>Oops, something went wrong! Please check the errors below.</p>
@@ -378,6 +376,8 @@ defmodule PhxBbWeb.UserSettings do
     </div>
     """
   end
+
+  defp display_avatar_error({:avatar, {error, _}}), do: error
 
   ## Tailwind Styles
 

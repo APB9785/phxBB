@@ -34,15 +34,15 @@
       <.form
         :let={f}
         for={to_form(@changeset)}
-        phx_submit="save_edit"
-        phx_change="validate"
-        phx_target={@myself}
+        phx-submit="save_edit"
+        phx-change="validate"
+        phx-target={@myself}
         id={"edit-post-#{@active_post.id}-form"}
       >
         <.input
           type="textarea"
           field={f[:body]}
-          phx_debounce="blur"
+          phx-debounce="blur"
           autocomplete="off"
           class={post_form_style(@current_user)}
         />

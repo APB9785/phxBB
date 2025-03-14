@@ -5,8 +5,6 @@ defmodule PhxBbWeb.Inbox do
   use PhxBbWeb, :live_view
 
   alias PhxBb.Messages
-  alias PhxBbWeb.Endpoint
-  alias PhxBbWeb.ForumLive
   alias PhxBbWeb.StyleHelpers
 
   def mount(_params, _session, socket) do
@@ -66,7 +64,7 @@ defmodule PhxBbWeb.Inbox do
               <div class="self-end">
                 from
                 <.link
-                  patch={~p"/user/#{message.author.id}"}
+                  patch={~p"/users/#{message.author.id}"}
                   id={"author-#{message.author.id}-link"}
                   class={StyleHelpers.link_style(@current_user)}
                 >

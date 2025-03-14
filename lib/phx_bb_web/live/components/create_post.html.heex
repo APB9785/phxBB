@@ -3,16 +3,16 @@
     :let={f}
     id="new-post-form"
     for={to_form(@changeset)}
-    phx_submit="new_post"
-    phx_change="validate"
-    phx_target={@myself}
+    phx-submit="new_post"
+    phx-change="validate"
+    phx-target={@myself}
     class="flex-grow mx-4 grid justify-items-auto w-full flex-grow"
   >
     <.input
       type="textarea"
       field={f[:body]}
       placeholder="You may use Markdown to format your post"
-      phx_debounce="blur"
+      phx-debounce="blur"
       autocomplete="off"
       class={post_form_style(@current_user)}
     />

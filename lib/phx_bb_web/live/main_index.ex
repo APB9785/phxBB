@@ -23,7 +23,7 @@ defmodule PhxBbWeb.MainIndex do
       <div :for={board <- @board_list} class={index_board_bubble_style(@current_user)}>
         <div class="py-4 px-4 md:px-8 md:w-7/12">
           <.link
-            patch={~p"/board/#{board.id}"}
+            patch={~p"/boards/#{board.id}"}
             class={["hover:underline font-bold text-lg", StyleHelpers.text_theme(@current_user)]}
             id={"board-#{board.id}-link"}
           >
@@ -49,7 +49,7 @@ defmodule PhxBbWeb.MainIndex do
               <div>
                 Last post by
                 <.link
-                  patch={~p"/user/#{board.recent_user.id}"}
+                  patch={~p"/users/#{board.recent_user.id}"}
                   class={StyleHelpers.link_style(@current_user)}
                   id={"board-#{board.id}-recent-author-link"}
                 >
@@ -59,7 +59,7 @@ defmodule PhxBbWeb.MainIndex do
               <div>
                 in
                 <.link
-                  patch={~p"/topic/#{board.recent_topic.id}"}
+                  patch={~p"/topics/#{board.recent_topic.id}"}
                   class={StyleHelpers.text_theme(@current_user)}
                   id={"board-#{board.id}-recent-topic-link"}
                 >

@@ -76,9 +76,9 @@ defmodule PhxBbWeb.NewMessage do
           for={to_form(@changeset)}
           id="new-message-form"
           class="grid w-full"
-          phx_target={@myself}
-          phx_submit="new_message"
-          phx_change="validate"
+          phx-target={@myself}
+          phx-submit="new_message"
+          phx-change="validate"
         >
           <div class="flex">
             <div class="pr-4">
@@ -100,7 +100,7 @@ defmodule PhxBbWeb.NewMessage do
               type="text"
               field={f[:subject]}
               placeholder="Subject"
-              phx_debounce="blur"
+              phx-debounce="blur"
               autocomplete="off"
               class={StyleHelpers.user_form(@current_user)}
             />
@@ -114,7 +114,7 @@ defmodule PhxBbWeb.NewMessage do
               type="textarea"
               field={f[:body]}
               placeholder="Type your message here"
-              phx_debounce="blur"
+              phx-debounce="blur"
               autocomplete="off"
               class={StyleHelpers.user_form(@current_user)}
             />

@@ -3,8 +3,9 @@ defmodule PhxBbWeb.AppComponents do
   use Gettext, backend: PhxBbWeb.Gettext
   use PhxBbWeb, :verified_routes
 
-  alias Phoenix.LiveView.JS
+  alias PhxBbWeb.Parsers
   alias PhxBbWeb.StyleHelpers
+  alias PhxBbWeb.Timestamps
 
   attr :id, :string
   attr :current_user, :map
@@ -15,9 +16,8 @@ defmodule PhxBbWeb.AppComponents do
     <div class={post_author_style(@current_user)} id={@id}>
       <div>
         <.link
-          patch={~p"/forum/user/#{@post.author.id}"}
+          patch={~p"/users/#{@post.author.id}"}
           class={StyleHelpers.link_style(@current_user)}
-          phx_hook="ScrollToTop"
           id={"post-#{@post.id}-author-profile-link"}
         >
           {@post.author.username}
@@ -75,7 +75,7 @@ defmodule PhxBbWeb.AppComponents do
           <div class="flex justify-center">
             <div>
               <.link
-                patch={~p"/register"}
+                patch={~p"/users/register"}
                 id="user-menu-register"
                 class={StyleHelpers.link_style(nil)}
               >
@@ -84,7 +84,11 @@ defmodule PhxBbWeb.AppComponents do
             </div>
             &nbsp;&nbsp;&nbsp;&nbsp;
             <div>
-              <.link patch={~p"/login"} id="user-menu-login" class={StyleHelpers.link_style(nil)}>
+              <.link
+                patch={~p"/users/login"}
+                id="user-menu-login"
+                class={StyleHelpers.link_style(nil)}
+              >
                 Log in
               </.link>
             </div>
@@ -114,7 +118,7 @@ defmodule PhxBbWeb.AppComponents do
             <% end %>
             <div>
               <.link
-                patch={~p"/settings"}
+                patch={~p"/users/settings"}
                 id="user-menu-settings"
                 class={StyleHelpers.link_style(user)}
               >
@@ -123,7 +127,11 @@ defmodule PhxBbWeb.AppComponents do
             </div>
             &nbsp;&nbsp;&nbsp;&nbsp;
             <div>
-              <.link patch={~p"/logout"} id="user-menu-logout" class={StyleHelpers.link_style(user)}>
+              <.link
+                patch={~p"/users/logout"}
+                id="user-menu-logout"
+                class={StyleHelpers.link_style(user)}
+              >
                 Log out
               </.link>
             </div>
@@ -175,7 +183,7 @@ defmodule PhxBbWeb.AppComponents do
           <% else %>
             <div>
               <.link
-                patch={~p"/user/#{user_id}"}
+                patch={~p"/users/#{user_id}"}
                 class={StyleHelpers.link_style(@current_user)}
                 id={"online-user-#{user_id}"}
               >

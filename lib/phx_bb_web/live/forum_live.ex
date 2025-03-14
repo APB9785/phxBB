@@ -12,7 +12,8 @@ defmodule PhxBbWeb.ForumLive do
   alias PhxBb.SeenTopics
   alias PhxBb.Topics
   alias PhxBb.Topics.Topic
-  alias PhxBbWeb.{Endpoint, Presence, StyleHelpers}
+  alias PhxBbWeb.Presence
+  alias PhxBbWeb.StyleHelpers
 
   @presence "phx_bb:presence"
 
@@ -52,7 +53,7 @@ defmodule PhxBbWeb.ForumLive do
 
   def handle_params(%{"create_topic" => "1", "board" => _}, _url, socket)
       when is_nil(socket.assigns.current_user) do
-    {:noreply, push_redirect(socket, to: "/users/log_in")}
+    {:noreply, push_navigate(socket, to: "/users/log_in")}
   end
 
   def handle_params(%{"create_topic" => "1", "board" => board_id}, _url, socket) do
@@ -125,7 +126,7 @@ defmodule PhxBbWeb.ForumLive do
   def handle_params(%{"settings" => "1"}, _url, socket) do
     case socket.assigns.current_user do
       nil ->
-        {:noreply, push_redirect(socket, to: "/users/log_in")}
+        {:noreply, push_navigate(socket, to: "/users/log_in")}
 
       _user ->
         {:noreply, assign(socket, nav: :settings, page_title: "User Settings", child_pid: nil)}
@@ -147,14 +148,14 @@ defmodule PhxBbWeb.ForumLive do
       {:noreply,
        socket
        |> put_flash(:info, "You are already registered and logged in.")
-       |> push_patch(to: Routes.live_path(socket, __MODULE__))}
+       |> push_patch(to: ~p"/")}
     end
   end
 
   def handle_params(%{"messages" => "inbox"}, _url, socket) do
     case socket.assigns.current_user do
       nil ->
-        {:noreply, push_redirect(socket, to: "/users/log_in")}
+        {:noreply, push_navigate(socket, to: "/users/log_in")}
 
       _user ->
         {:noreply, assign(socket, nav: :inbox, page_title: "Inbox", child_pid: nil)}
@@ -164,7 +165,7 @@ defmodule PhxBbWeb.ForumLive do
   def handle_params(%{"messages" => "new"}, _url, socket) do
     case socket.assigns.current_user do
       nil ->
-        {:noreply, push_redirect(socket, to: "/users/log_in")}
+        {:noreply, push_navigate(socket, to: "/users/log_in")}
 
       _user ->
         {:noreply, assign(socket, nav: :new_message, page_title: "New Message", child_pid: nil)}
@@ -192,13 +193,13 @@ defmodule PhxBbWeb.ForumLive do
         {:noreply,
          socket
          |> put_flash(:info, "Email changed successfully.")
-         |> push_redirect(to: Routes.live_path(socket, __MODULE__))}
+         |> push_navigate(to: ~p"/")}
 
       :error ->
         {:noreply,
          socket
          |> put_flash(:error, "Email change link is invalid or it has expired.")
-         |> push_redirect(to: Routes.live_path(socket, __MODULE__))}
+         |> push_navigate(to: ~p"/")}
     end
   end
 
@@ -286,7 +287,7 @@ defmodule PhxBbWeb.ForumLive do
         # then odds are that the confirmation link was already visited, either
         # by some automation or by the user themselves, so we redirect without
         # a warning message.
-        push_redirect(socket, to: "/forum")
+        push_navigate(socket, to: "/forum")
 
       %{} ->
         socket
@@ -300,30 +301,4 @@ defmodule PhxBbWeb.ForumLive do
   ## Tailwind Styles
 
   def main_header_style(user), do: ["text-3xl text-center p-4 ", StyleHelpers.text_theme(user)]
-
-  ## Function Components
-
-  def link_to_index(current_user) do
-    live_patch("Board Index",
-      to: Routes.live_path(Endpoint, __MODULE__),
-      class: StyleHelpers.link_style(current_user),
-      id: "crumb-index-link"
-    )
-  end
-
-  def link_to_board(board, current_user) do
-    live_patch(board.name,
-      to: Routes.live_path(Endpoint, __MODULE__, board: board.id),
-      class: StyleHelpers.link_style(current_user),
-      id: "crumb-board-link"
-    )
-  end
-
-  def link_to_inbox(current_user) do
-    live_patch("Inbox",
-      to: Routes.live_path(Endpoint, __MODULE__, messages: "inbox"),
-      id: "crumb-inbox-link",
-      class: StyleHelpers.link_style(current_user)
-    )
-  end
 end
