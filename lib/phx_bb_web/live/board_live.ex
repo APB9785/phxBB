@@ -122,7 +122,7 @@ defmodule PhxBbWeb.Board do
           There are new updates - click here to load them
         </div>
       <% end %>
-
+      
     <!-- Topic listing -->
       <div id="topic-listing" class={post_dividers(@current_user)} phx-update={@update_toggle}>
         <%= for topic <- @topic_list do %>

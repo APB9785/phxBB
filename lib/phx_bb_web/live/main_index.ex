@@ -109,7 +109,7 @@ defmodule PhxBbWeb.MainIndex do
   defp index_board_bubble_theme(%{theme: "elixir"}), do: "bg-gray-200"
   defp index_board_bubble_theme(%{theme: "dark"}), do: "bg-gray-400"
 
-  def board_dividers(nil), do: board_dividers(%User{theme: StyleHelpers.default()})
+  def board_dividers(nil), do: board_dividers(%{theme: StyleHelpers.default()})
   def board_dividers(%{theme: "elixir"}), do: "md:divide-y-2"
   def board_dividers(%{theme: "dark"}), do: "md:divide-y-2 md:divide-gray-500"
 end

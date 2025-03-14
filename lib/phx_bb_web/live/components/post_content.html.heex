@@ -6,17 +6,17 @@
 
     <%= if may_edit?(@current_user, @active_post) do %>
       <div class={post_timestamp_style(@current_user)}>&nbsp-&nbsp</div>
-      <button
+      <.button
         phx-click="edit_post"
         phx-target={@myself}
         class={post_edit_link_style(@current_user)}
         id={"edit-post-#{@active_post.id}-link"}
       >
         Edit Post
-      </button>
+      </.button>
       <div class={post_timestamp_style(@current_user)}>&nbsp-&nbsp</div>
 
-      <button
+      <.button
         phx-click="delete_post"
         data-confirm="Are you sure?"
         phx-value-id={@active_post.id}
@@ -25,7 +25,7 @@
         id={"delete-post-#{@active_post.id}"}
       >
         Delete Post
-      </button>
+      </.button>
     <% end %>
   </div>
 
@@ -39,21 +39,25 @@
         phx_target={@myself}
         id={"edit-post-#{@active_post.id}-form"}
       >
-        {textarea(f, :body,
-          value: edit_post_form_value(@changeset),
-          phx_debounce: "blur",
-          autocomplete: "off",
-          class: post_form_style(@current_user)
-        )}
+        <.input
+          type="textarea"
+          field={f[:body]}
+          phx_debounce="blur"
+          autocomplete="off"
+          class={post_form_style(@current_user)}
+        />
 
-        <div class="ml-2 mt-2">{error_tag(f, :body)}</div>
+        <%!-- <div class="ml-2 mt-2">{error_tag(f, :body)}</div> --%>
 
-        {submit("Save Reply",
-          phx_disable_with: "Saving...",
-          class: small_button_style(@current_user)
-        )}
+        <.button
+          type="submit"
+          phx-disable-with="Saving..."
+          class={small_button_style(@current_user)}
+        >
+          Save Reply
+        </.button>
 
-        <button
+        <.button
           phx-click="cancel_edit"
           type="button"
           phx-target={@myself}
@@ -61,7 +65,7 @@
           id={"cancel-post-#{@active_post.id}-edit"}
         >
           Cancel
-        </button>
+        </.button>
       </.form>
     <% else %>
       <.post_content_body

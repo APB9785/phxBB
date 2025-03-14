@@ -58,35 +58,36 @@ defmodule PhxBbWeb.CreateTopic do
         phx_submit="new_topic"
         phx_change="validate"
       >
-        {text_input(f, :title,
-          placeholder: "Subject",
-          phx_debounce: "blur",
-          autocomplete: "off",
-          class: topic_title_form_style(@current_user)
-        )}
-        <div class="pl-6 pt-4">
+        <.input
+          type="text"
+          field={f[:title]}
+          placeholder="Subject"
+          phx-debounce="blur"
+          autocomplete="off"
+          class={topic_title_form_style(@current_user)}
+        />
+        <%!-- <div class="pl-6 pt-4">
           {error_tag(f, :title)}
-        </div>
+        </div> --%>
 
-        {textarea(f, :body,
-          placeholder: "You may user Markdown to format your post",
-          phx_debounce: "blur",
-          autocomplete: "off",
-          class: topic_body_form_style(@current_user)
-        )}
-        <div class="pl-6 pt-4">
+        <.input
+          type="textarea"
+          field={f[:body]}
+          placeholder="You may user Markdown to format your post"
+          phx-debounce="blur"
+          autocomplete="off"
+          class={topic_body_form_style(@current_user)}
+        />
+        <%!-- <div class="pl-6 pt-4">
           {error_tag(f, :body)}
-        </div>
+        </div> --%>
 
         <%= if @current_user.disabled_at do %>
           <p>Your posting privileges have been revoked by the forum administrator.</p>
         <% else %>
-          <div>
-            {submit("Create Post",
-              phx_disable_with: "Posting...",
-              class: button_style(@current_user)
-            )}
-          </div>
+          <.button type="submit" phx-disable-with="Posting..." class={button_style(@current_user)}>
+            Create Post
+          </.button>
         <% end %>
       </.form>
     </div>

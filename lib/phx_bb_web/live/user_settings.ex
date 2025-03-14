@@ -79,33 +79,32 @@ defmodule PhxBbWeb.UserSettings do
           for={to_form(@tz_changeset)}
           id="change-user-timezone-form"
           phx_submit="change_timezone"
-          phx_target={@myself}
         >
-          <%= if @tz_changeset.action do %>
-            <div class="alert alert-danger">
-              <p>Oops, something went wrong! Please check the errors below.</p>
-            </div>
-          <% end %>
-          <%= if @timezone_updated do %>
-            <p
-              class="alert alert-info"
-              id="timezone-updated-ok"
-              phx-click="clear_flash"
-              phx-value-flash="timezone_updated"
-              phx-target={@myself}
-            >
-              Timezone updated successfully.
-            </p>
-          <% end %>
+          <div :if={@tz_changeset.action} class="alert alert-danger">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+          <p
+            :if={@timezone_updated}
+            class="alert alert-info"
+            id="timezone-updated-ok"
+            phx-click="clear_flash"
+            phx-value-flash="timezone_updated"
+          >
+            Timezone updated successfully.
+          </p>
 
-          {label(f, :timezone, class: StyleHelpers.user_form_label(@current_user))}
-          {select(f, :timezone, Tzdata.zone_list(), class: StyleHelpers.user_form(@current_user))}
-          {error_tag(f, :timezone)}
+          <%!-- {label(f, :timezone, class: StyleHelpers.user_form_label(@current_user))} --%>
+          <.input
+            type="select"
+            field={f[:timezone]}
+            options={Tzdata.zone_list()}
+            class={StyleHelpers.user_form(@current_user)}
+          />
+          <%!-- {error_tag(f, :timezone)} --%>
 
-          {submit("Change timezone",
-            phx_disable_with: "Changing...",
-            class: button_style(@current_user)
-          )}
+          <.button type="submit" phx-disable-with="Changing..." class={button_style(@current_user)}>
+            Change timezone
+          </.button>
         </.form>
       </div>
       
@@ -119,31 +118,26 @@ defmodule PhxBbWeb.UserSettings do
           phx_submit="change_user_title"
           phx_target={@myself}
         >
-          <%= if @title_changeset.action do %>
-            <div class="alert alert-danger" id="title-update-failed">
-              <p>Oops, something went wrong! Please check the errors below.</p>
-            </div>
-          <% end %>
-          <%= if @title_updated do %>
-            <p
-              class="alert alert-info"
-              id="title-updated-ok"
-              phx-click="clear_flash"
-              phx-value-flash="title_updated"
-              phx-target={@myself}
-            >
-              User title updated successfully.
-            </p>
-          <% end %>
+          <div :if={@title_changeset.action} class="alert alert-danger" id="title-update-failed">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+          <p
+            :if={@title_updated}
+            class="alert alert-info"
+            id="title-updated-ok"
+            phx-click="clear_flash"
+            phx-value-flash="title_updated"
+          >
+            User title updated successfully.
+          </p>
 
-          {label(f, :title, class: StyleHelpers.user_form_label(@current_user))}
-          {text_input(f, :title, class: StyleHelpers.user_form(@current_user))}
-          {error_tag(f, :title)}
+          <%!-- {label(f, :title, class: StyleHelpers.user_form_label(@current_user))} --%>
+          <.input type="text" field={f[:title]} class={StyleHelpers.user_form(@current_user)} />
+          <%!-- {error_tag(f, :title)} --%>
 
-          {submit("Change user title",
-            phx_disable_with: "Changing...",
-            class: button_style(@current_user)
-          )}
+          <.button type="submit" phx-disable-with="Changing..." class={button_style(@current_user)}>
+            Change user title
+          </.button>
         </.form>
       </div>
       
@@ -155,82 +149,74 @@ defmodule PhxBbWeb.UserSettings do
           for={to_form(@theme_changeset)}
           id="change-user-theme-form"
           phx_submit="change_user_theme"
-          phx_target={@myself}
         >
-          <%= if @theme_changeset.action do %>
-            <div class="alert alert-danger" id="theme-change-failed">
-              <p>Oops, something went wrong! Please check the errors below.</p>
-            </div>
-          <% end %>
-          <%= if @theme_updated do %>
-            <p
-              class="alert alert-info"
-              id="theme-changed-ok"
-              phx-click="clear_flash"
-              phx-value-flash="theme_updated"
-              phx-target={@myself}
-            >
-              Theme updated successfully.
-            </p>
-          <% end %>
+          <div :if={@theme_changeset.action} class="alert alert-danger" id="theme-change-failed">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+          <p
+            :if={@theme_updated}
+            class="alert alert-info"
+            id="theme-changed-ok"
+            phx-click="clear_flash"
+            phx-value-flash="theme_updated"
+          >
+            Theme updated successfully.
+          </p>
 
-          {label(f, :theme, class: StyleHelpers.user_form_label(@current_user))}
-          {select(f, :theme, StyleHelpers.theme_list(), class: StyleHelpers.user_form(@current_user))}
-          {error_tag(f, :theme)}
+          <%!-- {label(f, :theme, class: StyleHelpers.user_form_label(@current_user))} --%>
+          <.input
+            type="select"
+            field={f[:theme]}
+            options={StyleHelpers.theme_list()}
+            class={StyleHelpers.user_form(@current_user)}
+          />
+          <%!-- {error_tag(f, :theme)} --%>
 
-          {submit("Change theme",
-            phx_disable_with: "Changing...",
-            class: button_style(@current_user)
-          )}
+          <.button type="submit" phx-disable-with="Changing..." class={button_style(@current_user)}>
+            Change theme
+          </.button>
         </.form>
       </div>
       
     <!-- Change avatar -->
       <div class="text-2xl py-4 md:pl-8">Change avatar</div>
       <div class={settings_block(@current_user)}>
-        <%= if @avatar_updated do %>
-          <p
-            class="alert alert-info"
-            id="avatar-updated-ok"
-            phx-click="clear_flash"
-            phx-value-flash="avatar_updated"
-            phx-target={@myself}
-          >
-            User avatar updated successfully.
-          </p>
-        <% end %>
-        <%= if @avatar_removed do %>
-          <p
-            class="alert alert-info"
-            id="avatar-removed-ok"
-            phx-click="clear_flash"
-            phx-value-flash="avatar_removed"
-            phx-target={@myself}
-          >
-            User avatar removed successfully.
-          </p>
-        <% end %>
+        <p
+          :if={@avatar_updated}
+          class="alert alert-info"
+          id="avatar-updated-ok"
+          phx-click="clear_flash"
+          phx-value-flash="avatar_updated"
+        >
+          User avatar updated successfully.
+        </p>
+        <p
+          :if={@avatar_removed}
+          class="alert alert-info"
+          id="avatar-removed-ok"
+          phx-click="clear_flash"
+          phx-value-flash="avatar_removed"
+        >
+          User avatar removed successfully.
+        </p>
         
     <!-- Current avatar display -->
         <div class="w-32">
           <img src={@current_user.avatar} class="max-h-40 w-full object-fill pb-4" />
         </div>
-        <%= if @current_user.avatar do %>
-          <button
-            id="remove-avatar-link"
-            phx-target={@myself}
-            phx-click="remove_avatar"
-            class={[StyleHelpers.link_style(@current_user), " pb-4"]}
-          >
-            Remove current avatar
-          </button>
-        <% end %>
+        <button
+          :if={@current_user.avatar}
+          id="remove-avatar-link"
+          phx-click="remove_avatar"
+          class={[StyleHelpers.link_style(@current_user), "pb-4"]}
+        >
+          Remove current avatar
+        </button>
 
         <.form
           for={to_form(@avatar_changeset)}
           id="change-user-avatar-form"
           phx_submit="upload_avatar"
-          phx_target={@myself}
           phx_change="validate_avatar"
         >
           <div class="border-2 p-2 md:w-1/4" phx-drop-target={@uploads.avatar.ref}>
@@ -246,44 +232,41 @@ defmodule PhxBbWeb.UserSettings do
             </div>
           <% end %>
 
-          <%= for entry <- @uploads.avatar.entries do %>
-            <div class="entry" id="avatar-preview">
-              <div class="w-32">
-                {live_img_preview(entry, class: "max-h-40 w-full object-fill")}
-              </div>
-
-              <div id="progress">
-                <div id="progress-value">
-                  {entry.progress}%
-                </div>
-                <div id="progress-bar">
-                  <span style={"w-#{entry.progress}%"}></span>
-                </div>
-              </div>
-
-              <a
-                href="#"
-                phx-click="cancel_upload"
-                phx-value-ref={entry.ref}
-                phx-target={@myself}
-                id="cancel-upload"
-              >
-                &times;
-              </a>
+          <div :for={entry <- @uploads.avatar.entries} class="entry" id="avatar-preview">
+            <div class="w-32">
+              {live_img_preview(entry, class: "max-h-40 w-full object-fill")}
             </div>
-          <% end %>
 
-          <%= for error <- @avatar_changeset.errors do %>
-            <div class="text-red-500 pt-2" id="avatar-submit-error">
-              {display_avatar_error(error)}
+            <div id="progress">
+              <div id="progress-value">
+                {entry.progress}%
+              </div>
+              <div id="progress-bar">
+                <span style={"w-#{entry.progress}%"}></span>
+              </div>
             </div>
-          <% end %>
 
-          {submit("Upload avatar",
-            phx_disable_with: "Uploading...",
-            class: button_style(@current_user),
-            id: "submit-user-avatar-upload"
-          )}
+            <a href="#" phx-click="cancel_upload" phx-value-ref={entry.ref} id="cancel-upload">
+              &times;
+            </a>
+          </div>
+
+          <div
+            :for={error <- @avatar_changeset.errors}
+            class="text-red-500 pt-2"
+            id="avatar-submit-error"
+          >
+            {display_avatar_error(error)}
+          </div>
+
+          <.button
+            type="submit"
+            phx-disable-with="Uploading..."
+            class={button_style(@current_user)}
+            id="submit-user-avatar-upload"
+          >
+            Upload avatar
+          </.button>
         </.form>
       </div>
       
@@ -295,50 +278,47 @@ defmodule PhxBbWeb.UserSettings do
           for={to_form(@email_changeset)}
           id="update-user-email-form"
           phx_submit="update_email"
-          phx_target={@myself}
         >
-          <%= if @email_changeset.action do %>
-            <div class="alert alert-danger">
-              <p>Oops, something went wrong! Please check the errors below.</p>
-            </div>
-          <% end %>
-          <%= if @email_updated do %>
-            <p
-              class="alert alert-info"
-              id="email-updated-ok"
-              phx-click="clear_flash"
-              phx-value-flash="email_updated"
-              phx-target={@myself}
-            >
-              A link to confirm your email change has been sent to the new address.
-            </p>
-          <% end %>
+          <div :if={@email_changeset.action} class="alert alert-danger">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
+          <p
+            :if={@email_updated}
+            class="alert alert-info"
+            id="email-updated-ok"
+            phx-click="clear_flash"
+            phx-value-flash="email_updated"
+          >
+            A link to confirm your email change has been sent to the new address.
+          </p>
 
-          {hidden_input(f, :action, name: "action", value: "update_email")}
+          <.input type="hidden" name="action" value="update_email" />
 
-          {label(f, :email, class: StyleHelpers.user_form_label(@current_user))}
-          {email_input(f, :email,
-            required: true,
-            class: StyleHelpers.user_form(@current_user)
-          )}
-          {error_tag(f, :email)}
+          <%!-- {label(f, :email, class: StyleHelpers.user_form_label(@current_user))} --%>
+          <.input
+            type="email"
+            field={f[:email]}
+            required
+            class={StyleHelpers.user_form(@current_user)}
+          />
+          <%!-- {error_tag(f, :email)} --%>
 
-          {label(f, :current_password,
+          <%!-- {label(f, :current_password,
             for: "current_password_for_email",
             class: StyleHelpers.user_form_label(@current_user)
-          )}
-          {password_input(f, :current_password,
-            required: true,
-            name: "current_password",
-            id: "current_password_for_email",
-            class: StyleHelpers.user_form(@current_user)
-          )}
-          {error_tag(f, :current_password)}
+          )} --%>
+          <.input
+            type="password"
+            field={f[:current_password]}
+            required
+            id="current_password_for_email"
+            class={StyleHelpers.user_form(@current_user)}
+          />
+          <%!-- {error_tag(f, :current_password)} --%>
 
-          {submit("Change email",
-            phx_disable_with: "Changing...",
-            class: button_style(@current_user)
-          )}
+          <.button type="submit" phx-disable-with="Changing..." class={button_style(@current_user)}>
+            Change email
+          </.button>
         </.form>
       </div>
       
@@ -350,48 +330,49 @@ defmodule PhxBbWeb.UserSettings do
           for={to_form(@password_changeset)}
           id="change-user-password-form"
           phx_submit="change_password"
-          phx_target={@myself}
         >
-          <%= if @password_changeset.action do %>
-            <div class="alert alert-danger">
-              <p>Oops, something went wrong! Please check the errors below.</p>
-            </div>
-          <% end %>
+          <div :if={@password_changeset.action} class="alert alert-danger">
+            <p>Oops, something went wrong! Please check the errors below.</p>
+          </div>
 
-          {hidden_input(f, :action, name: "action", value: "update_password")}
+          <.input type="hidden" name="action" value="update_password" />
 
-          {label(f, :password, "New password", class: StyleHelpers.user_form_label(@current_user))}
-          {password_input(f, :password,
-            required: true,
-            class: StyleHelpers.user_form(@current_user)
-          )}
-          {error_tag(f, :password)}
+          <%!-- {label(f, :password, "New password", class: StyleHelpers.user_form_label(@current_user))} --%>
+          <.input
+            type="password"
+            field={f[:password]}
+            required
+            class={StyleHelpers.user_form(@current_user)}
+          />
+          <%!-- {error_tag(f, :password)} --%>
 
-          {label(f, :password_confirmation, "Confirm new password",
+          <%!-- {label(f, :password_confirmation, "Confirm new password",
             class: StyleHelpers.user_form_label(@current_user)
-          )}
-          {password_input(f, :password_confirmation,
-            required: true,
-            class: StyleHelpers.user_form(@current_user)
-          )}
-          {error_tag(f, :password_confirmation)}
+          )} --%>
+          <.input
+            type="password"
+            field={f[:password_confirmation]}
+            required
+            class={StyleHelpers.user_form(@current_user)}
+          />
+          <%!-- {error_tag(f, :password_confirmation)} --%>
 
-          {label(f, :current_password,
+          <%!-- {label(f, :current_password,
             for: "current_password_for_password",
             class: StyleHelpers.user_form_label(@current_user)
-          )}
-          {password_input(f, :current_password,
-            required: true,
-            name: "current_password",
-            id: "current_password_for_password",
-            class: StyleHelpers.user_form(@current_user)
-          )}
-          {error_tag(f, :current_password)}
+          )} --%>
+          <.input
+            type="password"
+            field={f[:current_password]}
+            required
+            id="current_password_for_password"
+            class={StyleHelpers.user_form(@current_user)}
+          />
+          <%!-- {error_tag(f, :current_password)} --%>
 
-          {submit("Change password",
-            phx_disable_with: "Changing...",
-            class: button_style(@current_user)
-          )}
+          <.button type="submit" phx-disable-with="Changing..." class={button_style(@current_user)}>
+            Change password
+          </.button>
         </.form>
       </div>
     </div>
@@ -404,8 +385,8 @@ defmodule PhxBbWeb.UserSettings do
     ["md:mx-8 px-4 py-6 shadow rounded-lg ", confirmation_reminder_theme(user)]
   end
 
-  def confirmation_reminder_theme(%User{theme: "elixir"}), do: "bg-purple-200"
-  def confirmation_reminder_theme(%User{theme: "dark"}), do: "bg-purple-900 text-gray-200"
+  def confirmation_reminder_theme(%{theme: "elixir"}), do: "bg-purple-200"
+  def confirmation_reminder_theme(%{theme: "dark"}), do: "bg-purple-900 text-gray-200"
 
   def button_style(user) do
     [

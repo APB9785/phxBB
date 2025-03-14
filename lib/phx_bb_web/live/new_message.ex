@@ -85,46 +85,56 @@ defmodule PhxBbWeb.NewMessage do
               Send to:
             </div>
             <div>
-              {select(f, :recipient_id, @user_select, class: "rounded-sm border-black border")}
+              <.input
+                type="select"
+                field={f[:recipient_id]}
+                options={@user_select}
+                class="rounded-sm border-black border"
+              />
             </div>
           </div>
           <div class="h-4" />
 
           <div class="w-5/6">
-            {text_input(f, :subject,
-              placeholder: "Subject",
-              phx_debounce: "blur",
-              autocomplete: "off",
-              class: StyleHelpers.user_form(@current_user)
-            )}
+            <.input
+              type="text"
+              field={f[:subject]}
+              placeholder="Subject"
+              phx_debounce="blur"
+              autocomplete="off"
+              class={StyleHelpers.user_form(@current_user)}
+            />
           </div>
-          <div class="pl-6">
+          <%!-- <div class="pl-6">
             {error_tag(f, :subject)}
-          </div>
+          </div> --%>
 
           <div class="w-5/6 pt-2">
-            {textarea(f, :body,
-              placeholder: "Type your message here",
-              phx_debounce: "blur",
-              autocomplete: "off",
-              class: StyleHelpers.user_form(@current_user)
-            )}
+            <.input
+              type="textarea"
+              field={f[:body]}
+              placeholder="Type your message here"
+              phx_debounce="blur"
+              autocomplete="off"
+              class={StyleHelpers.user_form(@current_user)}
+            />
           </div>
-          <div class="pl-6">
+          <%!-- <div class="pl-6">
             {error_tag(f, :body)}
-          </div>
+          </div> --%>
 
           <div class="h-4" />
 
           <%= if @current_user.disabled_at do %>
             <p>Your messaging privileges have been revoked by the forum administrator.</p>
           <% else %>
-            <div>
-              {submit("Send Message",
-                phx_disable_with: "Posting...",
-                class: ["px-2 rounded-md ", StyleHelpers.button_theme(@current_user)]
-              )}
-            </div>
+            <.button
+              type="submit"
+              phx-disable-with="Posting..."
+              class={["px-2 rounded-md", StyleHelpers.button_theme(@current_user)]}
+            >
+              Send Message
+            </.button>
           <% end %>
         </.form>
       </div>

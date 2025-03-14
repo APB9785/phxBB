@@ -9,8 +9,14 @@ defmodule PhxBbWeb.UserProfile do
   alias PhxBbWeb.StyleHelpers
   alias PhxBbWeb.Timestamps
 
-  def mount(_params, _session, socket) do
-    socket = assign(socket, post_history: Accounts.last_five_posts(assigns.view_user.id))
+  def mount(params, _session, socket) do
+    view_user = Accounts.get_user(params["user_id"])
+
+    socket =
+      assign(socket,
+        post_history: Accounts.last_five_posts(view_user.id),
+        view_user: view_user
+      )
 
     {:ok, socket}
   end

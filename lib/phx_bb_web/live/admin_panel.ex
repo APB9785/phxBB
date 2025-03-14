@@ -91,7 +91,7 @@ defmodule PhxBbWeb.AdminPanel do
     ~H"""
     <div>
       <div class="text-2xl font-bold md:pl-8">Admin Panel</div>
-
+      
     <!-- Disable user account -->
       <div class="text-2xl py-4 md:pl-8">Disable user account</div>
       <div class={settings_block(@current_user)}>
@@ -114,26 +114,31 @@ defmodule PhxBbWeb.AdminPanel do
               User account successfully disabled.
             </p>
 
-            {label(f, :user, class: StyleHelpers.user_form_label(@current_user))}
-            {select(f, :user, @user_list,
-              selected: @select_disable,
-              class: StyleHelpers.user_form(@current_user)
-            )}
+            <%!-- {label(f, :user, class: StyleHelpers.user_form_label(@current_user))} --%>
+            <.input
+              type="select"
+              field={f[:user]}
+              options={@user_list}
+              class={StyleHelpers.user_form(@current_user)}
+            />
 
             <div class="flex justify-end md:justify-center">
-              {submit("Disable User",
-                data_confirm: "Are you sure?",
-                phx_disable_with: "Disabling...",
-                class: button_style(@current_user),
-                id: "disable-user-button"
-              )}
+              <.button
+                type="submit"
+                data-confirm="Are you sure?"
+                phx-disable-with="Disabling..."
+                class={button_style(@current_user)}
+                id="disable-user-button"
+              >
+                Disable User
+              </.button>
             </div>
           </.form>
         <% else %>
           <p class="font-bold">There are no other users to disable!</p>
         <% end %>
       </div>
-
+      
     <!-- Enable user account -->
       <div class="text-2xl py-4 md:pl-8">Re-enable user account</div>
       <div class={settings_block(@current_user)}>
@@ -156,19 +161,24 @@ defmodule PhxBbWeb.AdminPanel do
               User account successfully re-enabled.
             </p>
 
-            {label(f, :user, class: StyleHelpers.user_form_label(@current_user))}
-            {select(f, :user, @disabled_user_list,
-              selected: @select_enable,
-              class: StyleHelpers.user_form(@current_user)
-            )}
+            <%!-- {label(f, :user, class: StyleHelpers.user_form_label(@current_user))} --%>
+            <.input
+              type="select"
+              field={f[:user]}
+              options={@disabled_user_list}
+              class={StyleHelpers.user_form(@current_user)}
+            />
 
             <div class="flex justify-end md:justify-center">
-              {submit("Re-enable User",
-                data_confirm: "Are you sure?",
-                phx_disable_with: "Re-enabling...",
-                class: button_style(@current_user),
-                id: "enable-user-button"
-              )}
+              <.button
+                type="submit"
+                data-confirm="Are you sure?"
+                phx-disable-with="Re-enabling..."
+                class={button_style(@current_user)}
+                id="enable-user-button"
+              >
+                Re-enable User
+              </.button>
             </div>
           </.form>
         <% else %>
