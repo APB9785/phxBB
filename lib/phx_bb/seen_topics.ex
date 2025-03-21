@@ -125,7 +125,7 @@ defmodule PhxBb.SeenTopics do
   def seen_now(nil, _topic), do: :ok
 
   def seen_now(user_id, topic_id) do
-    now = NaiveDateTime.utc_now()
+    now = DateTime.utc_now()
 
     case get_seen_topic(user_id, topic_id) do
       %SeenTopic{} = seen_topic ->

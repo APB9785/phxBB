@@ -22,7 +22,7 @@ defmodule PhxBb.SeenTopicsTest do
       assert %SeenTopic{} = seen_topic = SeenTopics.get_seen_topic(user.id, topic.id)
       assert seen_topic.topic_id == topic.id
       assert seen_topic.user_id == user.id
-      assert %NaiveDateTime{} = seen_topic.time
+      assert %DateTime{} = seen_topic.time
     end
 
     test "get_seen_topic!/1 returns the seen_topic with given id", %{user: user, topic: topic} do

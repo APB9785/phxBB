@@ -89,7 +89,7 @@ defmodule PhxBb.Topics do
 
   """
   def create_topic(attrs \\ %{}) do
-    now = NaiveDateTime.utc_now()
+    now = DateTime.utc_now()
     user_id = attrs.author_id
     board_id = attrs.board_id
     {body, attrs} = Map.pop(attrs, :body)
@@ -190,6 +190,6 @@ defmodule PhxBb.Topics do
   def up_to_date?(%Topic{seen_at: []}), do: false
 
   def up_to_date?(%Topic{seen_at: [%SeenTopic{time: seen}], last_post_at: latest}) do
-    NaiveDateTime.compare(seen, latest) != :lt
+    DateTime.compare(seen, latest) != :lt
   end
 end

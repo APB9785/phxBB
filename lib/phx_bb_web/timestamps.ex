@@ -1,6 +1,8 @@
 defmodule PhxBbWeb.Timestamps do
   @moduledoc """
   This module contains functions for formatting Dates and DateTimes.
+
+  TODO: replace with Calendar.strftime/3 ?
   """
 
   @month_abv_map %{

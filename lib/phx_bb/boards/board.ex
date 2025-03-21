@@ -2,8 +2,7 @@ defmodule PhxBb.Boards.Board do
   @moduledoc """
   This module defines the Board schema and changeset.
   """
-
-  use Ecto.Schema
+  use PhxBb.Schema
 
   import Ecto.Changeset
 
@@ -18,7 +17,7 @@ defmodule PhxBb.Boards.Board do
 
     has_many :topics, PhxBb.Topics.Topic, on_delete: :delete_all
 
-    timestamps()
+    timestamps(type: :utc_datetime)
   end
 
   @doc false

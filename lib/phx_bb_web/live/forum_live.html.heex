@@ -1,141 +1,187 @@
-<!--   User Menu   -->
-<%= live_component PhxBbWeb.UserMenu,
-      active_user: @active_user,
-      unread_messages: @unread_messages %>
+<.user_menu current_user={@current_user} unread_messages={@unread_messages} />
 
 <!-- JS Hook for changing background color -->
 <div id="bg-color-setter" phx-hook="BackgroundColorChange" data-value={@bg_color}></div>
 
-<div class={StyleHelpers.content_background(@active_user)}>
-
+<div class={StyleHelpers.content_background(@current_user)}>
   <%= case @nav do %>
+    <% :main -> %>
+      <div class={main_header_style(@current_user)} id="main-header">
+        Welcome to the Forum!
+      </div>
 
-  <% :main -> %>
-    <div class={main_header_style(@active_user)} id="main-header">
-      Welcome to the Forum!
-    </div>
+      <.live_component module={PhxBbWeb.MainIndex} current_user={@current_user} />
 
-    <%= live_component PhxBbWeb.MainIndex, active_user: @active_user %>
+      <.users_online current_user={@current_user} users_online={@users_online} />
+    <% :board -> %>
+      <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+      </div>
 
-    <%= live_component PhxBbWeb.UsersOnline,
-          active_user: @active_user,
-          users_online: @users_online %>
-
-  <% :board -> %>
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-       > <%= link_to_index(@active_user) %>
-    </div>
-
-    <%= live_render @socket, PhxBbWeb.BoardLive,
-          id: "board-liveview",
-          session: %{
-            "active_user" => @active_user,
-            "active_board" => @active_board
-          } %>
-
-  <% :topic -> %>
-    <div id="breadcrumb" class="pt-4 pb-4 md:pl-8 md:pt-8">
-       > <%= link_to_index(@active_user) %>
-       > <%= link_to_board(@active_topic.board, @active_user) %>
-    </div>
-    <div id="topic-header" class="text-2xl pb-4 md:pl-8">
-      <%= @active_topic.title %>
-    </div>
-    <%= live_component PhxBbWeb.Topic,
-          active_user: @active_user,
-          active_topic: @active_topic,
-          post_list: @post_list,
-          id: "topic-component" %>
-    <!-- New Post form -->
-    <%= if @active_user do %>
-      <%= live_component PhxBbWeb.CreatePost,
-            active_user: @active_user,
-            active_topic: @active_topic,
-            id: "new-post-component" %>
-    <% end %>
-
-  <% :create_topic -> %>
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-       > <%= link_to_index(@active_user) %>
-       > <%= link_to_board(@active_board, @active_user) %>
-    </div>
-    <div class="text-2xl pb-4 md:pl-8" id="create-topic-header">
-      Create New Topic
-    </div>
-    <%= live_component PhxBbWeb.CreateTopic,
-          active_user: @active_user,
-          active_board: @active_board,
-          id: "create-topic-component" %>
-
-  <% :user_profile -> %>
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-       > <%= link_to_index(@active_user) %>
-    </div>
-    <%= live_component PhxBbWeb.UserProfile,
-          active_user: @active_user,
-          view_user: @view_user %>
-
-  <% :settings -> %>
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-       > <%= link_to_index(@active_user) %>
-    </div>
-    <%= live_component PhxBbWeb.UserSettings,
-          active_user: @active_user,
-          id: "user-settings-component" %>
-
-  <% :admin -> %>
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-       > <%= link_to_index(@active_user) %>
-    </div>
-    <%= live_component PhxBbWeb.AdminPanel,
-          active_user: @active_user,
-          id: "admin-panel-component" %>
-
-  <% :register -> %>
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-       > <%= link_to_index(@active_user) %>
-    </div>
-    <div class="text-2xl p-4 md:pl-8" id="register-header">
-      Register
-    </div>
-    <%= live_component PhxBbWeb.UserRegistration,
-          active_user: @active_user,
-          id: "user-registration-component" %>
-
-  <% :inbox -> %>
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-       > <%= link_to_index(@active_user) %>
-    </div>
-    <div class="text-2xl p-4 md:pl-8" id="inbox-header">
-      Inbox
-    </div>
-    <%= live_component PhxBbWeb.Inbox,
-          active_user: @active_user,
-          id: "inbox-component" %>
-
-  <% :new_message -> %>
-    <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
-       > <%= link_to_index(@active_user) %>
-       > <%= link_to_inbox(@active_user) %>
-    </div>
-    <div class="text-2xl p-4 md:pl-8" id="new-message-header">
-      New Message
-    </div>
-    <%= live_component PhxBbWeb.NewMessage,
-          active_user: @active_user,
-          id: "new-message-component" %>
-
-  <% :invalid -> %>
-    <div class="text-2xl p-8 text-center" id="page-not-found-live">
-      404 Page Not Found
-    </div>
-    <div class="text-center pb-8">
-      <%= live_patch "Return to Main Index",
-            to: Routes.live_path(@socket, __MODULE__),
-            class: StyleHelpers.link_style(@active_user),
-            id: "return-from-invalid" %>
-    </div>
-
+      {live_render(@socket, PhxBbWeb.BoardLive,
+        id: "board-liveview",
+        session: %{
+          "current_user" => @current_user,
+          "active_board" => @active_board
+        }
+      )}
+    <% :topic -> %>
+      <div id="breadcrumb" class="pt-4 pb-4 md:pl-8 md:pt-8">
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+        >
+        <.link
+          patch={~p"/boards/#{@active_topic.board.id}"}
+          id="crumb-board-link"
+          class={StyleHelpers.link_style(@current_user)}
+        >
+          {@active_topic.board.name}
+        </.link>
+      </div>
+      <div id="topic-header" class="text-2xl pb-4 md:pl-8">
+        {@active_topic.title}
+      </div>
+      <.live_component
+        module={PhxBbWeb.Topic}
+        current_user={@current_user}
+        active_topic={@active_topic}
+        post_list={@post_list}
+        id="topic-component"
+      />
+      <!-- New Post form -->
+      <.live_component
+        :if={@current_user}
+        module={PhxBbWeb.CreatePost}
+        current_user={@current_user}
+        active_topic={@active_topic}
+        id="new-post-component"
+      />
+    <% :create_topic -> %>
+      <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+        >
+        <.link
+          patch={~p"/boards/#{@active_board.id}"}
+          id="crumb-board-link"
+          class={StyleHelpers.link_style(@current_user)}
+        >
+          {@active_board.name}
+        </.link>
+      </div>
+      <div class="text-2xl pb-4 md:pl-8" id="create-topic-header">
+        Create New Topic
+      </div>
+      <.live_component
+        module={PhxBbWeb.CreateTopic}
+        current_user={@current_user}
+        active_board={@active_board}
+        id="create-topic-component"
+      />
+    <% :user_profile -> %>
+      <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+      </div>
+      <.live_component
+        module={PhxBbWeb.UserProfile}
+        current_user={@current_user}
+        view_user={@view_user}
+      />
+    <% :settings -> %>
+      <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+      </div>
+      <.live_component
+        module={PhxBbWeb.UserSettings}
+        current_user={@current_user}
+        id="user-settings-component"
+      />
+    <% :admin -> %>
+      <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+      </div>
+      <.live_component
+        module={PhxBbWeb.AdminPanel}
+        current_user={@current_user}
+        id="admin-panel-component"
+      />
+    <% :register -> %>
+      <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+      </div>
+      <div class="text-2xl p-4 md:pl-8" id="register-header">
+        Register
+      </div>
+      <.live_component
+        module={PhxBbWeb.UserRegistration}
+        current_user={@current_user}
+        id="user-registration-component"
+      />
+    <% :inbox -> %>
+      <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+      </div>
+      <div class="text-2xl p-4 md:pl-8" id="inbox-header">
+        Inbox
+      </div>
+      <.live_component module={PhxBbWeb.Inbox} current_user={@current_user} id="inbox-component" />
+    <% :new_message -> %>
+      <div class="pt-4 pb-4 md:pl-8 md:pt-8" id="breadcrumb">
+        >
+        <.link patch={~p"/"} id="crumb-index-link" class={StyleHelpers.link_style(@current_user)}>
+          Board Index
+        </.link>
+        >
+        <.link
+          patch={~p"/messages"}
+          id="crumb-inbox-link"
+          class={StyleHelpers.link_style(@current_user)}
+        >
+          Inbox
+        </.link>
+      </div>
+      <div class="text-2xl p-4 md:pl-8" id="new-message-header">
+        New Message
+      </div>
+      <.live_component
+        module={PhxBbWeb.NewMessage}
+        current_user={@current_user}
+        id="new-message-component"
+      />
+    <% :invalid -> %>
+      <div class="text-2xl p-8 text-center" id="page-not-found-live">
+        404 Page Not Found
+      </div>
+      <div class="text-center pb-8">
+        <.link
+          patch={~p"/"}
+          id="return-from-invalid"
+          class={StyleHelpers.link_style(@current_user)}
+        >
+          Return to Main Index
+        </.link>
+      </div>
   <% end %>
-
 </div>

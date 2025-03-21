@@ -2,10 +2,11 @@ defmodule PhxBb.Accounts do
   @moduledoc """
   The Accounts context.
   """
-
   import Ecto.Query, warn: false
 
-  alias PhxBb.Accounts.{User, UserNotifier, UserToken}
+  alias PhxBb.Accounts.User
+  alias PhxBb.Accounts.UserNotifier
+  alias PhxBb.Accounts.UserToken
   alias PhxBb.Posts.Post
   alias PhxBb.Repo
 
@@ -93,7 +94,7 @@ defmodule PhxBb.Accounts do
 
   def disable_user!(user_id) do
     user = Repo.get!(User, user_id)
-    user = User.disable_changeset(user, %{disabled_at: NaiveDateTime.utc_now()})
+    user = User.disable_changeset(user, %{disabled_at: DateTime.utc_now()})
     user = Repo.update!(user)
 
     Phoenix.PubSub.broadcast(PhxBb.PubSub, "user:#{user.id}", {:updated_user, user})
@@ -141,7 +142,7 @@ defmodule PhxBb.Accounts do
 
   """
   def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, hash_password: false)
+    User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
   end
 
   ## Settings
@@ -156,7 +157,7 @@ defmodule PhxBb.Accounts do
 
   """
   def change_user_email(user, attrs \\ %{}) do
-    User.email_changeset(user, attrs)
+    User.email_changeset(user, attrs, validate_email: false)
   end
 
   def change_user_timezone(user, attrs \\ %{}) do
@@ -216,11 +217,14 @@ defmodule PhxBb.Accounts do
   end
 
   defp user_email_multi(user, email, context) do
-    changeset = user |> User.email_changeset(%{email: email}) |> User.confirm_changeset()
+    changeset =
+      user
+      |> User.email_changeset(%{email: email})
+      |> User.confirm_changeset()
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, [context]))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, [context]))
   end
 
   @doc """
@@ -232,7 +236,7 @@ defmodule PhxBb.Accounts do
       {:ok, %{to: ..., body: ...}}
 
   """
-  def deliver_update_email_instructions(%User{} = user, current_email, update_email_url_fun)
+  def deliver_user_update_email_instructions(%User{} = user, current_email, update_email_url_fun)
       when is_function(update_email_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "change:#{current_email}")
 
@@ -273,7 +277,7 @@ defmodule PhxBb.Accounts do
 
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}
@@ -329,8 +333,8 @@ defmodule PhxBb.Accounts do
   @doc """
   Deletes the signed token with the given context.
   """
-  def delete_session_token(token) do
-    Repo.delete_all(UserToken.token_and_context_query(token, "session"))
+  def delete_user_session_token(token) do
+    Repo.delete_all(UserToken.by_token_and_context_query(token, "session"))
     :ok
   end
 
@@ -379,7 +383,7 @@ defmodule PhxBb.Accounts do
   defp confirm_user_multi(user) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.confirm_changeset(user))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, ["confirm"]))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, ["confirm"]))
   end
 
   ## Reset password
@@ -436,7 +440,7 @@ defmodule PhxBb.Accounts do
   def reset_user_password(user, attrs) do
     Ecto.Multi.new()
     |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
-    |> Ecto.Multi.delete_all(:tokens, UserToken.user_and_contexts_query(user, :all))
+    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
       {:ok, %{user: user}} -> {:ok, user}

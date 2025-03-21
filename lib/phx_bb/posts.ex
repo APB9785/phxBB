@@ -59,7 +59,7 @@ defmodule PhxBb.Posts do
 
   """
   def create_post(attrs \\ %{}) do
-    now = NaiveDateTime.utc_now()
+    now = DateTime.utc_now()
     user_id = attrs.author_id
     topic_id = attrs.topic_id
     # Including board_id in attrs is optional, but saves a DB hit when included

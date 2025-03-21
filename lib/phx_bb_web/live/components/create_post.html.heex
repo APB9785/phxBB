@@ -1,23 +1,30 @@
 <div class="flex w-full justify-center pt-2 md:pt-4 pb-2">
-  <.form id="new-post-form" let={f} for={@changeset}
-         phx_submit="new_post" phx_change="validate" phx_target={@myself}
-         class="flex-grow mx-4 grid justify-items-auto w-full flex-grow">
+  <.form
+    :let={f}
+    id="new-post-form"
+    for={to_form(@changeset)}
+    phx-submit="new_post"
+    phx-change="validate"
+    phx-target={@myself}
+    class="flex-grow mx-4 grid justify-items-auto w-full flex-grow"
+  >
+    <.input
+      type="textarea"
+      field={f[:body]}
+      placeholder="You may use Markdown to format your post"
+      phx-debounce="blur"
+      autocomplete="off"
+      class={post_form_style(@current_user)}
+    />
+    <%!-- 
+    <div class="text-center mt-4">{error_tag(f, :body)}</div> --%>
 
-    <%= textarea f, :body,
-          placeholder: "You may use Markdown to format your post",
-          phx_debounce: "blur",
-          autocomplete: "off",
-          class: post_form_style(@active_user) %>
-
-    <div class="text-center mt-4"><%= error_tag f, :body %></div>
-
-    <%= if @active_user.disabled_at do %>
+    <%= if @current_user.disabled_at do %>
       <p class="text-center text-sm">
         Your posting privileges have been revoked by the forum administrator.
       </p>
     <% else %>
-      <%= submit "Post reply", class: new_post_button_style(@active_user)%>
+      <.button type="submit" class={new_post_button_style(@current_user)}>Post reply</.button>
     <% end %>
-
   </.form>
 </div>
