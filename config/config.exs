@@ -44,7 +44,7 @@ config :esbuild,
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "3.4.3",
-  phx_new_1_7_20: [
+  phx_bb: [
     args: ~w(
       --config=tailwind.config.js
       --input=css/app.css

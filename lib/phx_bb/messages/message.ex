@@ -2,15 +2,15 @@ defmodule PhxBb.Messages.Message do
   @moduledoc """
   This module defines the Message schema and changeset.
   """
-  use Ecto.Schema
+  use PhxBb.Schema
 
   import Ecto.Changeset
 
   schema "messages" do
     field :subject, :string
     field :body, :string
-    field :sent_at, :naive_datetime
-    field :read_at, :naive_datetime
+    field :sent_at, :utc_datetime
+    field :read_at, :utc_datetime
 
     belongs_to :author, PhxBb.Accounts.User
     belongs_to :recipient, PhxBb.Accounts.User

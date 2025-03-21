@@ -54,23 +54,23 @@ defmodule PhxBbWeb.Telemetry do
       ),
 
       # Database Metrics
-      summary("phx_new_1_7_20.repo.query.total_time",
+      summary("phx_bb.repo.query.total_time",
         unit: {:native, :millisecond},
         description: "The sum of the other measurements"
       ),
-      summary("phx_new_1_7_20.repo.query.decode_time",
+      summary("phx_bb.repo.query.decode_time",
         unit: {:native, :millisecond},
         description: "The time spent decoding the data received from the database"
       ),
-      summary("phx_new_1_7_20.repo.query.query_time",
+      summary("phx_bb.repo.query.query_time",
         unit: {:native, :millisecond},
         description: "The time spent executing the query"
       ),
-      summary("phx_new_1_7_20.repo.query.queue_time",
+      summary("phx_bb.repo.query.queue_time",
         unit: {:native, :millisecond},
         description: "The time spent waiting for a database connection"
       ),
-      summary("phx_new_1_7_20.repo.query.idle_time",
+      summary("phx_bb.repo.query.idle_time",
         unit: {:native, :millisecond},
         description:
           "The time the connection spent waiting before being checked out for the query"

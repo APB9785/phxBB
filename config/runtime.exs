@@ -12,7 +12,7 @@ import Config
 # If you use `mix release`, you need to explicitly enable the server
 # by passing the PHX_SERVER=true when you start it:
 #
-#     PHX_SERVER=true bin/phx_new_1_7_20 start
+#     PHX_SERVER=true bin/phx_bb start
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
@@ -76,7 +76,7 @@ if config_env() == :prod do
   # To get SSL working, you will need to add the `https` key
   # to your endpoint configuration:
   #
-  #     config :phx_new_1_7_20, PhxBbWeb.Endpoint,
+  #     config :phx_bb, PhxBbWeb.Endpoint,
   #       https: [
   #         ...,
   #         port: 443,
@@ -98,7 +98,7 @@ if config_env() == :prod do
   # We also recommend setting `force_ssl` in your config/prod.exs,
   # ensuring no data is ever sent via http, always redirecting to https:
   #
-  #     config :phx_new_1_7_20, PhxBbWeb.Endpoint,
+  #     config :phx_bb, PhxBbWeb.Endpoint,
   #       force_ssl: [hsts: true]
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
@@ -109,7 +109,7 @@ if config_env() == :prod do
   # Also, you may need to configure the Swoosh API client of your choice if you
   # are not using SMTP. Here is an example of the configuration:
   #
-  #     config :phx_new_1_7_20, PhxBb.Mailer,
+  #     config :phx_bb, PhxBb.Mailer,
   #       adapter: Swoosh.Adapters.Mailgun,
   #       api_key: System.get_env("MAILGUN_API_KEY"),
   #       domain: System.get_env("MAILGUN_DOMAIN")

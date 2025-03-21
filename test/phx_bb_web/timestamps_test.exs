@@ -4,7 +4,7 @@ defmodule PhxBbWeb.TimestampsTest do
   alias PhxBbWeb.Timestamps
 
   test "format_time/1" do
-    datetime = %NaiveDateTime{
+    datetime = %DateTime{
       month: 2,
       day: 3,
       year: 1980,

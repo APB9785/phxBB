@@ -2,7 +2,7 @@ defmodule PhxBb.Posts.Post do
   @moduledoc """
   This module defines the Reply schema and changeset.
   """
-  use Ecto.Schema
+  use PhxBb.Schema
 
   import Ecto.Changeset
 
@@ -13,7 +13,7 @@ defmodule PhxBb.Posts.Post do
     belongs_to :edited_by, PhxBb.Accounts.User
     belongs_to :topic, PhxBb.Topics.Topic
 
-    timestamps()
+    timestamps(type: :utc_datetime)
   end
 
   @doc false

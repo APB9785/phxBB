@@ -56,7 +56,7 @@ defmodule PhxBb.Messages do
 
   """
   def create_message(attrs, author_id) do
-    now = NaiveDateTime.utc_now()
+    now = DateTime.utc_now()
 
     attrs =
       attrs
@@ -96,7 +96,7 @@ defmodule PhxBb.Messages do
 
   """
   def mark_read(message_id) do
-    now = NaiveDateTime.utc_now()
+    now = DateTime.utc_now()
     message = Repo.one(from Message, where: [id: ^message_id])
 
     {:ok, message} = update_message(message, %{read_at: now})

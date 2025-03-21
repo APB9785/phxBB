@@ -2,12 +2,12 @@ defmodule PhxBb.SeenTopics.SeenTopic do
   @moduledoc """
   Schema for SeenTopic.
   """
+  use PhxBb.Schema
 
-  use Ecto.Schema
   import Ecto.Changeset
 
   schema "seen_topics" do
-    field :time, :naive_datetime
+    field :time, :utc_datetime
 
     belongs_to :topic, PhxBb.Topics.Topic
     belongs_to :user, PhxBb.Accounts.User

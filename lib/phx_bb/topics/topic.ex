@@ -8,7 +8,7 @@ defmodule PhxBb.Topics.Topic do
   import Ecto.Changeset
 
   schema "topics" do
-    field :last_post_at, :naive_datetime
+    field :last_post_at, :utc_datetime
     field :post_count, :integer
     field :title, :string
     field :view_count, :integer
@@ -20,7 +20,7 @@ defmodule PhxBb.Topics.Topic do
     belongs_to :board, PhxBb.Boards.Board
     belongs_to :recent_user, PhxBb.Accounts.User
 
-    timestamps()
+    timestamps(type: :utc_datetime)
   end
 
   @doc false

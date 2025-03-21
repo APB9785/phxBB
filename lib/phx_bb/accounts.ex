@@ -94,7 +94,7 @@ defmodule PhxBb.Accounts do
 
   def disable_user!(user_id) do
     user = Repo.get!(User, user_id)
-    user = User.disable_changeset(user, %{disabled_at: NaiveDateTime.utc_now()})
+    user = User.disable_changeset(user, %{disabled_at: DateTime.utc_now()})
     user = Repo.update!(user)
 
     Phoenix.PubSub.broadcast(PhxBb.PubSub, "user:#{user.id}", {:updated_user, user})
